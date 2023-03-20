@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="circle">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/circle_corner_size</item>
+    </style>
+    <style name="rectangle">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/rectangle_corner_size</item>
+    </style>
+</resources>

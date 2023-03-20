@@ -1,0 +1,44 @@
+table {
+    border: 1px solid gray;
+    border-spacing: 0;
+    border-collapse: separate;
+}
+
+td, th {
+    padding: 8px;
+}
+
+.avatar {
+    height: 100px;
+    width: 100px;
+    border-radius: 50%;
+    border: 1px solid gray;
+    object-fit: cover;
+}
+
+.cover {
+    height: 100px;
+    width: 100px;
+    object-fit: contain;
+}
+
+.small-avatar {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    border: 1px solid gray;
+    object-fit: cover;
+    margin-bottom: -15px;
+}
+
+.menu-item {
+    text-decoration: none;
+    color: black;
+    border: 1px solid black;
+    margin-right: 10px;
+    padding: 5px
+}
+
+* {
+    color: red;
+}

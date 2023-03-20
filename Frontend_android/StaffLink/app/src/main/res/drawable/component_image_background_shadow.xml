@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Drop Shadow Stack -->
+    <item>
+        <shape>
+<!--            <padding android:bottom="1.5dp" android:left="1dp" />-->
+            <solid android:color="@color/transparent_shadow_10" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+<!--            <padding android:bottom="1dp" android:left="1.5dp" />-->
+            <solid android:color="@color/transparent_shadow_10" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+<!--            <padding android:bottom="1.5dp" android:left="1dp" />-->
+            <solid android:color="@color/transparent_shadow_20" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+<!--            <padding android:bottom="1dp" android:left="1.5dp" />-->
+            <solid android:color="@color/transparent_shadow_20" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+<!--            <padding android:bottom="1.5dp" android:left="1dp" />-->
+            <solid android:color="@color/transparent_shadow_30" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+<!--            <padding android:bottom="1dp" android:left="1.5dp" />-->
+            <solid android:color="@color/transparent_shadow_40" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+<!--            <padding android:bottom="1.5dp" android:left="1dp" />-->
+            <solid android:color="@color/transparent_shadow_50" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+<!--            <padding android:bottom="1dp" android:left="1.5dp" />-->
+            <solid android:color="@color/transparent_shadow_50" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+<!--            <padding android:bottom="1.5dp" android:left="1dp" />-->
+            <solid android:color="@color/shadow_light" />
+        </shape>
+    </item>
+
+    <!-- Background -->
+    <item>
+        <shape>
+            <solid android:color="@color/light" />
+        </shape>
+    </item>
+</layer-list>

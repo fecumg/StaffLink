@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="transparent">#00000000</color>
+
+    <color name="transparent_shadow_10">#19CCCCCC</color>
+    <color name="transparent_shadow_20">#33CCCCCC</color>
+    <color name="transparent_shadow_30">#4DCCCCCC</color>
+    <color name="transparent_shadow_40">#66CCCCCC</color>
+    <color name="transparent_shadow_50">#80CCCCCC</color>
+    <color name="transparent_shadow_60">#99CCCCCC</color>
+
+    <color name="light">#FFF8F9FA</color>
+
+    <color name="secondary">#FFBABABA</color>
+    <color name="secondary_light">#EAE9E9</color>
+
+    <color name="primary">#FF506993</color>
+    <color name="primary_light">#707D94</color>
+
+    <color name="warning">#FFE5B000</color>
+    <color name="warning_light">#E6C454</color>
+
+    <color name="danger">#FFC33951</color>
+    <color name="danger_light">#C66878</color>
+
+    <color name="dark">#FF343A40</color>
+
+    <color name="shadow">#9A000000</color>
+    <color name="shadow_light">#40000000</color>
+    <color name="light_blue_400">#FF29B6F6</color>
+    <color name="light_blue_600">#FF039BE5</color>
+    <color name="gray_400">#FFBDBDBD</color>
+    <color name="gray_600">#FF757575</color>
+</resources>
