@@ -65,10 +65,10 @@ public class RoleServiceImpl extends BaseService implements RoleService {
 //        set createdBy
         setCreatedBy(role, request);
 
-        Role newRole = roleRepository.save(role);
+//        set functions
+        role.setFunctions(this.getAssignedFunctions(roleRequest));
 
-//        new role-function-mappings
-        this.newRoleFunctionMappings(roleRequest, newRole, request);
+        Role newRole = roleRepository.save(role);
 
         return this.get(newRole.getId());
     }
@@ -93,10 +93,10 @@ public class RoleServiceImpl extends BaseService implements RoleService {
 
             role.setId(id);
 
-            Role editedRole = roleRepository.save(role);
+//            set functions
+            role.setFunctions(this.getAssignedFunctions(roleRequest));
 
-//            new role-function-mappings
-            this.newRoleFunctionMappings(roleRequest, editedRole, request);
+            Role editedRole = roleRepository.save(role);
 
 //            send message to gateway to update authenticatedUser caches
             List<ExchangeUser> exchangeUsers = this.getAffectedExchangeUser(editedRole);
@@ -108,21 +108,17 @@ public class RoleServiceImpl extends BaseService implements RoleService {
         }
     }
 
-    private void newRoleFunctionMappings(RoleRequest roleRequest, Role role, HttpServletRequest request) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        List<RoleFunctionMapping> roleFunctionMappings = new ArrayList<>();
+    private List<Function> getAssignedFunctions(RoleRequest roleRequest) {
+        List<Function> functions = new ArrayList<>();
 
         List<Integer> functionIds = roleRequest.getFunctionIds();
         if (functionIds != null && !functionIds.isEmpty()) {
             for (int functionId: functionIds) {
                 Optional<Function> optionalFunction = functionRepository.findById(functionId);
-                if (optionalFunction.isPresent()) {
-                    RoleFunctionMapping roleFunctionMapping = new RoleFunctionMapping(role, optionalFunction.get());
-                    this.setCreatedBy(roleFunctionMapping, request);
-                    roleFunctionMappings.add(roleFunctionMapping);
-                }
+                optionalFunction.ifPresent(functions::add);
             }
         }
-        roleFunctionMappingRepository.saveAll(roleFunctionMappings);
+        return functions;
     }
 
     private List<ExchangeUser> getAffectedExchangeUser(Role role) {

@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,7 +43,7 @@ public class Function extends BaseEntity{
     private Function parent;
 
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Function> children;
+    private List<Function> children = new ArrayList<>();
 
 
 
@@ -57,10 +58,10 @@ public class Function extends BaseEntity{
 
 
     @ManyToMany(mappedBy = "functions", fetch = FetchType.LAZY)
-    private List<Role> roles;
+    private List<Role> roles = new ArrayList<>();
 
 
 
-    @OneToMany(mappedBy = "function", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RoleFunctionMapping> roleFunctionMappings;
+    @OneToMany(mappedBy = "function", fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<RoleFunctionMapping> roleFunctionMappings = new ArrayList<>();
 }

@@ -5,9 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.util.Date;
 
 /**
  * @author Truong Duc Duong
@@ -31,14 +28,6 @@ public class UserRoleMapping {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private Role role;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private Date createdAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
-    private User createdBy;
 
     public UserRoleMapping(User user, Role role) {
         this.user = user;

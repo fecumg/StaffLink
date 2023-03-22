@@ -101,10 +101,10 @@ public class UserServiceImpl extends BaseService implements UserService {
             user.setAvatar(nameWithoutExtension);
         }
 
-        User newUser = userRepository.save(user);
+//         set roles
+        user.setRoles(this.getAssignedRoles(newUserRequest));
 
-//         new user-role-mappings
-        this.newUserRoleMappings(newUserRequest, newUser, request);
+        User newUser = userRepository.save(user);
 
         return this.get(newUser.getId());
     }
@@ -125,10 +125,10 @@ public class UserServiceImpl extends BaseService implements UserService {
 
 //            delete all existing role assignments
             User currentUser = optionalCurrentUser.get();
-            List<UserRoleMapping> userRoleMappings = currentUser.getUserRoleMappings();
-            if (!userRoleMappings.isEmpty()) {
-                userRoleMappingRepository.deleteAll(userRoleMappings);
-            }
+//            List<UserRoleMapping> userRoleMappings = currentUser.getUserRoleMappings();
+//            if (!userRoleMappings.isEmpty()) {
+//                userRoleMappingRepository.deleteAll(userRoleMappings);
+//            }
 
             User user = modelMapper.map(editUserRequest, User.class);
 
@@ -153,10 +153,10 @@ public class UserServiceImpl extends BaseService implements UserService {
                 user.setAvatar(currentUser.getAvatar());
             }
 
-            User editedUser = userRepository.save(user);
+//            set roles
+            user.setRoles(this.getAssignedRoles(editUserRequest));
 
-//            new user-role-mappings
-            this.newUserRoleMappings(editUserRequest, editedUser, request);
+            User editedUser = userRepository.save(user);
 
 //            send message to demand auth-gateway to modify authenticatedUser redis cache
             List<ExchangeUser> exchangeUsers = new ArrayList<>();
@@ -174,10 +174,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
     }
 
-    private void newUserRoleMappings(Object requestObject, User user, HttpServletRequest request) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    private List<Role> getAssignedRoles(Object requestObject) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Method method =  requestObject.getClass().getMethod("getRoleIds");
 
-        List<UserRoleMapping> userRoleMappings = new ArrayList<>();
+        List<Role> roles = new ArrayList<>();
 
         @SuppressWarnings("unchecked")
         List<Integer> roleIds = (List<Integer>) method.invoke(requestObject);
@@ -185,14 +185,10 @@ public class UserServiceImpl extends BaseService implements UserService {
             for (int roleId: roleIds
             ) {
                 Optional<Role> optionalRole = roleRepository.findById(roleId);
-                if (optionalRole.isPresent()) {
-                    UserRoleMapping userRoleMapping = new UserRoleMapping(user, optionalRole.get());
-                    this.setCreatedBy(userRoleMapping, request);
-                    userRoleMappings.add(userRoleMapping);
-                }
+                optionalRole.ifPresent(roles::add);
             }
         }
-        userRoleMappingRepository.saveAll(userRoleMappings);
+        return roles;
     }
 
     private void sendMessageToDeleteAuthCache(String username) {

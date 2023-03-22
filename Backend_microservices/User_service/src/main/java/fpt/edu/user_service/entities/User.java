@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.lang.Nullable;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -60,7 +61,7 @@ public class User extends BaseEntity {
 
     @JsonBackReference
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LoginFailureLog> loginFailureLogs;
+    private List<LoginFailureLog> loginFailureLogs = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
@@ -75,41 +76,31 @@ public class User extends BaseEntity {
 
     @JsonBackReference
     @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
-    private List<User> createdUsers;
+    private List<User> createdUsers = new ArrayList<>();
 
     @JsonBackReference
     @OneToMany(mappedBy = "updatedBy", fetch = FetchType.LAZY)
-    private List<User> updatedUsers;
+    private List<User> updatedUsers = new ArrayList<>();
 
 
 
     @JsonBackReference
     @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
-    private List<Role> createdRoles;
+    private List<Role> createdRoles = new ArrayList<>();
 
     @JsonBackReference
     @OneToMany(mappedBy = "updatedBy", fetch = FetchType.LAZY)
-    private List<Role> updatedRoles;
+    private List<Role> updatedRoles = new ArrayList<>();
 
 
 
     @JsonBackReference
     @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
-    private List<Function> createdFunctions;
+    private List<Function> createdFunctions = new ArrayList<>();
 
     @JsonBackReference
     @OneToMany(mappedBy = "updatedBy", fetch = FetchType.LAZY)
-    private List<Function> updatedFunctions;
-
-
-
-    @JsonBackReference
-    @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
-    private List<UserRoleMapping> createdUserRoleMappings;
-
-    @JsonBackReference
-    @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
-    private List<RoleFunctionMapping> createdRoleFunctionMappings;
+    private List<Function> updatedFunctions = new ArrayList<>();
 
 
 
@@ -119,12 +110,12 @@ public class User extends BaseEntity {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private List<Role> roles;
+    private List<Role> roles = new ArrayList<>();
 
 
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserRoleMapping> userRoleMappings;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<UserRoleMapping> userRoleMappings = new ArrayList<>();
 
 
     public User(Date createdAt, Date updatedAt, int id, String name, String username, String address, String phone, String email, String password, @Nullable String avatar, List<LoginFailureLog> loginFailureLogs, User createdBy, User updatedBy, List<Role> roles) {

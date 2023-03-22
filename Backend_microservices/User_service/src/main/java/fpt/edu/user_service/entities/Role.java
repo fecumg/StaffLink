@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,7 +45,7 @@ public class Role extends BaseEntity{
 
 
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
-    private List<User> users;
+    private List<User> users = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -52,15 +53,15 @@ public class Role extends BaseEntity{
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "function_id")
     )
-    private List<Function> functions;
+    private List<Function> functions = new ArrayList<>();
 
 
 
-    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserRoleMapping> userRoleMapping;
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<UserRoleMapping> userRoleMapping = new ArrayList<>();
 
 
 
-    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RoleFunctionMapping> roleFunctionMappings;
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<RoleFunctionMapping> roleFunctionMappings = new ArrayList<>();
 }
