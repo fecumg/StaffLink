@@ -1,15 +1,13 @@
 package fpt.edu.user_service.jwt;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 
 /**
@@ -33,7 +31,6 @@ public class JwtUtilities {
         //2. Sign the JWT using the HS512 algorithm and secret key.
         //3. According to JWS Compact Serialization(https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-3.1)
         //   compaction of the JWT to a URL-safe string
-        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
         return Jwts.builder()
                 .setSubject(username)
@@ -44,7 +41,7 @@ public class JwtUtilities {
     }
 
     private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET);
+        byte[] keyBytes = Base64.getDecoder().decode(SECRET);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

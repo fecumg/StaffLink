@@ -30,10 +30,4 @@ public class FunctionRequest {
 
     @Nullable
     private int parentId;
-
-    @Nullable
-    private int createdBy;
-
-    @Nullable
-    private int updatedBy;
 }

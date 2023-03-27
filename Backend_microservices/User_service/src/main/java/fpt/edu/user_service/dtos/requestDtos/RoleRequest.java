@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.Nullable;
 
 import java.util.List;
 
@@ -25,12 +24,6 @@ public class RoleRequest {
     @NotNull(message = "Description cannot be empty")
     @Size(max = 500, message = "Description cannot exceed {max} characters")
     private String description;
-
-    @Nullable
-    private int createdBy;
-
-    @Nullable
-    private int updatedBy;
 
     private List<Integer> functionIds;
 }

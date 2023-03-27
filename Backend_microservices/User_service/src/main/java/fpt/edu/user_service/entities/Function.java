@@ -42,6 +42,8 @@ public class Function extends BaseEntity{
     @JoinColumn(name = "parent_id")
     private Function parent;
 
+    private boolean displayed = true;
+
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Function> children = new ArrayList<>();
 

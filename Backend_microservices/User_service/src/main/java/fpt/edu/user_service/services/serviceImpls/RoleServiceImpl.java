@@ -187,8 +187,8 @@ public class RoleServiceImpl extends BaseService implements RoleService {
         }
     }
 
-    @CacheEvict(cacheNames = { getAllMethodCache, getMethodCache })
-    @Scheduled(fixedDelay = 6000)
+    @Scheduled(fixedDelay = 60000)
     public void cacheEvict() {
+        super.clearCache(getAllMethodCache, getMethodCache);
     }
 }

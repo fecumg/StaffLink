@@ -4,10 +4,10 @@ import fpt.edu.user_service.dtos.authenticationDtos.ExchangeUser;
 import fpt.edu.user_service.dtos.requestDtos.userRequestDtos.EditUserRequest;
 import fpt.edu.user_service.dtos.requestDtos.userRequestDtos.NewUserRequest;
 import fpt.edu.user_service.dtos.responseDtos.UserResponse;
-import fpt.edu.user_service.exceptions.UniqueKeyViolationException;
 import fpt.edu.user_service.entities.Role;
 import fpt.edu.user_service.entities.User;
 import fpt.edu.user_service.entities.UserRoleMapping;
+import fpt.edu.user_service.exceptions.UniqueKeyViolationException;
 import fpt.edu.user_service.pagination.Pagination;
 import fpt.edu.user_service.repositories.RoleRepository;
 import fpt.edu.user_service.repositories.UserRepository;
@@ -25,6 +25,7 @@ import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -73,6 +74,8 @@ public class UserServiceImpl extends BaseService implements UserService {
     private UserRoleMappingRepository userRoleMappingRepository;
     @Autowired
     public RabbitTemplate rabbitTemplate;
+    @Autowired
+    private CacheManager cacheManager;
 
     @Override
     @CacheEvict(value = getAllMethodCache, allEntries = true)
@@ -277,8 +280,8 @@ public class UserServiceImpl extends BaseService implements UserService {
                 .collect(Collectors.toList());
     }
 
-    @CacheEvict(cacheNames = { getAllMethodCache, getMethodCache })
     @Scheduled(fixedDelay = 60000)
     public void cacheEvict() {
+        super.clearCache(getAllMethodCache, getMethodCache);
     }
 }

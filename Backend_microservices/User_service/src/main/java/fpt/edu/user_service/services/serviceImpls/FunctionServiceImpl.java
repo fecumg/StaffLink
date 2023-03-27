@@ -178,7 +178,7 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
     @Caching(evict = {
             @CacheEvict(value = getAllMethodCache),
             @CacheEvict(value = getMethodCache, key = "#id")
-    }
+        }
     )
     public void delete(int id) {
         Optional<Function> optionalFunction = functionRepository.findById(id);
@@ -204,8 +204,8 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
         }
     }
 
-    @CacheEvict(cacheNames = { getAllMethodCache, getMethodCache })
-    @Scheduled(fixedDelay = 6000)
+    @Scheduled(fixedDelay = 60000)
     public void cacheEvict() {
+        super.clearCache(getAllMethodCache, getMethodCache);
     }
 }
