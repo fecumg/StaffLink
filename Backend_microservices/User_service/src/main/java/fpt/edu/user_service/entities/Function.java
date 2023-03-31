@@ -43,7 +43,7 @@ public class Function extends BaseEntity{
 
     private boolean displayed = true;
 
-    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
     private List<Function> children = new ArrayList<>();
 
 
@@ -61,6 +61,6 @@ public class Function extends BaseEntity{
 
 
 
-    @OneToMany(mappedBy = "function", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "function", fetch = FetchType.LAZY)
     private List<RoleFunctionMapping> roleFunctionMappings = new ArrayList<>();
 }

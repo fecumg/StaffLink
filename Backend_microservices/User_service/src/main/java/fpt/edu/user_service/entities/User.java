@@ -59,7 +59,7 @@ public class User extends BaseEntity {
     private String avatar;
 
     @JsonBackReference
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<LoginFailureLog> loginFailureLogs = new ArrayList<>();
 
     @Column(name = "created_by")
@@ -80,6 +80,6 @@ public class User extends BaseEntity {
 
 
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<UserRoleMapping> userRoleMappings = new ArrayList<>();
 }

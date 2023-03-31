@@ -6,7 +6,6 @@ import fpt.edu.user_service.dtos.requestDtos.userRequestDtos.NewUserRequest;
 import fpt.edu.user_service.dtos.responseDtos.UserResponse;
 import fpt.edu.user_service.entities.Role;
 import fpt.edu.user_service.entities.User;
-import fpt.edu.user_service.entities.UserRoleMapping;
 import fpt.edu.user_service.exceptions.UnauthorizedException;
 import fpt.edu.user_service.exceptions.UniqueKeyViolationException;
 import fpt.edu.user_service.pagination.Pagination;
@@ -250,17 +249,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
+            String username = user.getUsername();
 
             userRepository.delete(user);
 
-//            delete all existing all role assignments (needs experiments)
-            List<UserRoleMapping> userRoleMappings = user.getUserRoleMappings();
-            if (!userRoleMappings.isEmpty()) {
-                userRoleMappingRepository.deleteAll(userRoleMappings);
-            }
-
 //            send message to demand auth-gateway to update authenticatedUser redis cache
-            this.sendMessageToDeleteAuthCache(user.getUsername());
+            this.sendMessageToDeleteAuthCache(username);
         } else {
             throw new NotFoundException("User not found");
         }

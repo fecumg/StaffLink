@@ -55,11 +55,11 @@ public class Role extends BaseEntity{
 
 
 
-    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     private List<UserRoleMapping> userRoleMapping = new ArrayList<>();
 
 
 
-    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     private List<RoleFunctionMapping> roleFunctionMappings = new ArrayList<>();
 }

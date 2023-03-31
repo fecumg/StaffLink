@@ -4,7 +4,6 @@ import fpt.edu.user_service.dtos.authenticationDtos.ExchangeUser;
 import fpt.edu.user_service.dtos.requestDtos.FunctionRequest;
 import fpt.edu.user_service.dtos.responseDtos.FunctionResponse;
 import fpt.edu.user_service.entities.Function;
-import fpt.edu.user_service.entities.RoleFunctionMapping;
 import fpt.edu.user_service.entities.User;
 import fpt.edu.user_service.exceptions.UnauthorizedException;
 import fpt.edu.user_service.exceptions.UniqueKeyViolationException;
@@ -229,16 +228,10 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
             Function function = optionalFunction.get();
             List<ExchangeUser> exchangeUsers = this.getAffectedExchangeUser(function);
 
-            functionRepository.delete(function);
-
-//            delete all existing role-function-mappings
-            List<RoleFunctionMapping> roleFunctionMappings = function.getRoleFunctionMappings();
-            if (!roleFunctionMappings.isEmpty()) {
-                roleFunctionMappingRepository.deleteAll(roleFunctionMappings);
-            }
-
 //            send message to demand auth-gateway to update guardedPaths redis cache
             this.sendMessageToDeletePathCache(function.getUri());
+
+            functionRepository.delete(function);
 
 //            send message to demand auth-gateway to update authenticatedUser redis cache
             this.sendMessageToUpdateAuthCache(exchangeUsers);

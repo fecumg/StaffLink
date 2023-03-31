@@ -5,8 +5,6 @@ import fpt.edu.user_service.dtos.requestDtos.RoleRequest;
 import fpt.edu.user_service.dtos.responseDtos.RoleResponse;
 import fpt.edu.user_service.entities.Function;
 import fpt.edu.user_service.entities.Role;
-import fpt.edu.user_service.entities.RoleFunctionMapping;
-import fpt.edu.user_service.entities.UserRoleMapping;
 import fpt.edu.user_service.pagination.Pagination;
 import fpt.edu.user_service.repositories.*;
 import fpt.edu.user_service.services.RoleService;
@@ -162,19 +160,7 @@ public class RoleServiceImpl extends BaseService implements RoleService {
 
             List<ExchangeUser> exchangeUsers = this.getAffectedExchangeUser(optionalRole.get());
 
-            roleRepository.deleteById(id);
-
-//            delete all existing function assignments (needs experiments)
-            List<RoleFunctionMapping> roleFunctionMappings = role.getRoleFunctionMappings();
-            if (!roleFunctionMappings.isEmpty()) {
-                roleFunctionMappingRepository.deleteAll(roleFunctionMappings);
-            }
-
-//            delete all existing user-role-mappings
-            List<UserRoleMapping> userRoleMappings = role.getUserRoleMapping();
-            if (!userRoleMappings.isEmpty()) {
-                userRoleMappingRepository.deleteAll(userRoleMappings);
-            }
+            roleRepository.delete(role);
 
 //            send message to gateway to update authenticatedUser cache
             this.sendMessageToUpdateAuthCache(exchangeUsers);
