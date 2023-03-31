@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.Assert;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,14 +29,14 @@ public class AuthenticatedUser implements UserDetails {
     private String username;
     private String email;
     private String password;
-    private Collection<? extends GrantedAuthority> authorities;
+    private Collection<CustomGrantedAuthority> authorities;
     private List<String> authorizedUris;
 
 //    @TimeToLive
 //    private Long timeToLive = 1L;
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Collection<CustomGrantedAuthority> getAuthorities() {
         return authorities;
     }
 
@@ -84,8 +84,46 @@ public class AuthenticatedUser implements UserDetails {
         email = exchangeUser.getEmail();
         password = exchangeUser.getPassword();
         authorities = exchangeUser.getRoles().stream()
-                .map(SimpleGrantedAuthority::new)
+                .map(CustomGrantedAuthority::new)
                 .collect(Collectors.toList());
         authorizedUris = exchangeUser.getAuthorizedUris();
+    }
+
+    static class CustomGrantedAuthority implements GrantedAuthority {
+        private String role;
+
+        public CustomGrantedAuthority() {
+        }
+
+        public CustomGrantedAuthority(String role) {
+            Assert.hasText(role, "A granted authority textual representation is required");
+            this.role = role;
+        }
+
+        @Override
+        public String getAuthority() {
+            return this.role;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj instanceof CustomGrantedAuthority) {
+                return this.role.equals(((CustomGrantedAuthority) obj).role);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return this.role.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return this.role;
+        }
     }
 }

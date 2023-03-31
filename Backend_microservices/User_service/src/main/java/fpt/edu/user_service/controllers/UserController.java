@@ -75,4 +75,21 @@ public class UserController extends BaseController {
     public List<String> getAvatarNames() {
         return userService.getAllAvatarNames();
     }
+
+    @GetMapping(value = "/auth")
+    public ResponseEntity<Object> getAuthUser(HttpServletRequest request) {
+        UserResponse userResponse = userService.getAuthenticatedUser(request);
+        return createSuccessResponse(userResponse);
+    }
+
+    @PutMapping(value = "/editPersonalInfo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> editPersonalInfo(@Valid @ModelAttribute EditUserRequest editUserRequest, HttpServletRequest request, BindingResult bindingResult)
+            throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException, UniqueKeyViolationException {
+        if (bindingResult.hasErrors()) {
+            return createBindingErrorResponse(bindingResult);
+        } else {
+            UserResponse userResponse = userService.editPersonalInfo(editUserRequest, request);
+            return createSuccessResponse(userResponse);
+        }
+    }
 }

@@ -14,6 +14,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
@@ -120,10 +121,9 @@ public class AuthServiceImpl implements AuthService {
     public boolean isAuthorized(ServerWebExchange exchange, AuthenticatedUser authenticatedUser) {
 //        get requested core uri
         String requestedCoreUri = exchange.getRequest().getURI().getPath();
-        System.out.println(requestedCoreUri);
 
         return authenticatedUser.getAuthorizedUris().stream()
-                .anyMatch(authorizedUri -> authorizedUri.equals(requestedCoreUri));
+                .anyMatch(authorizedUri -> new AntPathMatcher().match(authorizedUri + "/**", requestedCoreUri));
     }
 
     @RabbitListener(queues = {"${rabbitmq.queue.new-auth-cache}"})

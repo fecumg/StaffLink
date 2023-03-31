@@ -27,9 +27,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query(value = "select count (l.id) from LoginFailureLog l where l.user.username = ?1")
     int loginFailureCountByUsername(String username);
 
-    @Query(value = "select new User(u.createdAt, u.updatedAt, u.id, u.name, u.username, u.address, u.phone, u.email, u.password, u.avatar, u.loginFailureLogs, u.createdBy, u.updatedBy, u.roles) from User u inner join UserRoleMapping urm on u.id = urm.user.id where urm.role.id = ?1")
+    @Query(value = "select urm.user from UserRoleMapping urm where urm.role.id = ?1")
     List<User> findAllByRoleId(int roleId);
 
-    @Query(value = "select new User(u.createdAt, u.updatedAt, u.id, u.name, u.username, u.address, u.phone, u.email, u.password, u.avatar, u.loginFailureLogs, u.createdBy, u.updatedBy, u.roles) from User u inner join UserRoleMapping urm on u.id = urm.user.id inner join RoleFunctionMapping rfm on urm.role.id = rfm.role.id where rfm.function.id = ?1")
+    @Query(value = "select urm.user from UserRoleMapping urm inner join RoleFunctionMapping rfm on urm.role.id = rfm.role.id where rfm.function.id = ?1")
     List<User> findAllByFunctionId(int functionId);
 }

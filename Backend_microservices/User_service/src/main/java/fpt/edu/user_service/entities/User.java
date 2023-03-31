@@ -13,7 +13,6 @@ import lombok.Setter;
 import org.springframework.lang.Nullable;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -60,47 +59,14 @@ public class User extends BaseEntity {
     private String avatar;
 
     @JsonBackReference
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<LoginFailureLog> loginFailureLogs = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
-    private User createdBy;
+    @Column(name = "created_by")
+    private int createdBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "updated_by")
-    private User updatedBy;
-
-
-
-
-    @JsonBackReference
-    @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
-    private List<User> createdUsers = new ArrayList<>();
-
-    @JsonBackReference
-    @OneToMany(mappedBy = "updatedBy", fetch = FetchType.LAZY)
-    private List<User> updatedUsers = new ArrayList<>();
-
-
-
-    @JsonBackReference
-    @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
-    private List<Role> createdRoles = new ArrayList<>();
-
-    @JsonBackReference
-    @OneToMany(mappedBy = "updatedBy", fetch = FetchType.LAZY)
-    private List<Role> updatedRoles = new ArrayList<>();
-
-
-
-    @JsonBackReference
-    @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
-    private List<Function> createdFunctions = new ArrayList<>();
-
-    @JsonBackReference
-    @OneToMany(mappedBy = "updatedBy", fetch = FetchType.LAZY)
-    private List<Function> updatedFunctions = new ArrayList<>();
+    @Column(name = "updated_by")
+    private int updatedBy;
 
 
 
@@ -116,21 +82,4 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<UserRoleMapping> userRoleMappings = new ArrayList<>();
-
-
-    public User(Date createdAt, Date updatedAt, int id, String name, String username, String address, String phone, String email, String password, @Nullable String avatar, List<LoginFailureLog> loginFailureLogs, User createdBy, User updatedBy, List<Role> roles) {
-        super(createdAt, updatedAt);
-        this.id = id;
-        this.name = name;
-        this.username = username;
-        this.address = address;
-        this.phone = phone;
-        this.email = email;
-        this.password = password;
-        this.avatar = avatar;
-        this.loginFailureLogs = loginFailureLogs;
-        this.createdBy = createdBy;
-        this.updatedBy = updatedBy;
-        this.roles = roles;
-    }
 }

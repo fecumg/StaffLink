@@ -18,4 +18,6 @@ public class FunctionResponse extends BaseResponse {
     private String name, description, uri;
 
     private FunctionResponse parent;
+
+    private boolean displayed;
 }

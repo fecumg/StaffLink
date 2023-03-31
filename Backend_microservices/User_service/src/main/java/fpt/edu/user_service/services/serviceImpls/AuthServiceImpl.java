@@ -1,14 +1,15 @@
 package fpt.edu.user_service.services.serviceImpls;
 
 import fpt.edu.user_service.dtos.authenticationDtos.ExchangeUser;
-import fpt.edu.user_service.jwt.JwtUtilities;
 import fpt.edu.user_service.entities.Function;
 import fpt.edu.user_service.entities.User;
+import fpt.edu.user_service.jwt.JwtUtilities;
 import fpt.edu.user_service.repositories.FunctionRepository;
 import fpt.edu.user_service.repositories.UserRepository;
 import fpt.edu.user_service.services.AuthService;
 import jakarta.ws.rs.BadRequestException;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Log4j2
-public class AuthServiceImpl implements AuthService {
+public class AuthServiceImpl extends BaseService implements AuthService {
 
     @Value("${rabbitmq.queue.new-auth-cache}")
     private String NEW_AUTH_CACHE_QUEUE_NAME;
@@ -39,6 +40,8 @@ public class AuthServiceImpl implements AuthService {
     private JwtUtilities jwtUtilities;
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public String login(String username, String password) {

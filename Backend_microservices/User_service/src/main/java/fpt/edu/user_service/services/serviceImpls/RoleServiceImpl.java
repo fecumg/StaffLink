@@ -11,6 +11,7 @@ import fpt.edu.user_service.pagination.Pagination;
 import fpt.edu.user_service.repositories.*;
 import fpt.edu.user_service.services.RoleService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.NotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -23,7 +24,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.webjars.NotFoundException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -86,10 +86,6 @@ public class RoleServiceImpl extends BaseService implements RoleService {
 
 //            delete all existing function assignments (needs experiments)
             Role currentRole = optionalRole.get();
-            List<RoleFunctionMapping> roleFunctionMappings = currentRole.getRoleFunctionMappings();
-            if (!roleFunctionMappings.isEmpty()) {
-                roleFunctionMappingRepository.deleteAll(roleFunctionMappings);
-            }
 
             role.setId(id);
 

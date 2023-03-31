@@ -25,4 +25,6 @@ public interface UserService {
     void delete(int id);
 
     List<String> getAllAvatarNames();
+    UserResponse getAuthenticatedUser(HttpServletRequest request);
+    UserResponse editPersonalInfo(EditUserRequest editUserRequest, HttpServletRequest request) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException, UniqueKeyViolationException;
 }

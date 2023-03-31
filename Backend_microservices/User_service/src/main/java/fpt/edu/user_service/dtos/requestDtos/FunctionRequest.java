@@ -24,10 +24,11 @@ public class FunctionRequest {
     @Size(max = 500, message = "Description cannot exceed {max} characters")
     private String description;
 
-    @NotNull(message = "Uri cannot be empty")
     @Size(max = 500, message = "Uri cannot exceed {max} characters")
     private String uri;
 
     @Nullable
     private int parentId;
+
+    private boolean displayed = true;
 }

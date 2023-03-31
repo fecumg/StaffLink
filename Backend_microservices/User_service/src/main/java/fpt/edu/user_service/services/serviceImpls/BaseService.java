@@ -25,7 +25,7 @@ import java.util.Optional;
 public class BaseService {
 
     @Value("${http.request.auth.id}")
-    private String AUTH_ID;
+    protected String AUTH_ID;
 
     @Value("${rabbitmq.exchange}")
     private String EXCHANGE;
@@ -45,8 +45,8 @@ public class BaseService {
             int authUserId = Integer.parseInt(authUserIdString);
             Optional<User> optionalAuthUser = userRepository.findById(authUserId);
             if (optionalAuthUser.isPresent()) {
-                Method method = object.getClass().getMethod("setCreatedBy", User.class);
-                method.invoke(object, optionalAuthUser.get());
+                Method method = object.getClass().getMethod("setCreatedBy", int.class);
+                method.invoke(object, authUserId);
             }
         }
     }
@@ -57,8 +57,8 @@ public class BaseService {
             int authUserId = Integer.parseInt(authUserIdString);
             Optional<User> optionalAuthUser = userRepository.findById(authUserId);
             if (optionalAuthUser.isPresent()) {
-                Method method = object.getClass().getMethod("setUpdatedBy", User.class);
-                method.invoke(object, optionalAuthUser.get());
+                Method method = object.getClass().getMethod("setUpdatedBy", int.class);
+                method.invoke(object, authUserId);
             }
         }
     }

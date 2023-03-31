@@ -21,4 +21,6 @@ public interface FunctionService {
     List<FunctionResponse> getAll(Pagination pagination);
     FunctionResponse get(int id);
     void delete(int id);
+    List<FunctionResponse> getAuthorizedFunctions(HttpServletRequest request);
+    List<FunctionResponse> getPotentialParentFunctions(int id);
 }

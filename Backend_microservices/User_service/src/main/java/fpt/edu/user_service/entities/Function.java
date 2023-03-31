@@ -34,7 +34,6 @@ public class Function extends BaseEntity{
     @Size(max = 500)
     private String description;
 
-    @NotNull
     @Size(max = 500)
     private String uri;
 
@@ -44,18 +43,16 @@ public class Function extends BaseEntity{
 
     private boolean displayed = true;
 
-    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Function> children = new ArrayList<>();
 
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
-    private User createdBy;
+    @Column(name = "created_by")
+    private int createdBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "updated_by")
-    private User updatedBy;
+    @Column(name = "updated_by")
+    private int updatedBy;
 
 
 

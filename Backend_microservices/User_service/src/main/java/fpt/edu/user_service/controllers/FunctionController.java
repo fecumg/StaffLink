@@ -70,4 +70,16 @@ public class FunctionController extends BaseController {
         functionService.delete(id);
         return createSuccessResponse();
     }
+
+    @GetMapping(value = "/authorized")
+    public ResponseEntity<Object> getAuthorizedFunctions(HttpServletRequest request) {
+        List<FunctionResponse> authorizedFunctions = functionService.getAuthorizedFunctions(request);
+        return createSuccessResponse(authorizedFunctions);
+    }
+
+    @GetMapping(value = "/potentialParents/{id}")
+    public ResponseEntity<Object> getPotentialParents(@PathVariable("id") int id) {
+        List<FunctionResponse> potentialParents = functionService.getPotentialParentFunctions(id);
+        return createSuccessResponse(potentialParents);
+    }
 }

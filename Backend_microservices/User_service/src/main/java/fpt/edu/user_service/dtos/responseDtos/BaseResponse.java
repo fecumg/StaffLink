@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.redis.core.RedisHash;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -17,14 +15,10 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @RedisHash
-public class BaseResponse implements Serializable {
-
-    @Serial
-    private final static long serialVersionUID = 1L;
-
+public class BaseResponse {
     private Date createdAt;
-    private UserResponse createdBy;
+    private int createdBy;
 
     private Date updatedAt;
-    private UserResponse updatedBy;
+    private int updatedBy;
 }

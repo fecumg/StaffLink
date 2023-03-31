@@ -46,6 +46,7 @@ public class ExchangeUser {
         return user.getRoles().stream()
                 .flatMap(role -> role.getFunctions().stream())
                 .map(Function::getUri)
-                .collect(Collectors.toList());
+                .distinct()
+                .toList();
     }
 }

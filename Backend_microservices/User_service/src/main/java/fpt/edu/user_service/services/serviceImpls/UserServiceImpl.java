@@ -7,6 +7,7 @@ import fpt.edu.user_service.dtos.responseDtos.UserResponse;
 import fpt.edu.user_service.entities.Role;
 import fpt.edu.user_service.entities.User;
 import fpt.edu.user_service.entities.UserRoleMapping;
+import fpt.edu.user_service.exceptions.UnauthorizedException;
 import fpt.edu.user_service.exceptions.UniqueKeyViolationException;
 import fpt.edu.user_service.pagination.Pagination;
 import fpt.edu.user_service.repositories.RoleRepository;
@@ -18,6 +19,7 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.amqp.core.Message;
@@ -25,7 +27,6 @@ import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -74,8 +75,6 @@ public class UserServiceImpl extends BaseService implements UserService {
     private UserRoleMappingRepository userRoleMappingRepository;
     @Autowired
     public RabbitTemplate rabbitTemplate;
-    @Autowired
-    private CacheManager cacheManager;
 
     @Override
     @CacheEvict(value = getAllMethodCache, allEntries = true)
@@ -126,12 +125,7 @@ public class UserServiceImpl extends BaseService implements UserService {
                 throw new UniqueKeyViolationException("Email has been used");
             }
 
-//            delete all existing role assignments
             User currentUser = optionalCurrentUser.get();
-//            List<UserRoleMapping> userRoleMappings = currentUser.getUserRoleMappings();
-//            if (!userRoleMappings.isEmpty()) {
-//                userRoleMappingRepository.deleteAll(userRoleMappings);
-//            }
 
             User user = modelMapper.map(editUserRequest, User.class);
 
@@ -278,6 +272,78 @@ public class UserServiceImpl extends BaseService implements UserService {
         return users.stream()
                 .map(User::getAvatar)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public UserResponse getAuthenticatedUser(HttpServletRequest request) {
+        String authUserIdString = request.getHeader(super.AUTH_ID);
+        if (StringUtils.isEmpty(authUserIdString)) {
+            throw new UnauthorizedException("Unauthorized");
+        }
+        int authUserId = Integer.parseInt(authUserIdString);
+        User authUser = userRepository.findById(authUserId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        return modelMapper.map(authUser, UserResponse.class);
+    }
+
+    @Override
+    public UserResponse editPersonalInfo(EditUserRequest editUserRequest, HttpServletRequest request) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException, UniqueKeyViolationException {
+        String authUserIdString = request.getHeader(super.AUTH_ID);
+        if (StringUtils.isEmpty(authUserIdString)) {
+            throw new UnauthorizedException("Unauthorized");
+        }
+        int authUserId = Integer.parseInt(authUserIdString);
+
+        if (userRepository.existsByEditedUsername(authUserId, editUserRequest.getUsername())) {
+            throw new UniqueKeyViolationException("Username already exists");
+        }
+        if (userRepository.existsByEditedEmail(authUserId, editUserRequest.getEmail())) {
+            throw new UniqueKeyViolationException("Email has been used");
+        }
+
+        User authUser = userRepository.findById(authUserId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        User user = modelMapper.map(editUserRequest, User.class);
+
+//        set current password
+        user.setPassword(authUser.getPassword());
+
+//        set authenticated user to createdBy
+        setUpdatedBy(user, request);
+
+//        set LoginFailureLogs
+        user.setLoginFailureLogs(authUser.getLoginFailureLogs());
+
+//        set id
+        user.setId(authUserId);
+
+//        process uploaded avatar image if exists
+        MultipartFile avatar = editUserRequest.getAvatar();
+        if (avatar != null && !avatar.isEmpty()) {
+            String filename = this.sendImageToFileService(avatar);
+            user.setAvatar(filename);
+        } else {
+            user.setAvatar(authUser.getAvatar());
+        }
+
+//        set roles
+        user.setRoles(authUser.getRoles());
+
+        User editedUser = userRepository.save(user);
+
+//        send message to demand auth-gateway to modify authenticatedUser redis cache
+        List<ExchangeUser> exchangeUsers = new ArrayList<>();
+        ExchangeUser exchangeUser = ExchangeUser.build(editedUser);
+        exchangeUsers.add(exchangeUser);
+        this.sendMessageToUpdateAuthCache(exchangeUsers);
+//        if username changes, delete cache with previous username
+        if (!editUserRequest.getUsername().equals(authUser.getUsername())) {
+            this.sendMessageToDeleteAuthCache(authUser.getUsername());
+        }
+
+        return this.get(editedUser.getId());
     }
 
     @Scheduled(fixedDelay = 60000)
