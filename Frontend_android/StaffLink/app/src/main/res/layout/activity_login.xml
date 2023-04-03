@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LoginActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/small_icon_size">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Login"
+            android:textSize="@dimen/header_text_size"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:textColor="@color/primary"
+            android:layout_centerVertical="true"/>
+
+        <ImageButton
+            android:id="@+id/buttonSubmitEdit"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:src="@drawable/ic_check_light_foreground"
+            android:backgroundTint="@color/primary"
+            android:layout_alignParentEnd="true"
+            android:visibility="gone"/>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/textViewError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/danger"/>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <fpt.edu.stafflink.components.CustomInputTextComponent
+            android:id="@+id/inputTextCredentialUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Username"
+            app:startIconDrawable="@drawable/ic_person_light_foreground"
+            app:color="@color/primary"
+            android:inputType="textVisiblePassword|textNoSuggestions"
+            android:layout_marginBottom="10dp"/>
+
+        <fpt.edu.stafflink.components.CustomInputTextComponent
+            android:id="@+id/inputTextCredentialPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Password"
+            app:startIconDrawable="@drawable/ic_password_light_foreground"
+            app:color="@color/primary"
+            android:inputType="textPassword"
+            android:layout_marginBottom="10dp"/>
+
+        <fpt.edu.stafflink.components.CustomButtonComponent
+            android:id="@+id/buttonLogin"
+            android:layout_width="@dimen/submit_button_width"
+            android:layout_height="@dimen/submit_button_height"
+            android:background="@drawable/component_button_background_primary"
+            android:foreground="@drawable/ic_login_foreground_stated_small"
+            android:layout_gravity="center_horizontal"/>
+    </LinearLayout>
+</LinearLayout>

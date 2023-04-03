@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.text.InputFilter;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
@@ -23,7 +24,16 @@ public class CustomInputTextComponent extends LinearLayout {
     TextInputLayout customInputTextComponentLayout;
     TextInputEditText customInputTextComponentMainElement;
 
-    boolean isFirstFocus = true;
+    private CharSequence hint;
+    private int textColor;
+    private Drawable drawable;
+    private int color;
+    private int maxLength;
+    private int inputType;
+    private CharSequence error;
+    private boolean editable;
+
+    private boolean isFirstFocus = true;
 
     public CustomInputTextComponent(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -36,80 +46,126 @@ public class CustomInputTextComponent extends LinearLayout {
     }
 
     public void setHint(CharSequence hint) {
+        this.hint = hint;
         customInputTextComponentLayout.setHint(hint);
-        customInputTextComponentMainElement.setHint(hint);
+//        customInputTextComponentMainElement.setHint(hint);
     }
     public CharSequence getHint() {
-        return customInputTextComponentLayout.getHint();
+        return this.hint;
     }
 
-    public void setText(CharSequence charSequence) {
-        customInputTextComponentMainElement.setText(charSequence);
+    public void setText(CharSequence text) {
+        customInputTextComponentMainElement.setText(text);
     }
     public CharSequence getText() {
         return customInputTextComponentMainElement.getText();
     }
 
-    public void setTextColor(int color) {
-        customInputTextComponentMainElement.setTextColor(color);
+    public void setTextColor(int textColor) {
+        this.textColor = textColor;
+        customInputTextComponentMainElement.setTextColor(textColor);
     }
     public int getTextColor() {
-        return customInputTextComponentMainElement.getCurrentTextColor();
+        return this.textColor;
     }
 
-    public void setStartIconDrawable(int drawable) {
-        customInputTextComponentLayout.setStartIconDrawable(ContextCompat.getDrawable(getContext(), drawable));
+    public void setStartIconDrawable(Drawable drawable) {
+        this.drawable = drawable;
+        customInputTextComponentLayout.setStartIconDrawable(drawable);
     }
     public Drawable getStartIconDrawable() {
-        return customInputTextComponentLayout.getStartIconDrawable();
+        return this.drawable;
     }
 
     public void setColor(int color) {
+        this.color = color;
+
         customInputTextComponentLayout.setStartIconTintList(ColorStateList.valueOf(color));
         customInputTextComponentLayout.setDefaultHintTextColor(ColorStateList.valueOf(color));
         customInputTextComponentMainElement.setBackgroundTintList(ColorStateList.valueOf(color));
 
-        customInputTextComponentMainElement.setOnFocusChangeListener((view, b) -> {
+        customInputTextComponentMainElement.setOnFocusChangeListener((view, b) -> post(() -> {
             if (b && isFirstFocus) {
-                view.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.transparent)));
+                view.setBackgroundTintList(null);
                 view.setBackgroundTintList(ColorStateList.valueOf(color));
                 isFirstFocus = false;
             }
-        });
+        }));
     }
     public int getColor() {
-        ColorStateList colorStateList = customInputTextComponentLayout.getDefaultHintTextColor();
-        if (colorStateList != null) {
-            return colorStateList.getDefaultColor();
-        } else {
-            return 0;
-        }
+        return this.color;
+    }
+
+    public void setMaxLength(int maxLength) {
+        this.maxLength = maxLength;
+        customInputTextComponentMainElement.setFilters(new InputFilter[] {new InputFilter.LengthFilter(maxLength)});
+    }
+
+    public int getMaxLength() {
+        return this.maxLength;
+    }
+
+    public void setInputType(int inputType) {
+        this.inputType = inputType;
+        customInputTextComponentMainElement.setInputType(inputType);
+    }
+
+    public int getInputType() {
+        return this.inputType;
+    }
+
+    public void setError(CharSequence error) {
+        this.error = error;
+        customInputTextComponentLayout.setError(error);
+    }
+
+    public CharSequence getError() {
+        return this.error;
+    }
+
+    public void setEditable(boolean editable) {
+        this.editable = editable;
+        customInputTextComponentMainElement.setEnabled(editable);
+    }
+
+    public boolean isEditable() {
+        return this.editable;
     }
 
     private void setAttributes(AttributeSet attrs) {
         TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.CustomInputTextComponent, 0, 0);
+        try {
+            if (typedArray.hasValue(R.styleable.CustomInputTextComponent_android_hint)) {
+                this.setHint(typedArray.getText(R.styleable.CustomInputTextComponent_android_hint));
+            }
 
-        if (typedArray.hasValue(R.styleable.CustomInputTextComponent_android_hint)) {
-            this.setHint(typedArray.getText(R.styleable.CustomInputTextComponent_android_hint));
+            if (typedArray.hasValue(R.styleable.CustomInputTextComponent_android_text)) {
+                this.setText(typedArray.getText(R.styleable.CustomInputTextComponent_android_text));
+            }
+
+            int textColor = typedArray.getColor(R.styleable.CustomInputTextComponent_android_textColor, ContextCompat.getColor(getContext(), R.color.dark));
+            this.setTextColor(textColor);
+
+            if (typedArray.hasValue(R.styleable.CustomInputTextComponent_startIconDrawable)) {
+                this.setStartIconDrawable(typedArray.getDrawable(R.styleable.CustomInputTextComponent_startIconDrawable));
+            }
+
+            int color = typedArray.getColor(R.styleable.CustomInputTextComponent_color, ContextCompat.getColor(getContext(), R.color.dark));
+            this.setColor(color);
+
+            int maxLength = typedArray.getInt(R.styleable.CustomInputTextComponent_android_maxLength, DEFAULT_MAX_LENGTH);
+            this.setMaxLength(maxLength);
+
+            int inputType = typedArray.getInt(R.styleable.CustomInputTextComponent_android_inputType, EditorInfo.TYPE_CLASS_TEXT);
+            this.setInputType(inputType);
+
+            if (typedArray.hasValue(R.styleable.CustomInputTextComponent_error)) {
+                this.setError(typedArray.getText(R.styleable.CustomInputTextComponent_error));
+            }
+
+            this.setEditable(typedArray.getBoolean(R.styleable.CustomInputTextComponent_android_enabled, true));
+        } finally {
+            typedArray.recycle();
         }
-
-        if (typedArray.hasValue(R.styleable.CustomInputTextComponent_android_text)) {
-            this.setText(typedArray.getText(R.styleable.CustomInputTextComponent_android_text));
-        }
-
-        int textColor = typedArray.getColor(R.styleable.CustomInputTextComponent_android_textColor, ContextCompat.getColor(getContext(), R.color.dark));
-        this.setTextColor(textColor);
-
-        if (typedArray.hasValue(R.styleable.CustomInputTextComponent_startIconDrawable)) {
-            customInputTextComponentLayout.setStartIconDrawable(typedArray.getDrawable(R.styleable.CustomInputTextComponent_startIconDrawable));
-        }
-
-        int color = typedArray.getColor(R.styleable.CustomInputTextComponent_color, ContextCompat.getColor(getContext(), R.color.dark));
-        this.setColor(color);
-
-        int maxLength = typedArray.getInt(R.styleable.CustomInputTextComponent_android_maxLength, DEFAULT_MAX_LENGTH);
-        customInputTextComponentMainElement.setFilters(new InputFilter[] {new InputFilter.LengthFilter(maxLength)});
-
-        typedArray.recycle();
     }
 }

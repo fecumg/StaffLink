@@ -1,3 +1,41 @@
 <resources>
     <string name="app_name">StaffLink</string>
+    <string name="authorization_header">Authorization</string>
+    <string name="authorization_sharedPreference">Authorization</string>
+
+    <string name="uri_extra">uri</string>
+    <string name="no_response">no response when calling api</string>
+
+    <string name="navigation_drawer_open">Open</string>
+    <string name="navigation_drawer_close">Close</string>
+
+    <string name="default_scheme">http</string>
+    <string name="staff_link_scheme">stafflink</string>
+    <string name="default_host">10.0.2.2</string>
+    <string name="default_port">9091</string>
+    <string name="default_domain">http://10.0.2.2:9091/</string>
+    <string name="staff_link_domain">stafflink://10.0.2.2:9091/</string>
+    <string name="image_path_prefix">images</string>
+    <string name="file_path_prefix">files</string>
+
+    <string name="login_path">/login</string>
+    <string name="personal_information_path">/auth</string>
+    <string name="unauthorized_path">/unauthorized</string>
+    <string name="user_path">/users</string>
+    <string name="role_path">/roles</string>
+    <string name="function_path">/functions</string>
+
+    <string name="navigation_greeting">Hello, </string>
+
+    <string name="user_form_title_new">New user</string>
+    <string name="user_form_title_edit">Edit user</string>
+
+    <string name="role_form_title_new">New role</string>
+    <string name="role_form_title_edit">Edit role</string>
+
+    <string name="function_form_title_new">New function</string>
+    <string name="function_form_title_edit">Edit function</string>
+
+    <string name="authentication_title_login">Login</string>
+    <string name="authentication_title_edit">Personal information</string>
 </resources>

@@ -1,11 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="circle">
+    <style name="oval">
         <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">@dimen/circle_corner_size</item>
+        <item name="cornerSize">@dimen/oval_corner_size</item>
     </style>
     <style name="rectangle">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">@dimen/rectangle_corner_size</item>
+    </style>
+    <style name="inputTextTheme">
+        <item name="colorControlNormal">@color/dark</item>
+        <item name="colorControlActivated">@color/dark</item>
+        <item name="colorControlHighlight">@color/dark</item>
+    </style>
+
+    <style name="defaultSwitchTheme" parent="Theme.AppCompat.Light">
+        <!-- active thumb & track color -->
+        <item name="colorControlActivated">@color/primary</item>
+
+        <!-- inactive thumb color -->
+        <item name="colorSwitchThumbNormal">@color/transparent_shadow_60</item>
+
+        <!-- inactive track color -->
+        <item name="android:colorForeground">#42221f1f</item>
     </style>
 </resources>

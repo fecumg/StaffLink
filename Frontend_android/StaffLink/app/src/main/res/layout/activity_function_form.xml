@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".FunctionFormActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/small_icon_size">
+
+        <ImageButton
+            android:id="@+id/buttonBackToFunctions"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:src="@drawable/ic_back_light_foreground"
+            android:backgroundTint="@color/danger"
+            android:layout_alignParentStart="true"/>
+
+        <TextView
+            android:id="@+id/textViewFunctionFormTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/header_text_size"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:textColor="@color/primary"
+            android:layout_centerVertical="true"/>
+
+        <ImageButton
+            android:id="@+id/buttonSubmitFunction"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:src="@drawable/ic_check_light_foreground"
+            android:backgroundTint="@color/primary"
+            android:layout_alignParentEnd="true"/>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/textViewError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/danger"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingHorizontal="5dp">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <fpt.edu.stafflink.components.CustomInputTextComponent
+                android:id="@+id/inputTextName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Name"
+                app:startIconDrawable="@drawable/ic_empty_foreground"
+                app:color="@color/primary"
+                android:inputType="text"
+                android:layout_marginBottom="10dp"/>
+
+            <fpt.edu.stafflink.components.CustomInputTextComponent
+                android:id="@+id/inputTextDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Description"
+                app:startIconDrawable="@drawable/ic_description_light_foreground"
+                app:color="@color/primary"
+                android:inputType="textMultiLine"
+                android:layout_marginBottom="10dp"/>
+
+            <fpt.edu.stafflink.components.CustomInputTextComponent
+                android:id="@+id/inputTextUri"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Uri"
+                app:startIconDrawable="@drawable/ic_link_light_foreground"
+                app:color="@color/primary"
+                android:inputType="text"
+                android:layout_marginBottom="10dp"/>
+
+            <fpt.edu.stafflink.components.CustomSelectComponent
+                android:id="@+id/selectParent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:nullable="true"
+                app:nullValue="Root function"/>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchDisplayed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Displayed"
+                android:checked="true"
+                android:theme="@style/defaultSwitchTheme"/>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

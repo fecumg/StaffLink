@@ -5,23 +5,42 @@
         <attr name="android:background"/>
         <attr name="android:textColor"/>
         <attr name="android:textSize"/>
+        <attr name="android:foreground"/>
+        <attr name="android:foregroundTint"/>
     </declare-styleable>
+    
     <declare-styleable name="CustomInputTextComponent">
         <attr name="android:hint"/>
         <attr name="android:text"/>
         <attr name="android:textColor"/>
         <attr name="startIconDrawable"/>
         <attr name="color" format="color"/>
-        <attr name="android:maxLength"/>
+        <attr name="android:maxLength" />
+        <attr name="android:inputType"/>
+        <attr name="error" format="string"/>
+        <attr name="android:enabled"/>
     </declare-styleable>
+    
     <declare-styleable name="CustomImageComponent">
         <attr name="android:src"/>
-        <attr name="shape" format="enum">
-            <enum name="circle" value="0"/>
-            <enum name="rectangle" value="1"/>
-        </attr>
         <attr name="hasShadow" format="boolean"/>
         <attr name="url" format="string"/>
         <attr name="ableToPickImage" format="boolean"/>
+        <attr name="tint" />
+        <attr name="cancellable" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="CustomTableComponent">
+        <attr name="imageShape" format="enum">
+            <enum name="oval" value="0"/>
+            <enum name="rectangle" value="1"/>
+        </attr>
+        <attr name="defaultImage" format="reference"/>
+        <attr name="defaultImageTint" format="color"/>
+    </declare-styleable>
+
+    <declare-styleable name="CustomSelectComponent">
+        <attr name="nullable" format="boolean"/>
+        <attr name="nullValue" format="string"/>
     </declare-styleable>
 </resources>

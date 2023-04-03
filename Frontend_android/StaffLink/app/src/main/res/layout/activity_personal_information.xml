@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PersonalInformationActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/small_icon_size">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Personal information"
+            android:textSize="@dimen/header_text_size"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:textColor="@color/primary"
+            android:layout_centerVertical="true"/>
+
+        <ImageButton
+            android:id="@+id/buttonSubmitEdit"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:src="@drawable/ic_check_light_foreground"
+            android:backgroundTint="@color/primary"
+            android:layout_alignParentEnd="true"/>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/textViewError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/danger"/>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <fpt.edu.stafflink.components.CustomInputTextComponent
+            android:id="@+id/inputTextName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Name"
+            app:startIconDrawable="@drawable/ic_empty_foreground"
+            app:color="@color/primary"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="10dp"/>
+
+        <fpt.edu.stafflink.components.CustomInputTextComponent
+            android:id="@+id/inputTextUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Username"
+            app:startIconDrawable="@drawable/ic_person_light_foreground"
+            app:color="@color/primary"
+            android:inputType="textVisiblePassword|textNoSuggestions"
+            android:layout_marginBottom="10dp"
+            android:enabled="false"/>
+
+        <fpt.edu.stafflink.components.CustomInputTextComponent
+            android:id="@+id/inputTextAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Address"
+            app:startIconDrawable="@drawable/ic_house_light_foreground"
+            app:color="@color/primary"
+            android:layout_marginBottom="10dp"/>
+
+        <fpt.edu.stafflink.components.CustomInputTextComponent
+            android:id="@+id/inputTextPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Phone"
+            app:startIconDrawable="@drawable/ic_phone_light_foreground"
+            app:color="@color/primary"
+            android:inputType="phone"
+            android:layout_marginBottom="10dp"/>
+
+        <fpt.edu.stafflink.components.CustomInputTextComponent
+            android:id="@+id/inputTextEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="E-mail"
+            app:startIconDrawable="@drawable/ic_email_light_foreground"
+            app:color="@color/primary"
+            android:inputType="textEmailAddress"
+            android:layout_marginBottom="10dp"/>
+
+        <fpt.edu.stafflink.components.CustomImageComponentOval
+            android:id="@+id/imageAvatar"
+            android:layout_width="@dimen/normal_circular_avatar_size"
+            android:layout_height="@dimen/normal_circular_avatar_size"
+            android:src="@drawable/ic_person_light_foreground"
+            app:tint="@color/primary"
+            app:ableToPickImage="true"
+            android:layout_marginBottom="10dp"
+            app:cancellable="true"/>
+    </LinearLayout>
+</LinearLayout>

@@ -1,11 +1,10 @@
 package fpt.edu.stafflink.utilities;
 
-import android.util.DisplayMetrics;
+import android.content.Context;
 import android.util.TypedValue;
 
 public class DimenUtils {
-    public int pixelToDp(int pixels) {
-        DisplayMetrics displaymetrics = new DisplayMetrics();
-        return (int) TypedValue.applyDimension( TypedValue.COMPLEX_UNIT_DIP, pixels, displaymetrics );
+    public static int dpToPx(Context context, int dp) {
+        return (int) TypedValue.applyDimension( TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
     }
 }

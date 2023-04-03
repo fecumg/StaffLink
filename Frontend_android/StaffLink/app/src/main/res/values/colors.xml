@@ -39,4 +39,8 @@
     <color name="light_blue_600">#FF039BE5</color>
     <color name="gray_400">#FFBDBDBD</color>
     <color name="gray_600">#FF757575</color>
+
+    <color name="table_header_color">@color/transparent_shadow_40</color>
+    <color name="table_alternate_color">@color/transparent_shadow_30</color>
+    <color name="table_border_color">@color/transparent_shadow_60</color>
 </resources>

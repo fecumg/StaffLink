@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/itemTableLayout">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/table_item_height">
+
+        <RelativeLayout
+            android:id="@+id/itemTableElementWrapper_one"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingHorizontal="5dp"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="5dp"
+                android:gravity="center_vertical"
+                android:maxLines="@integer/default_table_max_lines"
+                android:ellipsize="end"
+                android:visibility="gone"/>
+
+            <fpt.edu.stafflink.components.CustomImageComponent
+                android:layout_width="@dimen/table_item_image_size"
+                android:layout_height="@dimen/table_item_image_size"
+                android:layout_centerVertical="true"
+                android:visibility="gone"/>
+
+            <fpt.edu.stafflink.components.CustomImageComponentOval
+                android:layout_width="@dimen/table_item_image_size"
+                android:layout_height="@dimen/table_item_image_size"
+                android:layout_centerVertical="true"
+                android:visibility="gone"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/table_border_color"
+                android:layout_alignParentEnd="true"
+                android:visibility="gone"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/itemTableElementWrapper_two"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingHorizontal="5dp"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="5dp"
+                android:gravity="center_vertical"
+                android:maxLines="@integer/default_table_max_lines"
+                android:ellipsize="end"
+                android:visibility="gone"/>
+
+            <fpt.edu.stafflink.components.CustomImageComponent
+                android:layout_width="@dimen/table_item_image_size"
+                android:layout_height="@dimen/table_item_image_size"
+                android:layout_centerVertical="true"
+                android:visibility="gone"/>
+
+            <fpt.edu.stafflink.components.CustomImageComponentOval
+                android:layout_width="@dimen/table_item_image_size"
+                android:layout_height="@dimen/table_item_image_size"
+                android:layout_centerVertical="true"
+                android:visibility="gone"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/table_border_color"
+                android:layout_alignParentEnd="true"
+                android:visibility="gone"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/itemTableElementWrapper_three"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingHorizontal="5dp"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="5dp"
+                android:gravity="center_vertical"
+                android:maxLines="@integer/default_table_max_lines"
+                android:ellipsize="end"
+                android:visibility="gone"/>
+
+            <fpt.edu.stafflink.components.CustomImageComponent
+                android:layout_width="@dimen/table_item_image_size"
+                android:layout_height="@dimen/table_item_image_size"
+                android:layout_centerVertical="true"
+                android:visibility="gone"/>
+
+            <fpt.edu.stafflink.components.CustomImageComponentOval
+                android:layout_width="@dimen/table_item_image_size"
+                android:layout_height="@dimen/table_item_image_size"
+                android:layout_centerVertical="true"
+                android:visibility="gone"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/table_border_color"
+                android:layout_alignParentEnd="true"
+                android:visibility="gone"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/itemTableElementWrapper_four"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingHorizontal="5dp"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="5dp"
+                android:gravity="center_vertical"
+                android:maxLines="@integer/default_table_max_lines"
+                android:ellipsize="end"
+                android:visibility="gone"/>
+
+            <fpt.edu.stafflink.components.CustomImageComponent
+                android:layout_width="@dimen/table_item_image_size"
+                android:layout_height="@dimen/table_item_image_size"
+                android:layout_centerVertical="true"
+                android:visibility="gone"/>
+
+            <fpt.edu.stafflink.components.CustomImageComponentOval
+                android:layout_width="@dimen/table_item_image_size"
+                android:layout_height="@dimen/table_item_image_size"
+                android:layout_centerVertical="true"
+                android:visibility="gone"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/table_border_color"
+                android:layout_alignParentEnd="true"
+                android:visibility="gone"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/itemTableElementWrapper_five"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingHorizontal="5dp"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="5dp"
+                android:gravity="center_vertical"
+                android:maxLines="@integer/default_table_max_lines"
+                android:ellipsize="end"
+                android:visibility="gone"/>
+
+            <fpt.edu.stafflink.components.CustomImageComponent
+                android:layout_width="@dimen/table_item_image_size"
+                android:layout_height="@dimen/table_item_image_size"
+                android:layout_centerVertical="true"
+                android:visibility="gone"/>
+
+            <fpt.edu.stafflink.components.CustomImageComponentOval
+                android:layout_width="@dimen/table_item_image_size"
+                android:layout_height="@dimen/table_item_image_size"
+                android:layout_centerVertical="true"
+                android:visibility="gone"/>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/table_border_color"/>
+</LinearLayout>
