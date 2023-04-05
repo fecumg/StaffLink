@@ -5,6 +5,7 @@
     <file type="web" url="file://$PROJECT_DIR$/Auth_gateway" />
     <file type="web" url="file://$PROJECT_DIR$/Eureka_server" />
     <file type="web" url="file://$PROJECT_DIR$/File-service" />
+    <file type="web" url="file://$PROJECT_DIR$/Task-service" />
     <file type="web" url="file://$PROJECT_DIR$/User_service" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="18" project-jdk-type="JavaSDK" />

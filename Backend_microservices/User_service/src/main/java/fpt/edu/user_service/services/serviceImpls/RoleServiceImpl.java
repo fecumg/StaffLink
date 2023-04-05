@@ -169,7 +169,8 @@ public class RoleServiceImpl extends BaseService implements RoleService {
         }
     }
 
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(cron = "0 0 2 * * ?", zone = "Asia/Ho_Chi_Minh")
+//    @Scheduled(fixedDelay = 60000)
     public void cacheEvict() {
         super.clearCache(getAllMethodCache, getMethodCache);
     }

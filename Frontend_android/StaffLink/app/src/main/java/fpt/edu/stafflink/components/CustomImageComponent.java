@@ -18,10 +18,13 @@ import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -55,10 +58,13 @@ public class CustomImageComponent extends RelativeLayout {
     private static final float ZOOM_PIVOT = 0.5f;
     private static final long ZOOM_ANIMATION_DURATION = 300L;
     private static final int CANCEL_BUTTON_SPACING = 20;
+    private static final int PADDING_TO_INDEX_IN_DP = 2;
 
+    RelativeLayout customImageComponentLayout;
     ShapeableImageView customImageComponentMainElement;
     CardView customImageComponentWrapper;
     ImageButton customImageComponentRemoveButton;
+    TextView customImageComponentIndex;
 
     private boolean hasShadow;
     private Drawable src;
@@ -67,6 +73,7 @@ public class CustomImageComponent extends RelativeLayout {
     private boolean ableToPickImage;
     private int tint;
     private boolean cancellable;
+    private int index;
 
     private RxPermissions rxPermissions;
     private Disposable permissionDisposal;
@@ -76,6 +83,7 @@ public class CustomImageComponent extends RelativeLayout {
 
         this.initView();
         this.setAttributes(attrs);
+        this.setIndexDimensions();
     }
 
     public void scaleWithAnimation(View view, float startScale, float endScale) {
@@ -150,7 +158,7 @@ public class CustomImageComponent extends RelativeLayout {
     }
 
     public interface OnTouchEventHandler {
-        public void handle();
+        void handle();
     }
 
     private void pickImage(ActivityResult result, AppCompatActivity activity) {
@@ -180,15 +188,34 @@ public class CustomImageComponent extends RelativeLayout {
     public void initView() {
         View view = inflate(getContext(), R.layout.component_image_custom_rectangular, this);
 
+        customImageComponentLayout = view.findViewById(R.id.customImageComponentLayout);
         customImageComponentMainElement = view.findViewById(R.id.customImageComponentMainElement);
         customImageComponentWrapper = view.findViewById(R.id.customImageComponentWrapper);
         customImageComponentRemoveButton = view.findViewById(R.id.customImageComponentRemoveButton);
+        customImageComponentIndex = view.findViewById(R.id.customImageComponentIndex);
+    }
+
+    public void setIndexDimensions() {
+        ViewTreeObserver viewTreeObserver = customImageComponentMainElement.getViewTreeObserver();
+        viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                customImageComponentMainElement.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                int height = customImageComponentMainElement.getMeasuredHeight();
+                int indexHeightInDp = DimenUtils.pxToDp(getContext(), height) - PADDING_TO_INDEX_IN_DP;
+                int indexHeight = DimenUtils.dpToPx(getContext(), indexHeightInDp);
+
+                customImageComponentIndex.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, indexHeight));
+            }
+        });
     }
 
     public void setHasShadow(boolean hasShadow) {
         this.hasShadow = hasShadow;
         if (hasShadow) {
             this.setShadow();
+            this.setIndex(0);
         } else {
             this.removeShadow();
         }
@@ -289,6 +316,8 @@ public class CustomImageComponent extends RelativeLayout {
             customImageComponentRemoveButton.setVisibility(VISIBLE);
 
             customImageComponentRemoveButton.setOnClickListener(view -> cancelImage());
+
+            this.setIndex(0);
         } else {
             params.setMargins(0, 0, 0, 0);
             customImageComponentWrapper.setLayoutParams(params);
@@ -306,6 +335,23 @@ public class CustomImageComponent extends RelativeLayout {
 
     public boolean isCancellable() {
         return this.cancellable;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+        if (index > 0) {
+            customImageComponentIndex.setVisibility(VISIBLE);
+            customImageComponentIndex.setText(String.valueOf(index));
+
+            this.setCancellable(false);
+            this.setHasShadow(false);
+        } else {
+            customImageComponentIndex.setVisibility(GONE);
+        }
+    }
+
+    public int getIndex() {
+        return this.index;
     }
 
     private void setAttributes(AttributeSet attrs) {
@@ -332,6 +378,10 @@ public class CustomImageComponent extends RelativeLayout {
 
             boolean cancellable = typedArray.getBoolean(R.styleable.CustomImageComponent_cancellable, false);
             this.setCancellable(cancellable);
+
+            if (typedArray.hasValue(R.styleable.CustomImageComponent_index)) {
+                this.setIndex(typedArray.getIndex(R.styleable.CustomImageComponent_index));
+            }
         } finally {
             typedArray.recycle();
         }

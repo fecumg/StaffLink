@@ -59,6 +59,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     TextView baseNavigationTextViewGreeting;
     ImageButton baseNavigationButtonLogout;
     CustomNavigationComponent baseNavigationComponent;
+    LinearLayout baseNavigationLoginButtonLayout;
 
     CompositeDisposable compositeDisposable;
 
@@ -96,16 +97,20 @@ public abstract class BaseActivity extends AppCompatActivity {
         baseNavigationTextViewGreeting = findViewById(R.id.baseNavigationTextViewGreeting);
         baseNavigationButtonLogout = findViewById(R.id.baseNavigationButtonLogout);
         baseNavigationComponent = findViewById(R.id.baseNavigationComponent);
+        baseNavigationLoginButtonLayout = findViewById(R.id.baseNavigationLoginButtonLayout);
 
         baseNavigationComponent.setDrawerLayout(baseDrawerLayout);
 
         this.fetchAuthorizedFunctions();
         this.fetchAuthUser(this);
+    }
 
-        baseNavigationImageAvatar.setOnTouch(() -> {
-            baseDrawerLayout.closeDrawers();
-            ActivityUtils.goTo(this, getString(R.string.personal_information_path));
-        });
+    @Override
+    protected void onResume() {
+        super.onResume();
+        baseDrawerLayout.closeDrawers();
+        this.fetchAuthorizedFunctions();
+        this.fetchAuthUser(this);
     }
 
     protected void handleResponse(Response<Object> response, ResponseHandler handler, ErrorResponseHandler errorHandler) {
@@ -116,6 +121,9 @@ public abstract class BaseActivity extends AppCompatActivity {
                 handler.handle(resBody, gson);
             }
         } else {
+            if (response.code() == 401) {
+                ActivityUtils.goTo(this, getString(R.string.unauthorized_path));
+            }
             try (ResponseBody responseBody = response.errorBody()) {
                 if (responseBody != null) {
                     ErrorApiResponse errorApiResponse = gson.fromJson(responseBody.string(), ErrorApiResponse.class);
@@ -223,19 +231,33 @@ public abstract class BaseActivity extends AppCompatActivity {
                             });
 
             compositeDisposable.add(disposable);
+        } else {
+            this.bindAnonymous();
         }
     }
 
     private void bindAnonymous() {
+        baseNavigationLoginButtonLayout.setVisibility(View.VISIBLE);
         baseNavigationAuthLayout.setVisibility(View.GONE);
+
+        baseNavigationLoginButtonLayout.setOnClickListener(view -> {
+            baseDrawerLayout.closeDrawers();
+            ActivityUtils.goTo(this, getString(R.string.login_path));
+        });
     }
 
     private void bindAuthInformation(Context context, UserResponse userResponse) {
+        baseNavigationLoginButtonLayout.setVisibility(View.GONE);
         baseNavigationAuthLayout.setVisibility(View.VISIBLE);
         baseNavigationImageAvatar.setUrl(RetrofitManager.getImageUrl(context, userResponse.getAvatar()));
 
         baseNavigationTextViewGreeting.setText(R.string.navigation_greeting);
         baseNavigationTextViewGreeting.append(userResponse.getName());
+
+        baseNavigationImageAvatar.setOnTouch(() -> {
+            baseDrawerLayout.closeDrawers();
+            ActivityUtils.goTo(this, getString(R.string.personal_information_path));
+        });
 
         baseNavigationButtonLogout.setOnClickListener(view -> {
             this.removeBearer();

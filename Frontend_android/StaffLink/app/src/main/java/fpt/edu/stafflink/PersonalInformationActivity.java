@@ -56,6 +56,12 @@ public class PersonalInformationActivity extends BaseActivity {
         this.initiate();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        this.initiate();
+    }
+
     private void initiate() {
         this.fetchAuthUser(this);
 

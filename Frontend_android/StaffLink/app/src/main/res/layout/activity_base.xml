@@ -25,6 +25,26 @@
             android:layout_height="wrap_content">
 
             <LinearLayout
+                android:id="@+id/baseNavigationLoginButtonLayout"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="10dp">
+
+                <TextView
+                    android:id="@+id/itemNavigationMainElement"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/navigation_item_height"
+                    android:text="Login"
+                    android:gravity="center_vertical"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/dark"/>
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/baseNavigationAuthLayout"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"

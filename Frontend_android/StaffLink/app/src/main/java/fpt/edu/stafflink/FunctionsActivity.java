@@ -36,6 +36,7 @@ public class FunctionsActivity extends BaseActivity {
     private static final String FUNCTION_ACTION = "FunctionAction";
 
     ImageButton buttonNewFunction;
+    ImageButton buttonRefreshFunctions;
     CustomTableComponent<FunctionResponse> tableFunctions;
     ActivityResultLauncher<Intent> formActivityResultLauncher;
 
@@ -44,6 +45,7 @@ public class FunctionsActivity extends BaseActivity {
         setContentView(R.layout.activity_functions);
 
         buttonNewFunction = findViewById(R.id.buttonNewFunction);
+        buttonRefreshFunctions = findViewById(R.id.buttonRefreshFunctions);
         tableFunctions = findViewById(R.id.tableFunctions);
 
         compositeDisposable = new CompositeDisposable();
@@ -51,6 +53,7 @@ public class FunctionsActivity extends BaseActivity {
         this.setFormActivityResultLauncher();
 
         buttonNewFunction.setOnClickListener(view -> formActivityResultLauncher.launch(new Intent(FunctionsActivity.this, FunctionFormActivity.class)));
+        buttonRefreshFunctions.setOnClickListener(view -> this.refresh());
 
         this.initTable();
         this.fetchFunctions();
@@ -138,7 +141,7 @@ public class FunctionsActivity extends BaseActivity {
                                             tableFunctions.setError(null);
                                             Type type = new TypeToken<List<FunctionResponse>>() {}.getType();
                                             List<FunctionResponse> functionResponses = gson.fromJson(gson.toJson(responseBody), type);
-                                            tableFunctions.adapter.addNewItems(functionResponses);
+                                            tableFunctions.setObjects(functionResponses);
                                         },
                                         errorApiResponse -> tableFunctions.setError(errorApiResponse.getMessage())
                                 ),
@@ -150,6 +153,10 @@ public class FunctionsActivity extends BaseActivity {
                 );
 
         compositeDisposable.add(disposable);
+    }
+
+    private void refresh() {
+        this.fetchFunctions();
     }
 
     private void listenToAdapterOnClick() {

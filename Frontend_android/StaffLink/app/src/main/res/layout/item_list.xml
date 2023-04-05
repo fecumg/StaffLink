@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/list_item_height"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/itemListLayout"
+    android:padding="@dimen/list_item_padding">
+
+    <TextView
+        android:id="@+id/itemListTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxWidth="@dimen/list_item_title_max_width"
+        android:text="Title title title title title title title title"
+        android:textSize="@dimen/list_item_title_size"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end"/>
+
+    <TextView
+        android:id="@+id/itemListContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxWidth="@dimen/list_item_content_max_width"
+        android:text="description description description description description description description description description description description description description description description description description"
+        android:layout_below="@+id/itemListTitle"
+        android:layout_marginTop="10dp"
+        android:maxLines="3"
+        android:ellipsize="end"/>
+
+    <fpt.edu.stafflink.components.CustomImageComponentOval
+        android:id="@+id/itemListIndexPrimary"
+        android:layout_width="30dp"
+        android:layout_height="20dp"
+        android:src="@drawable/component_button_background_primary"
+        app:hasShadow="false"
+        android:layout_alignParentEnd="true" />
+</RelativeLayout>

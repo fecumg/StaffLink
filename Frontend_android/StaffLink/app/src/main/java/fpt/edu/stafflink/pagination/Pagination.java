@@ -1,10 +1,12 @@
 package fpt.edu.stafflink.pagination;
 
+import java.util.HashMap;
+
 /**
  * @author Truong Duc Duong
  */
 
-public class Pagination {
+public class Pagination extends HashMap<String, String> {
     private static final String ASC = "ASC";
     private static final String DESC = "DESC";
 
@@ -18,17 +20,27 @@ public class Pagination {
         this.pageSize = pageSize;
         this.sortBy = sortBy;
         this.direction = direction;
+        this.generateMap();
     }
 
     public Pagination(int pageNumber, int pageSize, String sortBy) {
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
         this.sortBy = sortBy;
+        this.generateMap();
     }
 
     public Pagination(int pageNumber, int pageSize) {
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
+        this.generateMap();
+    }
+
+    private void generateMap() {
+        put("pageNumber", String.valueOf(this.pageNumber));
+        put("pageSize", String.valueOf(this.pageSize));
+        put("sortBy", this.sortBy);
+        put("direction", this.direction);
     }
 
     public Pagination(int pageNumber) {

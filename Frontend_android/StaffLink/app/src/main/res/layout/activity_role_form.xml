@@ -9,7 +9,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/small_icon_size">
+        android:layout_height="wrap_content">
 
         <ImageButton
             android:id="@+id/buttonBackToRoles"
@@ -21,13 +21,14 @@
 
         <TextView
             android:id="@+id/textViewRoleFormTitle"
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/title_width"
             android:layout_height="wrap_content"
             android:textSize="@dimen/header_text_size"
             android:textStyle="bold"
             android:gravity="center"
             android:textColor="@color/primary"
-            android:layout_centerVertical="true"/>
+            android:layout_centerVertical="true"
+            android:layout_centerInParent="true"/>
 
         <ImageButton
             android:id="@+id/buttonSubmitRole"

@@ -14,8 +14,8 @@ import org.springframework.data.domain.Sort;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Pagination {
-    private static final String ASC = "ASC";
-    private static final String DESC = "DESC";
+    public static final String ASC = "ASC";
+    public static final String DESC = "DESC";
     
     private int pageNumber = 1;
     private int pageSize = 10;

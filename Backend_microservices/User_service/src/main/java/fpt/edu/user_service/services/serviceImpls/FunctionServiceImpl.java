@@ -204,8 +204,10 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
             PageRequest pageRequest = Pagination.getPageRequest(pagination);
             functions =  functionRepository.findAll(pageRequest).getContent();
         }
-        return modelMapper.map(functions, new TypeToken<List<FunctionResponse>>() {}.getType());
 
+        List<Function> rearrangedFunctions = this.rearrange(functions, null);
+
+        return modelMapper.map(rearrangedFunctions, new TypeToken<List<FunctionResponse>>() {}.getType());
     }
 
     @Override
@@ -255,7 +257,9 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
                 .distinct()
                 .toList();
 
-        return modelMapper.map(authorizedFunctions, new TypeToken<List<FunctionResponse>>() {}.getType());
+        List<Function> rearrangedAuthorizedFunctions = this.rearrange(authorizedFunctions, null);
+
+        return modelMapper.map(rearrangedAuthorizedFunctions, new TypeToken<List<FunctionResponse>>() {}.getType());
     }
 
     @Override
@@ -273,10 +277,25 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
                 )
                 .toList();
 
-        return modelMapper.map(potentialParents, new TypeToken<List<FunctionResponse>>() {}.getType());
+        List<Function> rearrangedPotentialParents = this.rearrange(potentialParents, null);
+
+        return modelMapper.map(rearrangedPotentialParents, new TypeToken<List<FunctionResponse>>() {}.getType());
     }
 
-    @Scheduled(fixedDelay = 60000)
+    private List<Function> rearrange(List<Function> functions, Function initialParent) {
+        List<Function> rearrangedList = new ArrayList<>();
+        functions.forEach(function -> {
+            if ((initialParent == null && function.getParent() == null) ||
+                    (initialParent != null && function.getParent() != null && initialParent.getId() == function.getParent().getId())) {
+                rearrangedList.add(function);
+                rearrangedList.addAll(rearrange(functions, function));
+            }
+        });
+        return rearrangedList;
+    }
+
+    @Scheduled(cron = "0 0 2 * * ?", zone = "Asia/Ho_Chi_Minh")
+//    @Scheduled(fixedDelay = 60000)
     public void cacheEvict() {
         super.clearCache(getAllMethodCache, getMethodCache);
     }

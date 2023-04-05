@@ -38,6 +38,7 @@ public class UsersActivity extends BaseActivity {
     private int pageNumber = 1;
     private static final int PAGE_SIZE = 20;
     ImageButton buttonNewUser;
+    ImageButton buttonRefreshUsers;
     CustomTableComponent<UserResponse> tableUsers;
 
     ActivityResultLauncher<Intent> formActivityResultLauncher;
@@ -47,6 +48,7 @@ public class UsersActivity extends BaseActivity {
         setContentView(R.layout.activity_users);
 
         buttonNewUser = findViewById(R.id.buttonNewUser);
+        buttonRefreshUsers = findViewById(R.id.buttonRefreshUsers);
         tableUsers = findViewById(R.id.tableUsers);
 
         compositeDisposable = new CompositeDisposable();
@@ -54,6 +56,7 @@ public class UsersActivity extends BaseActivity {
         this.setFormActivityResultLauncher();
 
         buttonNewUser.setOnClickListener(view -> formActivityResultLauncher.launch(new Intent(UsersActivity.this, UserFormActivity.class)));
+        buttonRefreshUsers.setOnClickListener(view -> this.refresh());
 
         this.initTable();
         this.fetchUsers();
@@ -148,7 +151,11 @@ public class UsersActivity extends BaseActivity {
                                         tableUsers.setError(null);
                                         Type type = new TypeToken<List<UserResponse>>() {}.getType();
                                         List<UserResponse> userResponses = gson.fromJson(gson.toJson(responseBody), type);
-                                        tableUsers.adapter.addNewItems(userResponses);
+                                        if (pageNumber == 1) {
+                                            tableUsers.setObjects(userResponses);
+                                        } else {
+                                            tableUsers.adapter.addNewItems(userResponses);
+                                        }
                                         pageNumber ++;
                                     },
                                     errorApiResponse -> tableUsers.setError(errorApiResponse.getMessage())
@@ -161,6 +168,11 @@ public class UsersActivity extends BaseActivity {
                 );
 
         compositeDisposable.add(disposable);
+    }
+
+    private void refresh() {
+        this.pageNumber = 1;
+        this.fetchUsers();
     }
 
     private void listenToAdapterOnClick() {

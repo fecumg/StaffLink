@@ -4,6 +4,7 @@ import android.content.Context;
 
 import fpt.edu.stafflink.services.AuthenticationService;
 import fpt.edu.stafflink.services.FunctionService;
+import fpt.edu.stafflink.services.ProjectService;
 import fpt.edu.stafflink.services.RoleService;
 import fpt.edu.stafflink.services.UserService;
 
@@ -30,5 +31,11 @@ public class RetrofitServiceManager {
         return RetrofitManager
                 .getRetrofitInstance(context)
                 .create(FunctionService.class);
+    }
+
+    public static ProjectService getProjectService(Context context) {
+        return RetrofitManager
+                .getRetrofitInstance(context)
+                .create(ProjectService.class);
     }
 }

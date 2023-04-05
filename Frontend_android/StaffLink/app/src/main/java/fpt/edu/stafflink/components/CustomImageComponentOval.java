@@ -3,13 +3,16 @@ package fpt.edu.stafflink.components;
 import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewTreeObserver;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import fpt.edu.stafflink.R;
+import fpt.edu.stafflink.utilities.DimenUtils;
 
 public class CustomImageComponentOval extends CustomImageComponent{
     public CustomImageComponentOval(Context context, @Nullable AttributeSet attrs) {
@@ -20,9 +23,11 @@ public class CustomImageComponentOval extends CustomImageComponent{
     public void initView() {
         View view = inflate(getContext(), R.layout.component_image_custom_oval, this);
 
+        super.customImageComponentLayout = view.findViewById(R.id.customImageComponentLayout);
         super.customImageComponentMainElement = view.findViewById(R.id.customImageComponentMainElement);
         super.customImageComponentWrapper = view.findViewById(R.id.customImageComponentWrapper);
         super.customImageComponentRemoveButton = view.findViewById(R.id.customImageComponentRemoveButton);
+        super.customImageComponentIndex = view.findViewById(R.id.customImageComponentIndex);
     }
 
     @Override

@@ -17,10 +17,12 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import fpt.edu.stafflink.R;
+import fpt.edu.stafflink.utilities.DimenUtils;
 
 public class CustomInputTextComponent extends LinearLayout {
 
     private static final int DEFAULT_MAX_LENGTH = 180;
+    private static final int ERROR_ENABLE_LAYOUT_BOTTOM_MARGIN_IN_DP = -10;
     TextInputLayout customInputTextComponentLayout;
     TextInputEditText customInputTextComponentMainElement;
 

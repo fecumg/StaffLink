@@ -16,11 +16,12 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.QueryMap;
 
 public interface UserService {
 
     @GET("/users")
-    Observable<Response<Object>> getUsers(@Query("pagination") Pagination pagination);
+    Observable<Response<Object>> getUsers(@QueryMap Pagination pagination);
 
     @GET("users/{id}")
     Observable<Response<Object>> getUser(@Path("id") int id);

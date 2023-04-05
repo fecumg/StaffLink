@@ -8,7 +8,7 @@
     <TextView
         android:id="@+id/itemNavigationMainElement"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/list_item_height"
+        android:layout_height="@dimen/navigation_item_height"
         android:gravity="center_vertical"/>
 
     <View

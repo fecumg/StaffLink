@@ -9,6 +9,7 @@ import com.google.gson.GsonBuilder;
 import fpt.edu.stafflink.R;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -18,6 +19,9 @@ public class RetrofitManager {
     private static Retrofit roleRetrofitInstance;
 
     private static Retrofit generateRetrofitInstance(Context context, String domain) {
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
         OkHttpClient client = new OkHttpClient.Builder().addInterceptor(chain -> {
             SharedPreferences sharedPreferences = context.getSharedPreferences(context.getString(R.string.app_name), Context.MODE_PRIVATE);
             String bearer = sharedPreferences.getString(context.getString(R.string.authorization_sharedPreference), "");
@@ -26,7 +30,7 @@ public class RetrofitManager {
                     .addHeader("Authorization", bearer)
                     .build();
             return chain.proceed(request);
-        }).build();
+        }).addInterceptor(interceptor).build();
 
         Gson gson = new GsonBuilder()
                 .setLenient()

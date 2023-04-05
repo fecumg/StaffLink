@@ -28,6 +28,7 @@
         <attr name="ableToPickImage" format="boolean"/>
         <attr name="tint" />
         <attr name="cancellable" format="boolean"/>
+        <attr name="index" format="integer"/>
     </declare-styleable>
 
     <declare-styleable name="CustomTableComponent">

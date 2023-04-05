@@ -7,7 +7,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -70,7 +69,7 @@ public class CustomNavigationComponent extends LinearLayout {
         List<FunctionResponse> rearrangedFunctions = new ArrayList<>();
         functions.forEach(function -> {
             if (
-                    function.getParent() == parent ||
+                    (function.getParent() == null && parent == null) ||
                     (function.getParent() != null && parent != null && function.getParent().getId() == parent.getId())) {
                 rearrangedFunctions.add(function);
                 rearrangedFunctions.addAll(rearrangeFunctions(functions, function));

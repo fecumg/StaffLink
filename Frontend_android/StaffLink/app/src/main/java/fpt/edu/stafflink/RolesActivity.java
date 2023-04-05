@@ -20,6 +20,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 import fpt.edu.stafflink.components.CustomTableComponent;
@@ -36,6 +37,7 @@ public class RolesActivity extends BaseActivity {
     private static final String ROLE_ACTION = "RoleAction";
 
     ImageButton buttonNewRole;
+    ImageButton buttonRefreshRoles;
     CustomTableComponent<RoleResponse> tableRoles;
 
     ActivityResultLauncher<Intent> formActivityResultLauncher;
@@ -45,6 +47,7 @@ public class RolesActivity extends BaseActivity {
         setContentView(R.layout.activity_roles);
 
         buttonNewRole = findViewById(R.id.buttonNewRole);
+        buttonRefreshRoles = findViewById(R.id.buttonRefreshRoles);
         tableRoles = findViewById(R.id.tableRoles);
 
         compositeDisposable = new CompositeDisposable();
@@ -52,6 +55,8 @@ public class RolesActivity extends BaseActivity {
         this.setFormActivityResultLauncher();
 
         buttonNewRole.setOnClickListener(view -> formActivityResultLauncher.launch(new Intent(RolesActivity.this, RoleFormActivity.class)));
+        buttonRefreshRoles.setOnClickListener(view -> this.refresh());
+
 
         this.initTable();
         this.fetchRoles();
@@ -139,7 +144,7 @@ public class RolesActivity extends BaseActivity {
                                             tableRoles.setError(null);
                                             Type type = new TypeToken<List<RoleResponse>>() {}.getType();
                                             List<RoleResponse> roleResponses = gson.fromJson(gson.toJson(responseBody), type);
-                                            tableRoles.adapter.addNewItems(roleResponses);
+                                            tableRoles.setObjects(roleResponses);
                                         },
                                         errorApiResponse -> tableRoles.setError(errorApiResponse.getMessage())
                                 ),
@@ -151,6 +156,10 @@ public class RolesActivity extends BaseActivity {
                 );
 
         compositeDisposable.add(disposable);
+    }
+
+    private void refresh() {
+        this.fetchRoles();
     }
 
     private void listenToAdapterOnClick() {

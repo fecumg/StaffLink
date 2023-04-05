@@ -21,9 +21,10 @@
     <string name="login_path">/login</string>
     <string name="personal_information_path">/auth</string>
     <string name="unauthorized_path">/unauthorized</string>
-    <string name="user_path">/users</string>
-    <string name="role_path">/roles</string>
-    <string name="function_path">/functions</string>
+    <string name="users_path">/users</string>
+    <string name="roles_path">/roles</string>
+    <string name="functions_path">/functions</string>
+    <string name="projects_path">/projects</string>
 
     <string name="navigation_greeting">Hello, </string>
 

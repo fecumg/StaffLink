@@ -9,17 +9,18 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/small_icon_size">
+        android:layout_height="wrap_content">
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/title_width"
             android:layout_height="wrap_content"
             android:text="Functions"
             android:textSize="@dimen/header_text_size"
             android:textStyle="bold"
             android:gravity="center"
             android:textColor="@color/primary"
-            android:layout_centerVertical="true"/>
+            android:layout_centerVertical="true"
+            android:layout_centerInParent="true"/>
 
         <ImageButton
             android:id="@+id/buttonNewFunction"
@@ -28,6 +29,14 @@
             android:src="@drawable/ic_add_light_foreground"
             android:backgroundTint="@color/primary"
             android:layout_alignParentEnd="true"/>
+
+        <ImageButton
+            android:id="@+id/buttonRefreshFunctions"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:src="@drawable/ic_refresh_light_foreground"
+            android:backgroundTint="@color/secondary"
+            android:layout_toLeftOf="@+id/buttonNewFunction"/>
     </RelativeLayout>
 
     <fpt.edu.stafflink.components.CustomTableComponent

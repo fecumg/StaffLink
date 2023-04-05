@@ -40,6 +40,16 @@ public class LoginActivity extends BaseActivity {
         this.initiate();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        inputTextCredentialUsername.setText(null);
+        inputTextCredentialUsername.clearFocus();
+
+        inputTextCredentialPassword.setText(null);
+        inputTextCredentialPassword.clearFocus();
+    }
+
     private void initiate() {
         if (StringUtils.isEmpty(super.getBearer().trim())) {
             buttonLogin.setOnClick(view -> {

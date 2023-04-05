@@ -56,6 +56,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl extends BaseService implements UserService {
     private static final String getAllMethodCache = "allUserResponses";
     private static final String getMethodCache = "userResponses";
+    private static final int FIXED_DELAY = 1000 * 60 * 60 * 24;
 
     @Value("${rabbitmq.exchange}")
     private String EXCHANGE;
@@ -340,7 +341,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         return this.get(editedUser.getId());
     }
 
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(cron = "0 0 2 * * ?", zone = "Asia/Ho_Chi_Minh")
+//    @Scheduled(fixedDelay = 60000)
     public void cacheEvict() {
         super.clearCache(getAllMethodCache, getMethodCache);
     }
