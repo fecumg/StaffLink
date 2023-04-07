@@ -30,13 +30,14 @@ import java.util.List;
 
 import fpt.edu.stafflink.components.CustomImageComponentOval;
 import fpt.edu.stafflink.components.CustomNavigationComponent;
+import fpt.edu.stafflink.exceptions.UnauthorizedException;
 import fpt.edu.stafflink.models.responseDtos.FunctionResponse;
 import fpt.edu.stafflink.models.responseDtos.UserResponse;
 import fpt.edu.stafflink.response.ErrorApiResponse;
-import fpt.edu.stafflink.response.ErrorResponseHandler;
-import fpt.edu.stafflink.response.MergedResponse;
-import fpt.edu.stafflink.response.MergedResponseHandler;
-import fpt.edu.stafflink.response.ResponseHandler;
+import fpt.edu.stafflink.response.RetrofitResponse.ErrorResponseHandler;
+import fpt.edu.stafflink.response.RetrofitResponse.MergedResponse;
+import fpt.edu.stafflink.response.RetrofitResponse.MergedResponseHandler;
+import fpt.edu.stafflink.response.RetrofitResponse.ResponseHandler;
 import fpt.edu.stafflink.retrofit.RetrofitManager;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import fpt.edu.stafflink.utilities.ActivityUtils;
@@ -45,6 +46,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
+import reactor.core.Disposables;
 import retrofit2.Response;
 
 public abstract class BaseActivity extends AppCompatActivity {
@@ -62,6 +64,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     LinearLayout baseNavigationLoginButtonLayout;
 
     CompositeDisposable compositeDisposable;
+    reactor.core.Disposable.Composite reactorCompositeDisposable;
 
     SharedPreferences sharedPreferences;
 
@@ -73,9 +76,14 @@ public abstract class BaseActivity extends AppCompatActivity {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             throwable.printStackTrace();
             Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+
+            if (throwable instanceof UnauthorizedException) {
+                ActivityUtils.goTo(this, getString(R.string.unauthorized_path));
+            }
         });
 
         compositeDisposable = new CompositeDisposable();
+        reactorCompositeDisposable = Disposables.composite();
 
         sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
 
@@ -113,7 +121,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         this.fetchAuthUser(this);
     }
 
-    protected void handleResponse(Response<Object> response, ResponseHandler handler, ErrorResponseHandler errorHandler) {
+    public void handleResponse(Response<Object> response, ResponseHandler handler, ErrorResponseHandler errorHandler) {
         Gson gson = new GsonBuilder().create();
         if (response.isSuccessful()) {
             Object resBody = response.body();
@@ -137,7 +145,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
-    protected void handleMergedResponse(MergedResponse mergedResponse, MergedResponseHandler handler, ErrorResponseHandler errorHandler) {
+    public void handleMergedResponse(MergedResponse mergedResponse, MergedResponseHandler handler, ErrorResponseHandler errorHandler) {
         Gson gson = new GsonBuilder().create();
         Response<Object> first = mergedResponse.getFirst();
         Response<Object> second = mergedResponse.getSecond();
@@ -274,7 +282,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
-    protected void pushToast(String text) {
+    public void pushToast(String text) {
         toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.TOP, 0, 0);
         toast.show();
@@ -296,6 +304,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         compositeDisposable.dispose();
+        reactorCompositeDisposable.dispose();
     }
 
     protected abstract void onSubCreate(@Nullable Bundle savedInstanceState);

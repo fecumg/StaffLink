@@ -1,6 +1,7 @@
 package fpt.edu.taskservice.controllers.exceptionHandler;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import fpt.edu.taskservice.exceptions.UnauthorizedException;
 import fpt.edu.taskservice.responses.ErrorApiResponse;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
@@ -19,6 +20,12 @@ import org.springframework.web.reactive.result.method.annotation.ResponseEntityE
 @RestControllerAdvice
 @Log4j2
 public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorApiResponse> handleUnauthorizedException(UnauthorizedException e) {
+        e.printStackTrace();
+        return new ResponseEntity<>(new ErrorApiResponse(e.getMessage()), HttpStatus.UNAUTHORIZED);
+    }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorApiResponse> handleNotFoundException(NotFoundException e) {

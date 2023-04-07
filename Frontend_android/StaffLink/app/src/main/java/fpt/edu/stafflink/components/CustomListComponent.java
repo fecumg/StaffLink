@@ -80,4 +80,8 @@ public class CustomListComponent<T> extends LinearLayout {
     public CharSequence getError() {
         return this.error;
     }
+
+    public void scrollTo(int position) {
+        customListComponentMainElement.scrollToPosition(position);
+    }
 }

@@ -7,5 +7,40 @@
     android:layout_height="match_parent"
     tools:context=".ProjectAccessActivity">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
+        <ImageButton
+            android:id="@+id/buttonBackToProjects"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:src="@drawable/ic_back_light_foreground"
+            android:backgroundTint="@color/danger"
+            android:layout_alignParentStart="true"/>
+
+        <TextView
+            android:id="@+id/textViewProjectAccessTitle"
+            android:layout_width="@dimen/title_width"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/header_text_size"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:textColor="@color/primary"
+            android:layout_centerVertical="true"
+            android:layout_centerInParent="true"/>
+
+        <ImageButton
+            android:id="@+id/buttonSubmitProject"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:src="@drawable/ic_check_light_foreground"
+            android:backgroundTint="@color/primary"
+            android:layout_alignParentEnd="true"/>
+    </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/fragmentProjectInfo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </LinearLayout>

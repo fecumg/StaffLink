@@ -1,4 +1,4 @@
-package fpt.edu.stafflink.services;
+package fpt.edu.stafflink.retrofit.services;
 
 import io.reactivex.Observable;
 import okhttp3.RequestBody;

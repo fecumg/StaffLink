@@ -20,11 +20,11 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 
 import fpt.edu.stafflink.components.CustomTableComponent;
 import fpt.edu.stafflink.models.responseDtos.RoleResponse;
+import fpt.edu.stafflink.pagination.Pagination;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -132,8 +132,10 @@ public class RolesActivity extends BaseActivity {
     }
 
     private void fetchRoles() {
+        Pagination pagination = new Pagination(0);
+
         Disposable disposable = RetrofitServiceManager.getRoleService(this)
-                .getAllRoles()
+                .getRoles(pagination)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(

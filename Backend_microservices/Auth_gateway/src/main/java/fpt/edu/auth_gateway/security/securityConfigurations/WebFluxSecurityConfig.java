@@ -52,7 +52,7 @@ public class WebFluxSecurityConfig {
                 .pathMatchers(HttpMethod.OPTIONS).permitAll()
                 .pathMatchers("/login").permitAll()
                 .pathMatchers("/images/**").permitAll()
-                .anyExchange().authenticated()
+                .anyExchange().permitAll()
                 .and().build();
     }
 }

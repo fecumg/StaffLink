@@ -14,7 +14,7 @@
         <TextView
             android:layout_width="@dimen/title_width"
             android:layout_height="wrap_content"
-            android:text="Project management"
+            android:text="Projects"
             android:textSize="@dimen/header_text_size"
             android:textStyle="bold"
             android:gravity="center"
@@ -23,11 +23,20 @@
             android:layout_centerInParent="true"/>
 
         <ImageButton
+            android:id="@+id/buttonNewProject"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:src="@drawable/ic_add_light_foreground"
+            android:backgroundTint="@color/primary"
+            android:layout_alignParentEnd="true"/>
+
+        <ImageButton
             android:id="@+id/buttonRefreshProjects"
             android:layout_width="@dimen/small_icon_size"
             android:layout_height="@dimen/small_icon_size"
             android:src="@drawable/ic_refresh_light_foreground"
-            android:backgroundTint="@color/secondary"/>
+            android:backgroundTint="@color/secondary"
+            android:layout_toStartOf="@+id/buttonNewProject"/>
     </RelativeLayout>
 
     <fpt.edu.stafflink.components.CustomInputTextComponent

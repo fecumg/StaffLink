@@ -1,6 +1,5 @@
 package fpt.edu.taskservice.pagination;
 
-import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,12 +15,14 @@ public class Pagination {
     public static final String ASC = "ASC";
     public static final String DESC = "DESC";
 
-    @Min(value = 1, message = "Page number must be greater than 0")
-    private int pageNumber = 1;
+    private int pageNumber = 0;
 
-    @Min(value = 0, message = "Page size cannot not be negative")
     private int pageSize = 10;
     private String sortBy = "id";
 
     private String direction = ASC;
+
+    public static boolean isPaginationValid(Pagination pagination) {
+        return pagination != null && pagination.getPageNumber() > 0 && pagination.getPageSize() > 0;
+    }
 }

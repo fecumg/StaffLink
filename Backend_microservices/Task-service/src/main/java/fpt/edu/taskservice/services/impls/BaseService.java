@@ -3,9 +3,9 @@ package fpt.edu.taskservice.services.impls;
 import fpt.edu.taskservice.dtos.responseDtos.AttachmentResponse;
 import fpt.edu.taskservice.dtos.responseDtos.TaskResponse;
 import fpt.edu.taskservice.entities.Task;
+import fpt.edu.taskservice.exceptions.UnauthorizedException;
 import fpt.edu.taskservice.pagination.Pagination;
 import fpt.edu.taskservice.repositories.AttachmentRepository;
-import fpt.edu.taskservice.services.validations.ValidationHandler;
 import jakarta.ws.rs.BadRequestException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +34,6 @@ public class BaseService<T> {
     @Value("${http.request.auth.id}")
     private String AUTH_ID;
 
-    @Autowired
-    private ValidationHandler validationHandler;
     @Autowired
     private AttachmentRepository attachmentRepository;
 
@@ -68,6 +66,14 @@ public class BaseService<T> {
         }
     }
 
+    protected int getAuthId(ServerWebExchange exchange) {
+        String authUserIdString = exchange.getRequest().getHeaders().getFirst(AUTH_ID);
+        if (!StringUtils.hasText(authUserIdString)) {
+            throw new UnauthorizedException("Unauthorized");
+        }
+        return Integer.parseInt(authUserIdString);
+    }
+
     protected Date parseDate(String dateString, String pattern) {
         SimpleDateFormat sdf = new SimpleDateFormat(pattern);
         try {
@@ -77,40 +83,60 @@ public class BaseService<T> {
         }
     }
 
-    protected <FieldType> FieldType getFieldValue(Object object, String fieldName, Class<FieldType> resultType) {
-        if (StringUtils.hasText(fieldName) || object == null) {
-            return null;
+    protected String getFieldValue(Object object, String fieldName) {
+        if (!StringUtils.hasText(fieldName) || object == null) {
+            return "";
         }
         Class<?> clazz = object.getClass();
         try {
-            Field field = clazz.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            Object value =  field.get(object);
-            if (value != null) {
-                return resultType.cast(value);
+            Field field = this.getField(clazz, fieldName);
+            if (field != null) {
+                field.setAccessible(true);
+                return String.valueOf(field.get(object));
+            } else {
+                return "";
             }
-            return null;
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             e.printStackTrace();
-            return null;
+            return "";
+        }
+    }
+
+    private Field getField(Class<?> clazz, String fieldName) {
+        try {
+            return clazz.getDeclaredField(fieldName);
+        } catch (NoSuchFieldException e) {
+            Class<?> superClass = clazz.getSuperclass();
+            if (superClass!= null) {
+                return getField(clazz.getSuperclass(), fieldName);
+            } else {
+                e.printStackTrace();
+                return null;
+            }
         }
     }
 
     protected Flux<T> paginate(Flux<T> objectFlux, Pagination pagination) {
-        validationHandler.validate(pagination);
-
-        Flux<T> sortedObjectFlux;
-        if (pagination.getDirection().equals(Pagination.ASC)) {
-            sortedObjectFlux = objectFlux.sort(Comparator.comparing(task -> this.getFieldValue(task, pagination.getSortBy(), Date.class)));
-        } else if (pagination.getDirection().equals(Pagination.DESC)) {
-            sortedObjectFlux = objectFlux.sort(Comparator.comparing(task -> this.getFieldValue(task, pagination.getSortBy(), Date.class)).reversed());
+        if (pagination == null) {
+            return objectFlux;
         } else {
-            throw new BadRequestException("Sort direction must be either '" + Pagination.ASC + "' or '" + Pagination.DESC + "'");
-        }
+            Flux<T> sortedObjectFlux;
+            if (pagination.getDirection().equals(Pagination.ASC)) {
+                sortedObjectFlux = objectFlux.sort(Comparator.comparing(object -> this.getFieldValue(object, pagination.getSortBy())));
+            } else if (pagination.getDirection().equals(Pagination.DESC)) {
+                sortedObjectFlux = objectFlux.sort(Comparator.comparing(object -> this.getFieldValue(object, pagination.getSortBy())).reversed());
+            } else {
+                throw new BadRequestException("Sort direction must be either '" + Pagination.ASC + "' or '" + Pagination.DESC + "'");
+            }
 
-        return sortedObjectFlux
-                .skip((long) (pagination.getPageNumber() - 1) * pagination.getPageSize())
-                .take(pagination.getPageSize());
+            if (Pagination.isPaginationValid(pagination)) {
+                return sortedObjectFlux
+                        .skip((long) (pagination.getPageNumber() - 1) * pagination.getPageSize())
+                        .take(pagination.getPageSize());
+            } else {
+                return sortedObjectFlux;
+            }
+        }
     }
 
     protected Mono<TaskResponse> buildTaskResponse(Task task) {

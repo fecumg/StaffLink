@@ -1,12 +1,12 @@
 package fpt.edu.stafflink.pagination;
 
-import java.util.HashMap;
+import org.springframework.util.LinkedMultiValueMap;
 
 /**
  * @author Truong Duc Duong
  */
 
-public class Pagination extends HashMap<String, String> {
+public class MultiValuePagination extends LinkedMultiValueMap<String, String> {
     private static final String ASC = "ASC";
     private static final String DESC = "DESC";
 
@@ -15,7 +15,7 @@ public class Pagination extends HashMap<String, String> {
     private String sortBy = "id";
     private String direction = ASC;
 
-    public Pagination(int pageNumber, int pageSize, String sortBy, String direction) {
+    public MultiValuePagination(int pageNumber, int pageSize, String sortBy, String direction) {
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
         this.sortBy = sortBy;
@@ -23,32 +23,32 @@ public class Pagination extends HashMap<String, String> {
         this.generateMap();
     }
 
-    public Pagination(int pageNumber, int pageSize, String sortBy) {
+    public MultiValuePagination(int pageNumber, int pageSize, String sortBy) {
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
         this.sortBy = sortBy;
         this.generateMap();
     }
 
-    public Pagination(int pageNumber, int pageSize) {
+    public MultiValuePagination(int pageNumber, int pageSize) {
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
         this.generateMap();
     }
 
-    public Pagination(int pageNumber) {
+    public MultiValuePagination(int pageNumber) {
         this.pageNumber = pageNumber;
         this.generateMap();
     }
 
-    public Pagination() {
+    public MultiValuePagination() {
     }
 
     private void generateMap() {
-        put("pageNumber", String.valueOf(this.pageNumber));
-        put("pageSize", String.valueOf(this.pageSize));
-        put("sortBy", this.sortBy);
-        put("direction", this.direction);
+        add("pageNumber", String.valueOf(this.pageNumber));
+        add("pageSize", String.valueOf(this.pageSize));
+        add("sortBy", this.sortBy);
+        add("direction", this.direction);
     }
 
     public int getPageNumber() {

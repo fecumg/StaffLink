@@ -26,7 +26,8 @@ import fpt.edu.stafflink.components.CustomInputTextComponent;
 import fpt.edu.stafflink.models.requestDtos.RoleRequest;
 import fpt.edu.stafflink.models.responseDtos.FunctionResponse;
 import fpt.edu.stafflink.models.responseDtos.RoleResponse;
-import fpt.edu.stafflink.response.MergedResponse;
+import fpt.edu.stafflink.pagination.Pagination;
+import fpt.edu.stafflink.response.RetrofitResponse.MergedResponse;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -107,9 +108,11 @@ public class RoleFormActivity extends BaseActivity {
     }
 
     private void fetchDataOnNew() {
+        Pagination pagination = new Pagination(0);
+
         Disposable disposable = RetrofitServiceManager
                 .getFunctionService(this)
-                .getAllFunctions()
+                .getFunctions(pagination)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -134,9 +137,11 @@ public class RoleFormActivity extends BaseActivity {
     }
 
     private void fetchDataOnEdit(int id) {
+        Pagination pagination = new Pagination(0);
+
         Observable<Response<Object>> getFunctionsObservable = RetrofitServiceManager
                 .getFunctionService(this)
-                .getAllFunctions()
+                .getFunctions(pagination)
                 .subscribeOn(Schedulers.io());
 
         Observable<Response<Object>> getRoleObservable = RetrofitServiceManager

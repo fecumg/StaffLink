@@ -31,7 +31,8 @@ import fpt.edu.stafflink.models.requestDtos.userRequestDtos.EditUserRequest;
 import fpt.edu.stafflink.models.requestDtos.userRequestDtos.NewUserRequest;
 import fpt.edu.stafflink.models.responseDtos.RoleResponse;
 import fpt.edu.stafflink.models.responseDtos.UserResponse;
-import fpt.edu.stafflink.response.MergedResponse;
+import fpt.edu.stafflink.pagination.Pagination;
+import fpt.edu.stafflink.response.RetrofitResponse.MergedResponse;
 import fpt.edu.stafflink.retrofit.RetrofitManager;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import fpt.edu.stafflink.utilities.ValidationUtils;
@@ -129,9 +130,11 @@ public class UserFormActivity extends BaseActivity {
     }
 
     private void fetchDataOnNew() {
+        Pagination pagination = new Pagination(0);
+
         Disposable disposable = RetrofitServiceManager
                 .getRoleService(this)
-                .getAllRoles()
+                .getRoles(pagination)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -156,9 +159,11 @@ public class UserFormActivity extends BaseActivity {
     }
 
     private void fetchDataOnEdit(Context context, int id) {
+        Pagination pagination = new Pagination(0);
+
         Observable<Response<Object>> getRolesObservable = RetrofitServiceManager
                 .getRoleService(this)
-                .getAllRoles()
+                .getRoles(pagination)
                 .subscribeOn(Schedulers.io());
 
 

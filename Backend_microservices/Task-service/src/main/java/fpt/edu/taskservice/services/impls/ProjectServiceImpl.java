@@ -75,14 +75,8 @@ public class ProjectServiceImpl extends BaseService<Project> implements ProjectS
 
     @Override
     public Flux<ProjectResponse> getAll(Pagination pagination) {
-        Flux<Project> projectFlux;
-        if (pagination == null) {
-            projectFlux = projectRepository.findAll();
-        } else {
-            projectFlux = super.paginate(projectRepository.findAll(), pagination);
-        }
-        return projectFlux
-                .map(ProjectResponse::new)
+        return  super.paginate(projectRepository.findAll(), pagination)
+                .flatMapSequential(this::buildProjectResponse)
                 .delayElements(Duration.ofMillis(100))
                 .doOnError(throwable -> log.error(throwable.getMessage()));
     }
@@ -102,6 +96,15 @@ public class ProjectServiceImpl extends BaseService<Project> implements ProjectS
                 .flatMap(this::deleteTasksByProject)
                 .flatMap(project -> projectRepository.delete(project))
                 .doOnSuccess(voidValue -> log.info("Project with id '{}' deleted", id))
+                .doOnError(throwable -> log.error(throwable.getMessage()));
+    }
+
+    @Override
+    public Flux<ProjectResponse> getCreatedProjectByAuthUser(Pagination pagination, ServerWebExchange exchange) {
+        int authId = super.getAuthId(exchange);
+        return super.paginate(projectRepository.findAllByCreatedBy(authId), pagination)
+                .flatMapSequential(this::buildProjectResponse)
+                .delayElements(Duration.ofMillis(100))
                 .doOnError(throwable -> log.error(throwable.getMessage()));
     }
 

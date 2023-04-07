@@ -30,7 +30,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -220,13 +219,13 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     @Cacheable(value = getAllMethodCache, key = "#pagination.getPageNumber()")
     public List<UserResponse> getAll(Pagination pagination) {
-        List<User> users;
-        if (pagination == null) {
-            users =  userRepository.findAll();
-        } else {
-            PageRequest pageRequest = Pagination.getPageRequest(pagination);
-            users =  userRepository.findAll(pageRequest).getContent();
-        }
+        List<User> users = Pagination.retrieve(
+                pagination,
+                () -> userRepository.findAll(),
+                pageRequest -> userRepository.findAll(pageRequest).getContent(),
+                sort -> userRepository.findAll(sort),
+                User.class
+        );
         return modelMapper.map(users, new TypeToken<List<UserResponse>>() {}.getType());
     }
 

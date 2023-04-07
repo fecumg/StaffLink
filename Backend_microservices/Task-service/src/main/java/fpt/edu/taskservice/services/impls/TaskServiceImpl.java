@@ -58,6 +58,8 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
     @Value("${rabbitmq.routing-key.attachment-processing}")
     private String ATTACHMENT_PROCESSING_ROUTING_KEY;
 
+    private static final String DEFAULT_REQUEST_DATE_PATTERN = "dd-MM-yyyy";
+
     @Autowired
     private TaskRepository taskRepository;
     @Autowired
@@ -113,14 +115,8 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
 
     @Override
     public Flux<TaskResponse> getAll(Pagination pagination) {
-        Flux<Task> taskFlux;
-        if (pagination == null) {
-            taskFlux = taskRepository.findAll();
-        } else {
-            taskFlux = super.paginate(taskRepository.findAll(), pagination);
-        }
-        return taskFlux
-                .flatMap(super::buildTaskResponse)
+        return super.paginate(taskRepository.findAll(), pagination)
+                .flatMapSequential(super::buildTaskResponse)
                 .delayElements(Duration.ofMillis(100))
                 .doOnError(throwable -> log.error(throwable.getMessage()));
     }
@@ -213,7 +209,7 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
 
             Date requestedDueAt = null;
             if (StringUtils.hasText(requestedDueAtStr)) {
-                requestedDueAt = super.parseDate(requestedDueAtStr, env.getProperty("default.date.pattern"));
+                requestedDueAt = super.parseDate(requestedDueAtStr, env.getProperty("date.pattern.request", DEFAULT_REQUEST_DATE_PATTERN));
             }
 
             Calendar calendar = Calendar.getInstance();

@@ -1,4 +1,4 @@
-package fpt.edu.stafflink.response;
+package fpt.edu.stafflink.response.RetrofitResponse;
 
 import com.google.gson.Gson;
 

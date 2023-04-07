@@ -48,4 +48,9 @@ public class ProjectController extends BaseController {
     public ResponseEntity<Mono<Void>> deleteProject(@PathVariable("id") String id) {
         return ResponseEntity.ok(projectService.delete(id));
     }
+
+    @GetMapping("/created")
+    public ResponseEntity<Flux<ProjectResponse>> getCreatedProject(@Nullable @ModelAttribute Pagination pagination, ServerWebExchange exchange) {
+        return ResponseEntity.ok(projectService.getCreatedProjectByAuthUser(pagination, exchange));
+    }
 }

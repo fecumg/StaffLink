@@ -18,7 +18,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -125,15 +124,14 @@ public class RoleServiceImpl extends BaseService implements RoleService {
     @Override
     @Cacheable(value = getAllMethodCache, key = "#pagination.getPageNumber()")
     public List<RoleResponse> getAll(Pagination pagination) {
-        List<Role> roles;
-        if (pagination == null) {
-            roles =  roleRepository.findAll();
-        } else {
-            PageRequest pageRequest = Pagination.getPageRequest(pagination);
-            roles =  roleRepository.findAll(pageRequest).getContent();
-        }
+        List<Role> roles = Pagination.retrieve(
+                pagination,
+                () -> roleRepository.findAll(),
+                pageRequest -> roleRepository.findAll(pageRequest).getContent(),
+                sort -> roleRepository.findAll(sort),
+                Role.class
+        );
         return modelMapper.map(roles, new TypeToken<List<RoleResponse>>() {}.getType());
-
     }
 
     @Override

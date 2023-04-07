@@ -27,7 +27,8 @@ import fpt.edu.stafflink.components.CustomSelectComponent;
 import fpt.edu.stafflink.models.requestDtos.FunctionRequest;
 import fpt.edu.stafflink.models.responseDtos.FunctionResponse;
 import fpt.edu.stafflink.models.responseDtos.RoleResponse;
-import fpt.edu.stafflink.response.MergedResponse;
+import fpt.edu.stafflink.pagination.Pagination;
+import fpt.edu.stafflink.response.RetrofitResponse.MergedResponse;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -109,9 +110,11 @@ public class FunctionFormActivity extends BaseActivity {
     }
 
     private void fetchDataOnNew() {
+        Pagination pagination = new Pagination(0);
+
         Disposable disposable = RetrofitServiceManager
                 .getFunctionService(this)
-                .getAllFunctions()
+                .getFunctions(pagination)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(

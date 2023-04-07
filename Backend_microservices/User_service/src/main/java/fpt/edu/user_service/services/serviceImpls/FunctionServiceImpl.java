@@ -26,7 +26,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -197,16 +196,14 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
     @Override
     @Cacheable(value = getAllMethodCache, key = "#pagination.getPageNumber()")
     public List<FunctionResponse> getAll(Pagination pagination) {
-        List<Function> functions;
-        if (pagination == null) {
-            functions =  functionRepository.findAll();
-        } else {
-            PageRequest pageRequest = Pagination.getPageRequest(pagination);
-            functions =  functionRepository.findAll(pageRequest).getContent();
-        }
-
+        List<Function> functions = Pagination.retrieve(
+                pagination,
+                () -> functionRepository.findAll(),
+                pageRequest -> functionRepository.findAll(pageRequest).getContent(),
+                sort -> functionRepository.findAll(sort),
+                Function.class
+        );
         List<Function> rearrangedFunctions = this.rearrange(functions, null);
-
         return modelMapper.map(rearrangedFunctions, new TypeToken<List<FunctionResponse>>() {}.getType());
     }
 

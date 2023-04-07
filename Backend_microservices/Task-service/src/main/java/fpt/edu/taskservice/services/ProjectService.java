@@ -19,4 +19,5 @@ public interface ProjectService {
     Flux<ProjectResponse> getAll(Pagination pagination);
     Mono<ProjectResponse> get(String id);
     Mono<Void> delete(String id);
+    Flux<ProjectResponse> getCreatedProjectByAuthUser(Pagination pagination, ServerWebExchange exchange);
 }

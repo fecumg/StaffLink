@@ -16,8 +16,10 @@ import java.util.Date;
 @AllArgsConstructor
 @RedisHash
 public class BaseResponse {
+
     private Date createdAt;
     private int createdBy;
+
 
     private Date updatedAt;
     private int updatedBy;

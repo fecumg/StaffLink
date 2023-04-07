@@ -24,6 +24,7 @@ import java.util.List;
 
 import fpt.edu.stafflink.components.CustomTableComponent;
 import fpt.edu.stafflink.models.responseDtos.FunctionResponse;
+import fpt.edu.stafflink.pagination.Pagination;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -129,8 +130,10 @@ public class FunctionsActivity extends BaseActivity {
     }
 
     private void fetchFunctions() {
+        Pagination pagination = new Pagination(0);
+
         Disposable disposable = RetrofitServiceManager.getFunctionService(this)
-                .getAllFunctions()
+                .getFunctions(pagination)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(

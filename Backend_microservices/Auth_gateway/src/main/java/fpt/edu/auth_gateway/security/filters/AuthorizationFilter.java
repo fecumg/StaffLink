@@ -90,7 +90,7 @@ public class AuthorizationFilter extends AbstractGatewayFilterFactory<Authorizat
 
     private Mono<Boolean> isFreePath(Config config, ServerWebExchange exchange) {
         PathMatcher pathMatcher = new AntPathMatcher();
-        return Mono.just(config.getExcludedPaths())
+        return Mono.justOrEmpty(config.getExcludedPaths())
                 .filter(StringUtils::hasText)
                 .map(excludedPathsString -> Arrays.stream(excludedPathsString.split(", ")).toList())
                 .flatMapMany(Flux::fromIterable)

@@ -2,11 +2,11 @@ package fpt.edu.stafflink.retrofit;
 
 import android.content.Context;
 
-import fpt.edu.stafflink.services.AuthenticationService;
-import fpt.edu.stafflink.services.FunctionService;
-import fpt.edu.stafflink.services.ProjectService;
-import fpt.edu.stafflink.services.RoleService;
-import fpt.edu.stafflink.services.UserService;
+import fpt.edu.stafflink.retrofit.services.AuthenticationService;
+import fpt.edu.stafflink.retrofit.services.FunctionService;
+import fpt.edu.stafflink.retrofit.services.ProjectService;
+import fpt.edu.stafflink.retrofit.services.RoleService;
+import fpt.edu.stafflink.retrofit.services.UserService;
 
 public class RetrofitServiceManager {
     public static AuthenticationService getAuthenticationService(Context context) {
