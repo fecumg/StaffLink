@@ -167,6 +167,6 @@ public class BaseService<T> {
         int authId = this.getAuthId(exchange);
 
         return projectRepository.findAll()
-                .filter(project -> project.getCreatedBy() == authId || project.getUserIds().contains(authId));
+                .filter(project -> project.getCreatedBy() == authId || (project.getUserIds() != null && project.getUserIds().contains(authId)));
     }
 }

@@ -7,6 +7,8 @@ import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_PROJECT_ACCESS_TYPE;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_STRING_ID;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -20,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 
+import fpt.edu.stafflink.BaseActivity;
 import fpt.edu.stafflink.R;
 import fpt.edu.stafflink.components.CustomInputTextComponent;
 import fpt.edu.stafflink.models.requestDtos.ProjectRequest;
@@ -102,15 +105,15 @@ public class ProjectInfoFragment extends BaseFragment {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         response ->
-                                getBaseActivity().handleResponse(
-                                        response,
-                                        (responseBody, gson) -> {
-                                            textViewError.setText(null);
-                                            ProjectResponse projectResponse = gson.fromJson(gson.toJson(responseBody), ProjectResponse.class);
-                                            this.bindEditedProject(projectResponse);
-                                        },
-                                        errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
-                                ),
+                            getBaseActivity().handleResponse(
+                                    response,
+                                    (responseBody, gson) -> {
+                                        textViewError.setText(null);
+                                        ProjectResponse projectResponse = gson.fromJson(gson.toJson(responseBody), ProjectResponse.class);
+                                        this.bindEditedProject(projectResponse);
+                                    },
+                                    errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
+                            ),
                         error -> {
                             Log.e(ERROR_TAG, "fetchDataOnEdit: " + error.getMessage(), error);
                             getBaseActivity().pushToast(error.getMessage());

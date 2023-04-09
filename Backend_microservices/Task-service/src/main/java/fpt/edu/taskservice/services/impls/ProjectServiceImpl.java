@@ -111,7 +111,7 @@ public class ProjectServiceImpl extends BaseService<Project> implements ProjectS
                 .filter(project ->
                         project.getTasks()
                                 .stream()
-                                .anyMatch(task -> task.getUserIds().contains(authId))
+                                .anyMatch(task -> task.getUserIds() != null && task.getUserIds().contains(authId))
                 );
 
         return this.buildProjectResponseFlux(assignedProjectFlux, pagination);

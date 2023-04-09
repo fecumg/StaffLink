@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
@@ -68,7 +69,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     SharedPreferences sharedPreferences;
 
-    List<FunctionResponse> authorizedFunctions;
+    protected MutableLiveData<List<FunctionResponse>> authorizedFunctions;
 
     Toast toast;
 
@@ -88,6 +89,8 @@ public abstract class BaseActivity extends AppCompatActivity {
         reactorCompositeDisposable = Disposables.composite();
 
         sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
+
+        authorizedFunctions = new MutableLiveData<>();
 
         this.onSubCreate(savedInstanceState);
     }
@@ -199,8 +202,8 @@ public abstract class BaseActivity extends AppCompatActivity {
                                                 (resBody, gson) -> {
                                                     baseNavigationComponent.setError(null);
                                                     Type type = new TypeToken<List<FunctionResponse>>() {}.getType();
-                                                    this.authorizedFunctions = gson.fromJson(gson.toJson(resBody), type);
-                                                    this.setNavigationFunctions(this.authorizedFunctions);
+                                                    authorizedFunctions.setValue(gson.fromJson(gson.toJson(resBody), type));
+                                                    this.setNavigationFunctions(this.authorizedFunctions.getValue());
                                                 },
                                                 errorResBody -> baseNavigationComponent.setError(errorResBody.getMessage())),
                             error -> {
@@ -303,8 +306,12 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     protected boolean isAuthorized(String functionPath) {
-        return this.authorizedFunctions.stream()
-                .anyMatch(functionResponse -> functionPath.equals(functionResponse.getUri()));
+        if (this.authorizedFunctions.getValue() != null) {
+            return this.authorizedFunctions.getValue().stream()
+                    .anyMatch(functionResponse -> functionPath.equals(functionResponse.getUri()));
+        } else {
+            return false;
+        }
     }
 
     @Override

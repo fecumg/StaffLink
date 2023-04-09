@@ -17,7 +17,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -26,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Arrays;
 
 import fpt.edu.stafflink.enums.TaskStatus;
+import fpt.edu.stafflink.fragments.BaseFragment;
 import fpt.edu.stafflink.fragments.ProjectInfoFragment;
 import fpt.edu.stafflink.fragments.TasksFragment;
 import fpt.edu.stafflink.models.requestDtos.ProjectRequest;
@@ -87,12 +87,13 @@ public class ProjectAccessActivity extends BaseActivity {
         this.position = intent.getIntExtra(PARAM_POSITION, DEFAULT_POSITION);
         this.accessType = intent.getIntExtra(PARAM_PROJECT_ACCESS_TYPE, PROJECT_ACCESS_TYPE_OBSERVABLE);
 
-        this.initByCase();
+//        this.initByCases();
+        super.authorizedFunctions.observe(this, authorizedFunctions -> this.initByCases());
 
         buttonBackToProjects.setOnClickListener(view -> onBackPressed());
     }
 
-    private void initByCase() {
+    private void initByCases() {
         if (StringUtils.isEmpty(this.id)) {
             this.showInfoOnNew();
         } else{
@@ -162,7 +163,8 @@ public class ProjectAccessActivity extends BaseActivity {
         }
     }
 
-    private void replaceFragment(Fragment fragment) {
+    private void replaceFragment(BaseFragment fragment) {
+        fragment.onAttach(getBaseContext());
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragmentProjectInfo, fragment);

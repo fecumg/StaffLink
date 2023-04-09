@@ -164,7 +164,7 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
         int authId = super.getAuthId(exchange);
 
         Flux<Task> assignedTaskFlux = taskRepository.findAll()
-                .filter(task -> task.getUserIds().contains(authId) && task.getStatus() == status);
+                .filter(task -> task.getUserIds() != null && task.getUserIds().contains(authId) && task.getStatus() == status);
 
         return this.buildTaskResponseFlux(assignedTaskFlux, pagination);
     }
@@ -175,7 +175,7 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
 
         Flux<Task> assignedTaskFlux = projectRepository.findById(projectId)
                 .flatMapMany(project -> taskRepository.findAllByProject(project))
-                .filter(task -> task.getUserIds().contains(authId) && task.getStatus() == status);
+                .filter(task -> task.getUserIds() != null && task.getUserIds().contains(authId) && task.getStatus() == status);
 
         return this.buildTaskResponseFlux(assignedTaskFlux, pagination);
     }
