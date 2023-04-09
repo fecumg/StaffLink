@@ -18,36 +18,26 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.List;
 
 import fpt.edu.stafflink.components.CustomListComponent;
 import fpt.edu.stafflink.models.responseDtos.ProjectResponse;
 import fpt.edu.stafflink.pagination.MultiValuePagination;
-import fpt.edu.stafflink.pagination.Pagination;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
-import fpt.edu.stafflink.webClient.WebClientManager;
 import fpt.edu.stafflink.webClient.WebClientServiceManager;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import reactor.core.scheduler.Scheduler;
-import retrofit2.Response;
 
 public class ProjectsActivity extends BaseActivity {
     private static final String ERROR_TAG = "AllProjectsActivity";
     private static final String PROJECT_ACTION = "ProjectAction";
     public static final int PROJECT_ACCESS_TYPE_OBSERVABLE = 0;
     public static final int PROJECT_ACCESS_TYPE_ASSIGNED = 1;
-    public static final int PROJECT_ACCESS_TYPE_CREATED = 2;
+    public static final int PROJECT_ACCESS_TYPE_AUTHORIZED = 2;
 
     private int pageNumber = 1;
     private static final int PAGE_SIZE = 20;
@@ -195,7 +185,7 @@ public class ProjectsActivity extends BaseActivity {
     }
 
     private void setProjectAccessType(Intent accessProjectIntent) {
-        accessProjectIntent.putExtra(PARAM_PROJECT_ACCESS_TYPE, PROJECT_ACCESS_TYPE_CREATED);
+        accessProjectIntent.putExtra(PARAM_PROJECT_ACCESS_TYPE, PROJECT_ACCESS_TYPE_AUTHORIZED);
     }
 
     private void doOnBackFromForm(ActivityResult result) {

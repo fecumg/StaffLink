@@ -4,6 +4,7 @@ import fpt.edu.taskservice.dtos.requestDtos.ProjectRequest;
 import fpt.edu.taskservice.dtos.responseDtos.ProjectResponse;
 import fpt.edu.taskservice.dtos.responseDtos.TaskResponse;
 import fpt.edu.taskservice.entities.Project;
+import fpt.edu.taskservice.entities.Task;
 import fpt.edu.taskservice.pagination.Pagination;
 import fpt.edu.taskservice.repositories.ProjectRepository;
 import fpt.edu.taskservice.repositories.TaskRepository;
@@ -75,10 +76,7 @@ public class ProjectServiceImpl extends BaseService<Project> implements ProjectS
 
     @Override
     public Flux<ProjectResponse> getAll(Pagination pagination) {
-        return  super.paginate(projectRepository.findAll(), pagination)
-                .flatMapSequential(this::buildProjectResponse)
-                .delayElements(Duration.ofMillis(100))
-                .doOnError(throwable -> log.error(throwable.getMessage()));
+        return this.buildProjectResponseFlux(projectRepository.findAll(), pagination);
     }
 
     @Override
@@ -100,12 +98,23 @@ public class ProjectServiceImpl extends BaseService<Project> implements ProjectS
     }
 
     @Override
-    public Flux<ProjectResponse> getCreatedProjectByAuthUser(Pagination pagination, ServerWebExchange exchange) {
+    public Flux<ProjectResponse> getAuthorizedProjects(Pagination pagination, ServerWebExchange exchange) {
+        return this.buildProjectResponseFlux(super.getAuthorizedProjects(exchange), pagination);
+    }
+
+    @Override
+    public Flux<ProjectResponse> getAssignedProjects(Pagination pagination, ServerWebExchange exchange) {
         int authId = super.getAuthId(exchange);
-        return super.paginate(projectRepository.findAllByCreatedBy(authId), pagination)
-                .flatMapSequential(this::buildProjectResponse)
-                .delayElements(Duration.ofMillis(100))
-                .doOnError(throwable -> log.error(throwable.getMessage()));
+
+        Flux<Project> assignedProjectFlux = projectRepository.findAll()
+                .flatMap(this::buildProject)
+                .filter(project ->
+                        project.getTasks()
+                                .stream()
+                                .anyMatch(task -> task.getUserIds().contains(authId))
+                );
+
+        return this.buildProjectResponseFlux(assignedProjectFlux, pagination);
     }
 
     private Mono<Project> deleteTasksByProject(Project project) {
@@ -118,6 +127,18 @@ public class ProjectServiceImpl extends BaseService<Project> implements ProjectS
                 .thenReturn(project);
     }
 
+    private Mono<Project> buildProject(Project project) {
+        Mono<List<Task>> taskListMono = taskRepository.findAllByProject(project)
+                .collectList();
+
+        return Mono.just(project)
+                .zipWith(taskListMono, (preparedProject, tasks) -> {
+                    preparedProject.setTasks(tasks);
+                    return preparedProject;
+                })
+                .doOnError(throwable -> log.error(throwable.getMessage()));
+    }
+
     private Mono<ProjectResponse> buildProjectResponse(Project project) {
         Mono<List<TaskResponse>> taskResponsesMono = taskRepository.findAllByProject(project)
                 .flatMap(super::buildTaskResponse)
@@ -128,6 +149,13 @@ public class ProjectServiceImpl extends BaseService<Project> implements ProjectS
                     projectResponse.setTasks(taskResponses);
                     return projectResponse;
                 }))
+                .doOnError(throwable -> log.error(throwable.getMessage()));
+    }
+
+    private Flux<ProjectResponse> buildProjectResponseFlux(Flux<Project> projectFlux, Pagination pagination) {
+        return super.paginate(projectFlux, pagination)
+                .flatMapSequential(this::buildProjectResponse)
+                .delayElements(Duration.ofMillis(100))
                 .doOnError(throwable -> log.error(throwable.getMessage()));
     }
 }

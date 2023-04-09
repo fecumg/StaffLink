@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @author Truong Duc Duong
  */
@@ -21,4 +23,6 @@ public class ProjectRequest {
     @NotNull(message = "Description cannot be empty")
     @Size(max = 500, message = "Description cannot exceed {max} characters")
     private String description;
+
+    protected List<Integer> userIds;
 }

@@ -63,10 +63,12 @@ public abstract class BaseActivity extends AppCompatActivity {
     CustomNavigationComponent baseNavigationComponent;
     LinearLayout baseNavigationLoginButtonLayout;
 
-    CompositeDisposable compositeDisposable;
-    reactor.core.Disposable.Composite reactorCompositeDisposable;
+    public CompositeDisposable compositeDisposable;
+    public reactor.core.Disposable.Composite reactorCompositeDisposable;
 
     SharedPreferences sharedPreferences;
+
+    List<FunctionResponse> authorizedFunctions;
 
     Toast toast;
 
@@ -197,8 +199,8 @@ public abstract class BaseActivity extends AppCompatActivity {
                                                 (resBody, gson) -> {
                                                     baseNavigationComponent.setError(null);
                                                     Type type = new TypeToken<List<FunctionResponse>>() {}.getType();
-                                                    List<FunctionResponse> functions = gson.fromJson(gson.toJson(resBody), type);
-                                                    this.setNavigationFunctions(functions);
+                                                    this.authorizedFunctions = gson.fromJson(gson.toJson(resBody), type);
+                                                    this.setNavigationFunctions(this.authorizedFunctions);
                                                 },
                                                 errorResBody -> baseNavigationComponent.setError(errorResBody.getMessage())),
                             error -> {
@@ -298,6 +300,11 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected String getBearer() {
         return sharedPreferences.getString(getString(R.string.authorization_sharedPreference), "");
+    }
+
+    protected boolean isAuthorized(String functionPath) {
+        return this.authorizedFunctions.stream()
+                .anyMatch(functionResponse -> functionPath.equals(functionResponse.getUri()));
     }
 
     @Override

@@ -39,6 +39,74 @@
             android:layout_alignParentEnd="true"/>
     </RelativeLayout>
 
+    <HorizontalScrollView
+        android:id="@+id/projectAccessMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/projectAccessMenuInfo"
+                android:layout_width="@dimen/submit_button_width"
+                android:layout_height="@dimen/submit_button_height"
+                android:text="@string/project_access_menu_info"
+                android:background="@color/project_access_menu_color"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/projectAccessMenuInitiated"
+                android:layout_width="@dimen/submit_button_width"
+                android:layout_height="@dimen/submit_button_height"
+                android:text="@string/project_access_menu_initiated"
+                android:background="@color/project_access_menu_color"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/projectAccessMenuInProgress"
+                android:layout_width="@dimen/submit_button_width"
+                android:layout_height="@dimen/submit_button_height"
+                android:text="@string/project_access_menu_inProgress"
+                android:background="@color/project_access_menu_color"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/projectAccessMenuPending"
+                android:layout_width="@dimen/submit_button_width"
+                android:layout_height="@dimen/submit_button_height"
+                android:text="@string/project_access_menu_pending"
+                android:background="@color/project_access_menu_color"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/projectAccessMenuCompleted"
+                android:layout_width="@dimen/submit_button_width"
+                android:layout_height="@dimen/submit_button_height"
+                android:text="@string/project_access_menu_completed"
+                android:background="@color/project_access_menu_color"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/projectAccessMenuOverdue"
+                android:layout_width="@dimen/submit_button_width"
+                android:layout_height="@dimen/submit_button_height"
+                android:text="@string/project_access_menu_overdue"
+                android:background="@color/project_access_menu_color"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/projectAccessMenuFailed"
+                android:layout_width="@dimen/submit_button_width"
+                android:layout_height="@dimen/submit_button_height"
+                android:text="@string/project_access_menu_failed"
+                android:background="@color/project_access_menu_color"
+                android:gravity="center"/>
+        </LinearLayout>
+    </HorizontalScrollView>
+
     <FrameLayout
         android:id="@+id/fragmentProjectInfo"
         android:layout_width="match_parent"

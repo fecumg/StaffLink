@@ -2,10 +2,12 @@ package fpt.edu.taskservice.services.impls;
 
 import fpt.edu.taskservice.dtos.responseDtos.AttachmentResponse;
 import fpt.edu.taskservice.dtos.responseDtos.TaskResponse;
+import fpt.edu.taskservice.entities.Project;
 import fpt.edu.taskservice.entities.Task;
 import fpt.edu.taskservice.exceptions.UnauthorizedException;
 import fpt.edu.taskservice.pagination.Pagination;
 import fpt.edu.taskservice.repositories.AttachmentRepository;
+import fpt.edu.taskservice.repositories.ProjectRepository;
 import jakarta.ws.rs.BadRequestException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,8 @@ public class BaseService<T> {
 
     @Autowired
     private AttachmentRepository attachmentRepository;
+    @Autowired
+    private ProjectRepository projectRepository;
 
     protected void setCreatedBy(Object object, ServerWebExchange exchange) {
         String authUserIdString = exchange.getRequest().getHeaders().getFirst(AUTH_ID);
@@ -157,5 +161,12 @@ public class BaseService<T> {
                 .doOnError(throwable -> log.error(throwable.getMessage()))
                 .doOnSuccess(voidValue -> log.info("Attachments related to task '{}' deleted", task.getId()))
                 .thenReturn(task);
+    }
+
+    protected Flux<Project> getAuthorizedProjects(ServerWebExchange exchange) {
+        int authId = this.getAuthId(exchange);
+
+        return projectRepository.findAll()
+                .filter(project -> project.getCreatedBy() == authId || project.getUserIds().contains(authId));
     }
 }

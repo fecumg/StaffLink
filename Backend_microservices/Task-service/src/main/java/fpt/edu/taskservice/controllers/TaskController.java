@@ -50,4 +50,24 @@ public class TaskController extends BaseController {
     public ResponseEntity<Mono<Void>> deleteTask(@PathVariable("id") String id) {
         return ResponseEntity.ok(taskService.delete(id));
     }
+
+    @GetMapping("/authorized")
+    public ResponseEntity<Flux<TaskResponse>> getAuthorizedTasks(int status, @Nullable @ModelAttribute Pagination pagination, ServerWebExchange exchange) {
+        return ResponseEntity.ok(taskService.getAuthorizedTasks(status, pagination, exchange));
+    }
+
+    @GetMapping("/authorized/{projectId}")
+    public ResponseEntity<Flux<TaskResponse>> getAuthorizedTasksByProject(@PathVariable("projectId") String projectId, int status, @Nullable @ModelAttribute Pagination pagination, ServerWebExchange exchange) {
+        return ResponseEntity.ok(taskService.getAuthorizedTasksByProjectId(projectId, status, pagination, exchange));
+    }
+
+    @GetMapping("/assigned")
+    public ResponseEntity<Flux<TaskResponse>> getAssignedTasks(int status, @Nullable @ModelAttribute Pagination pagination, ServerWebExchange exchange) {
+        return ResponseEntity.ok(taskService.getAssignedTasks(status, pagination, exchange));
+    }
+
+    @GetMapping("/assigned/{projectId}")
+    public ResponseEntity<Flux<TaskResponse>> getAssignedTasksByProject(@PathVariable("projectId") String projectId, int status, @Nullable @ModelAttribute Pagination pagination, ServerWebExchange exchange) {
+        return ResponseEntity.ok(taskService.getAssignedTasksByProject(projectId, status, pagination, exchange));
+    }
 }

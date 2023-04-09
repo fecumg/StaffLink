@@ -20,4 +20,11 @@ public interface TaskService {
     Flux<TaskResponse> getAll(Pagination pagination);
     Mono<TaskResponse> get(String id);
     Mono<Void> delete(String id);
+
+    Flux<TaskResponse> getTasks(int status, Pagination pagination);
+    Flux<TaskResponse> getTasksByProject(String projectId, int status, Pagination pagination);
+    Flux<TaskResponse> getAssignedTasks(int status, Pagination pagination, ServerWebExchange exchange);
+    Flux<TaskResponse> getAssignedTasksByProject(String projectId, int status, Pagination pagination, ServerWebExchange exchange);
+    Flux<TaskResponse> getAuthorizedTasks(int status, Pagination pagination, ServerWebExchange exchange);
+    Flux<TaskResponse> getAuthorizedTasksByProjectId(String projectId, int status, Pagination pagination, ServerWebExchange exchange);
 }

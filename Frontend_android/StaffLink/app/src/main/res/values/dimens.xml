@@ -30,5 +30,4 @@
 
     <dimen name="title_width">200dp</dimen>
     <dimen name="title_width_without_refresh">280dp</dimen>
-
 </resources>

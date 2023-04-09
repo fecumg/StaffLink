@@ -59,7 +59,7 @@ public class CustomListAdapter<T> extends BaseAdapter<T, CustomListAdapter.ViewH
 
         int color = ContextCompat.getColor(view.getContext(), R.color.table_alternate_color);
         Drawable colorDrawable = new ColorDrawable(color);
-        if (viewType == TYPE_ODD) {
+        if (viewType == TYPE_EVEN) {
             viewHolder.itemListLayout.setForeground(colorDrawable);
         }
 

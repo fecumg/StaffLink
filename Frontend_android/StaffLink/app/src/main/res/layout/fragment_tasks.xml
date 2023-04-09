@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.TasksFragment">
+
+    <fpt.edu.stafflink.components.CustomInputTextComponent
+        android:id="@+id/inputTextSearchTasks"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Search"
+        app:startIconDrawable="@drawable/ic_search_light_foreground"
+        app:color="@color/primary"
+        android:inputType="text"
+        android:layout_marginBottom="-20dp"/>
+
+    <fpt.edu.stafflink.components.CustomListComponent
+        android:id="@+id/listTasks"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

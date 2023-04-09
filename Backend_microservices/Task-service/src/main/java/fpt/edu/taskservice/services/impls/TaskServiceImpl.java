@@ -139,6 +139,66 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
                 .doOnError(throwable -> log.error(throwable.getMessage()));
     }
 
+    @Override
+    public Flux<TaskResponse> getTasks(int taskStatusCode, Pagination pagination) {
+        Flux<Task> taskFlux = taskRepository.findAll()
+                .filter(task -> task.getStatus() == taskStatusCode);
+
+        return super.paginate(taskFlux, pagination)
+                .flatMapSequential(super::buildTaskResponse)
+                .delayElements(Duration.ofMillis(100))
+                .doOnError(throwable -> log.error(throwable.getMessage()));
+    }
+
+    @Override
+    public Flux<TaskResponse> getTasksByProject(String projectId, int status, Pagination pagination) {
+        Flux<Task> taskFlux = projectRepository.findById(projectId)
+                .flatMapMany(project -> taskRepository.findAllByProject(project))
+                .filter(task -> task.getStatus() == status);
+
+        return this.buildTaskResponseFlux(taskFlux, pagination);
+    }
+
+    @Override
+    public Flux<TaskResponse> getAssignedTasks(int status, Pagination pagination, ServerWebExchange exchange) {
+        int authId = super.getAuthId(exchange);
+
+        Flux<Task> assignedTaskFlux = taskRepository.findAll()
+                .filter(task -> task.getUserIds().contains(authId) && task.getStatus() == status);
+
+        return this.buildTaskResponseFlux(assignedTaskFlux, pagination);
+    }
+
+    @Override
+    public Flux<TaskResponse> getAssignedTasksByProject(String projectId, int status, Pagination pagination, ServerWebExchange exchange) {
+        int authId = super.getAuthId(exchange);
+
+        Flux<Task> assignedTaskFlux = projectRepository.findById(projectId)
+                .flatMapMany(project -> taskRepository.findAllByProject(project))
+                .filter(task -> task.getUserIds().contains(authId) && task.getStatus() == status);
+
+        return this.buildTaskResponseFlux(assignedTaskFlux, pagination);
+    }
+
+    @Override
+    public Flux<TaskResponse> getAuthorizedTasks(int status, Pagination pagination, ServerWebExchange exchange) {
+        Flux<Task> authorizedTaskFlux = super.getAuthorizedProjects(exchange)
+                .flatMap(project -> taskRepository.findAllByProject(project))
+                .filter(task -> task.getStatus() == status);
+
+        return this.buildTaskResponseFlux(authorizedTaskFlux, pagination);
+    }
+
+    @Override
+    public Flux<TaskResponse> getAuthorizedTasksByProjectId(String projectId, int status, Pagination pagination, ServerWebExchange exchange) {
+        Flux<Task> authorizedTaskFlux = super.getAuthorizedProjects(exchange)
+                .filter(project -> projectId.equals(project.getId()))
+                .flatMap(project -> taskRepository.findAllByProject(project))
+                .filter(task -> task.getStatus() == status);
+
+        return this.buildTaskResponseFlux(authorizedTaskFlux, pagination);
+    }
+
     @SuppressWarnings("unchecked")
     private Mono<Task> saveNewAttachments(Object taskRequest, Task task, ServerWebExchange exchange) {
         List<FilePart> newAttachments;
@@ -226,5 +286,12 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Flux<TaskResponse> buildTaskResponseFlux(Flux<Task> taskFlux, Pagination pagination) {
+        return super.paginate(taskFlux, pagination)
+                .flatMapSequential(super::buildTaskResponse)
+                .delayElements(Duration.ofMillis(100))
+                .doOnError(throwable -> log.error(throwable.getMessage()));
     }
 }

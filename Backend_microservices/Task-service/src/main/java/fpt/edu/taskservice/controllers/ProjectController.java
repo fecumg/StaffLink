@@ -49,8 +49,13 @@ public class ProjectController extends BaseController {
         return ResponseEntity.ok(projectService.delete(id));
     }
 
-    @GetMapping("/created")
-    public ResponseEntity<Flux<ProjectResponse>> getCreatedProject(@Nullable @ModelAttribute Pagination pagination, ServerWebExchange exchange) {
-        return ResponseEntity.ok(projectService.getCreatedProjectByAuthUser(pagination, exchange));
+    @GetMapping("/authorized")
+    public ResponseEntity<Flux<ProjectResponse>> getAuthorizedProjects(@Nullable @ModelAttribute Pagination pagination, ServerWebExchange exchange) {
+        return ResponseEntity.ok(projectService.getAuthorizedProjects(pagination, exchange));
+    }
+
+    @GetMapping("/assigned")
+    public ResponseEntity<Flux<ProjectResponse>> getAssignedProjects(@Nullable @ModelAttribute Pagination pagination, ServerWebExchange exchange) {
+        return ResponseEntity.ok(projectService.getAssignedProjects(pagination, exchange));
     }
 }

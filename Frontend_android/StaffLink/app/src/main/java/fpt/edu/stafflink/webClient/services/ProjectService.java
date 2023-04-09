@@ -10,9 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ProjectService {
-    Flux<Object> getProjects(Pagination pagination);
-    Mono<Object> getProject(String id);
-    Mono<Object> newProject(ProjectRequest projectRequest);
-    Mono<Object> editProject(String id, ProjectRequest projectRequest);
+    Flux<Object> getProjects(Context context, Pagination pagination);
+    Flux<Object> getAssignedProjects(Context context, Pagination pagination);
     Flux<ProjectResponse> getCreatedProjects(Context context, MultiValuePagination pagination);
 }

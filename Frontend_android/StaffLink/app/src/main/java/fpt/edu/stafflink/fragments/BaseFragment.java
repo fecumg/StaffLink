@@ -6,10 +6,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import fpt.edu.stafflink.BaseActivity;
-import io.reactivex.disposables.CompositeDisposable;
 
 public class BaseFragment extends Fragment {
-    CompositeDisposable compositeDisposable;
+
     protected BaseActivity getBaseActivity() {
         return (BaseActivity) getActivity();
     }
@@ -17,12 +16,5 @@ public class BaseFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        compositeDisposable = new CompositeDisposable();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        compositeDisposable.dispose();
     }
 }

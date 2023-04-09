@@ -43,4 +43,7 @@
     <color name="table_header_color">@color/transparent_shadow_40</color>
     <color name="table_alternate_color">@color/transparent_shadow_30</color>
     <color name="table_border_color">@color/transparent_shadow_60</color>
+
+    <color name="project_access_menu_color">@color/transparent_shadow_20</color>
+    <color name="project_access_menu_color_highlight">@color/transparent_shadow_60</color>
 </resources>

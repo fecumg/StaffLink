@@ -1,7 +1,7 @@
 package fpt.edu.stafflink.fragments;
 
 import static android.app.Activity.RESULT_OK;
-import static fpt.edu.stafflink.ProjectsActivity.PROJECT_ACCESS_TYPE_CREATED;
+import static fpt.edu.stafflink.ProjectsActivity.PROJECT_ACCESS_TYPE_AUTHORIZED;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_ID;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_PROJECT_ACCESS_TYPE;
@@ -86,7 +86,7 @@ public class ProjectInfoFragment extends BaseFragment {
     }
 
     private void prepareProjectForm() {
-        if (this.accessType == PROJECT_ACCESS_TYPE_CREATED || StringUtils.isEmpty(this.id)) {
+        if (this.accessType == PROJECT_ACCESS_TYPE_AUTHORIZED || StringUtils.isEmpty(this.id)) {
             inputTextName.setEditable(true);
             inputTextDescription.setEditable(true);
         } else {
@@ -117,7 +117,7 @@ public class ProjectInfoFragment extends BaseFragment {
                             textViewError.setText(error.getMessage());
                         });
 
-        compositeDisposable.add(disposable);
+        getBaseActivity().compositeDisposable.add(disposable);
     }
 
     public void submitNewProject(RequestBody projectRequestBody) {
@@ -143,7 +143,7 @@ public class ProjectInfoFragment extends BaseFragment {
                             textViewError.setText(error.getMessage());
                         });
 
-        compositeDisposable.add(disposable);
+        getBaseActivity().compositeDisposable.add(disposable);
     }
 
     public void submitEditProject(String id, RequestBody projectRequestBody) {
@@ -167,7 +167,7 @@ public class ProjectInfoFragment extends BaseFragment {
                             textViewError.setText(error.getMessage());
                         });
 
-        compositeDisposable.add(disposable);
+        getBaseActivity().compositeDisposable.add(disposable);
     }
 
     public ProjectRequest validateProject() {

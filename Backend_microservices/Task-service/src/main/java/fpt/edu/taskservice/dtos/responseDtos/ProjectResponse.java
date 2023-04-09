@@ -20,12 +20,14 @@ public class ProjectResponse extends BaseResponse{
     private String id;
     private String name;
     private String description;
+    protected List<Integer> userIds;
     private List<TaskResponse> tasks;
 
     public ProjectResponse(Project project) {
         this.id = project.getId();
         this.name = project.getName();
         this.description = project.getDescription();
+        this.userIds = project.getUserIds();
 
         super.setCreatedAt(project.getCreatedAt());
         super.setCreatedBy(project.getCreatedBy());
