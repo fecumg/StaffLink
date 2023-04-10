@@ -1,6 +1,7 @@
 package fpt.edu.stafflink.components;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -18,6 +19,7 @@ import fpt.edu.stafflink.adapters.CustomListAdapter;
 
 public class CustomListComponent<T> extends LinearLayout {
     private static final String ERROR_TAG = "CustomListComponent";
+    private static final int DEFAULT_ITEM_MAX_LINES = 3;
 
     RecyclerView customListComponentMainElement;
 
@@ -30,6 +32,8 @@ public class CustomListComponent<T> extends LinearLayout {
         super(context, attrs);
 
         this.initView(context);
+
+        this.setAttributes(attrs);
     }
 
     private void initView(Context context) {
@@ -83,5 +87,36 @@ public class CustomListComponent<T> extends LinearLayout {
 
     public void scrollTo(int position) {
         customListComponentMainElement.scrollToPosition(position);
+    }
+
+    public void setItemMaxLines(int maxLines) {
+        this.adapter.setMaxLines(maxLines);
+    }
+
+    public int getItemMaxLines() {
+        return this.adapter.getMaxLines();
+    }
+
+    public void setItemHeight(int height) {
+        this.adapter.setHeight(height);
+    }
+
+    public int getItemHeight() {
+        return this.adapter.getHeight();
+    }
+
+    private void setAttributes(AttributeSet attrs) {
+        TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.CustomListComponent, 0, 0);
+        try {
+            int itemMaxLines = typedArray.getInt(R.styleable.CustomListComponent_itemMaxLines, DEFAULT_ITEM_MAX_LINES);
+            this.setItemMaxLines(itemMaxLines);
+
+            if (typedArray.hasValue(R.styleable.CustomListComponent_itemHeight)) {
+                int itemHeight = typedArray.getDimensionPixelSize(R.styleable.CustomListComponent_itemHeight, getContext().getResources().getDimensionPixelSize(R.dimen.list_item_height));
+                this.setItemHeight(itemHeight);
+            }
+        } finally {
+            typedArray.recycle();
+        }
     }
 }

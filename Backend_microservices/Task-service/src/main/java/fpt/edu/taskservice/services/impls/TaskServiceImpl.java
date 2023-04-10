@@ -102,6 +102,7 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
                     Task preparedTask = modelMapper.map(request, Task.class);
                     preparedTask.setProject(currentTask.getProject());
                     super.setUpdatedBy(preparedTask, exchange);
+                    preparedTask.setCreatedBy(currentTask.getCreatedBy());
                     preparedTask.setId(id);
                     return preparedTask;
                 }))

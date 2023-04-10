@@ -43,6 +43,28 @@
                 app:color="@color/primary"
                 android:inputType="textMultiLine"
                 android:layout_marginBottom="10dp"/>
+
+            <fpt.edu.stafflink.components.CustomSelectedListComponent
+                android:id="@+id/selectedListUsers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <fpt.edu.stafflink.components.CustomInputTextComponent
+                android:id="@+id/inputTextSearchUsers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Search users"
+                app:startIconDrawable="@drawable/ic_search_light_foreground"
+                app:color="@color/primary"
+                android:inputType="text"
+                android:layout_marginBottom="10dp"/>
+
+            <fpt.edu.stafflink.components.CustomListComponent
+                android:id="@+id/listUsers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:itemHeight="70dp"
+                app:itemMaxLines="1"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

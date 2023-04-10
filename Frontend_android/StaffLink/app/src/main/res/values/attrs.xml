@@ -44,4 +44,13 @@
         <attr name="nullable" format="boolean"/>
         <attr name="nullValue" format="string"/>
     </declare-styleable>
+
+    <declare-styleable name="CustomListComponent">
+        <attr name="itemMaxLines" format="integer"/>
+        <attr name="itemHeight" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="CustomSelectedListComponent">
+        <attr name="removable" format="boolean"/>
+    </declare-styleable>
 </resources>

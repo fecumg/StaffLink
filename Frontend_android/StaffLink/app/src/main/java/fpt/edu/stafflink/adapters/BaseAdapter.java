@@ -72,6 +72,12 @@ public abstract class BaseAdapter<T, TViewHolder extends RecyclerView.ViewHolder
         notifyItemRemoved(position);
     }
 
+    public void removeAll() {
+        int formerItemCount = getItemCount();
+        this.objects.removeAll(this.objects);
+        notifyItemRangeRemoved(0, formerItemCount);
+    }
+
     public List<T> getObjects() {
         return objects;
     }

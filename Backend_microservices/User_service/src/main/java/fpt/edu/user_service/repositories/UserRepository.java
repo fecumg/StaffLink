@@ -1,6 +1,9 @@
 package fpt.edu.user_service.repositories;
 
 import fpt.edu.user_service.entities.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -32,4 +35,13 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query(value = "select urm.user from UserRoleMapping urm inner join RoleFunctionMapping rfm on urm.role.id = rfm.role.id where rfm.function.id = ?1")
     List<User> findAllByFunctionId(int functionId);
+
+    @Query(value = "SELECT u FROM User AS u WHERE u.name LIKE %?1%")
+    List<User> search(String search);
+
+    @Query(value = "SELECT u FROM User AS u WHERE u.name LIKE %?1% OR u.username LIKE %?1%")
+    Page<User> search(String search, Pageable pageable);
+
+    @Query(value = "SELECT u FROM User AS u WHERE u.name LIKE %?1% OR u.username LIKE %?1%")
+    List<User> search(String search, Sort sort);
 }

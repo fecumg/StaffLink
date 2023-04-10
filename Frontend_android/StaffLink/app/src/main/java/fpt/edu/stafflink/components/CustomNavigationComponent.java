@@ -69,8 +69,9 @@ public class CustomNavigationComponent extends LinearLayout {
         List<FunctionResponse> rearrangedFunctions = new ArrayList<>();
         functions.forEach(function -> {
             if (
-                    (function.getParent() == null && parent == null) ||
-                    (function.getParent() != null && parent != null && function.getParent().getId() == parent.getId())) {
+                    function.isDisplayed() &&
+                            ((function.getParent() == null && parent == null) || (function.getParent() != null && parent != null && function.getParent().getId() == parent.getId()))
+                    ) {
                 rearrangedFunctions.add(function);
                 rearrangedFunctions.addAll(rearrangeFunctions(functions, function));
             }

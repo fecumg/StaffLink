@@ -44,7 +44,7 @@ public class AttachmentServiceImpl extends BaseService implements AttachmentServ
     @Autowired
     private Environment env;
 
-    @RabbitListener(queues = {"${rabbitmq.queue.attachment-processing}"})
+    @RabbitListener(queues = {"${rabbitmq.queue.attachment-processing}"}, messageConverter = "jsonConverter")
     private void processUploadedAttachment(ExchangeAttachment exchangeAttachment) {
         String attachmentFolderDirectory = System.getProperty("user.dir") + File.separator + UPLOADS + File.separator + ATTACHMENTS;
 

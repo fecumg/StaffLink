@@ -11,7 +11,6 @@ import fpt.edu.user_service.exceptions.UniqueKeyViolationException;
 import fpt.edu.user_service.pagination.Pagination;
 import fpt.edu.user_service.repositories.RoleRepository;
 import fpt.edu.user_service.repositories.UserRepository;
-import fpt.edu.user_service.repositories.UserRoleMappingRepository;
 import fpt.edu.user_service.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.BadRequestException;
@@ -70,8 +69,6 @@ public class UserServiceImpl extends BaseService implements UserService {
     private UserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
-    @Autowired
-    private UserRoleMappingRepository userRoleMappingRepository;
     @Autowired
     public RabbitTemplate rabbitTemplate;
 
@@ -217,15 +214,26 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    @Cacheable(value = getAllMethodCache, key = "#pagination.getPageNumber()")
-    public List<UserResponse> getAll(Pagination pagination) {
-        List<User> users = Pagination.retrieve(
-                pagination,
-                () -> userRepository.findAll(),
-                pageRequest -> userRepository.findAll(pageRequest).getContent(),
-                sort -> userRepository.findAll(sort),
-                User.class
-        );
+    @Cacheable(value = getAllMethodCache, key = "(#search == null ? '' : #search).concat('-').concat(#pagination.getPageNumber())")
+    public List<UserResponse> getAll(String search, Pagination pagination) {
+        List<User> users;
+        if (StringUtils.isEmpty(search)) {
+            users = Pagination.retrieve(
+                    pagination,
+                    () -> userRepository.findAll(),
+                    pageRequest -> userRepository.findAll(pageRequest).getContent(),
+                    sort -> userRepository.findAll(sort),
+                    User.class
+            );
+        } else {
+            users = Pagination.retrieve(
+                    pagination,
+                    () -> userRepository.search(search),
+                    pageRequest -> userRepository.search(search, pageRequest).getContent(),
+                    sort -> userRepository.search(search, sort),
+                    User.class
+            );
+        }
         return modelMapper.map(users, new TypeToken<List<UserResponse>>() {}.getType());
     }
 

@@ -54,8 +54,8 @@ public class UserController extends BaseController {
     }
 
     @GetMapping(value = "")
-    public ResponseEntity<Object> getUsers(@Nullable @ModelAttribute Pagination pagination) {
-        List<UserResponse> userResponses = userService.getAll(pagination);
+    public ResponseEntity<Object> getUsers(@Nullable String search, @Nullable @ModelAttribute Pagination pagination) {
+        List<UserResponse> userResponses = userService.getAll(search, pagination);
         return createSuccessResponse(userResponses);
     }
 

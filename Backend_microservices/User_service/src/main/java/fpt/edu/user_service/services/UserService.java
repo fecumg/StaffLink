@@ -20,7 +20,7 @@ import java.util.List;
 public interface UserService {
     UserResponse save(NewUserRequest newUserRequest, HttpServletRequest request) throws UniqueKeyViolationException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException;
     UserResponse update(int id, EditUserRequest editUserRequest, HttpServletRequest request) throws UniqueKeyViolationException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException;
-    List<UserResponse> getAll(Pagination pagination);
+    List<UserResponse> getAll(String search, Pagination pagination);
     UserResponse get(int id);
     void delete(int id);
 

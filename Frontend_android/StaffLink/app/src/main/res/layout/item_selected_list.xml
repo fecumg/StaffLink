@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:id="@+id/itemSelectedListLayout">
+
+    <TextView
+        android:id="@+id/itemSelectedListMainElement"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="50dp"/>
+
+    <ImageButton
+        android:id="@+id/itemSelectedListRemoveButton"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/background_circular_stated"
+        android:src="@drawable/ic_cancel_light_foreground_trimmed_tiny"
+        app:tint="@color/dark"
+        android:foregroundGravity="center"
+        android:elevation="3dp"
+        android:visibility="gone"/>
+</LinearLayout>

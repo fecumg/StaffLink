@@ -13,6 +13,7 @@ import lombok.Setter;
 import org.springframework.lang.Nullable;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -82,4 +83,24 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<UserRoleMapping> userRoleMappings = new ArrayList<>();
+
+
+    public User(Date createdAt, Date updatedAt, int id, String name, String username, String address, String phone, String email, String password, @Nullable String avatar, List<LoginFailureLog> loginFailureLogs, int createdBy, int updatedBy, List<Role> roles, List<UserRoleMapping> userRoleMappings) {
+        super(createdAt, updatedAt);
+        this.id = id;
+        this.name = name;
+        this.username = username;
+        this.address = address;
+        this.phone = phone;
+        this.email = email;
+        this.password = password;
+        this.avatar = avatar;
+        this.loginFailureLogs = loginFailureLogs;
+        this.createdBy = createdBy;
+        this.updatedBy = updatedBy;
+        this.roles = roles;
+        this.userRoleMappings = userRoleMappings;
+    }
 }
+
+

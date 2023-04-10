@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageButton;
 
 import androidx.activity.result.ActivityResult;
@@ -61,7 +62,7 @@ public class ProjectsActivity extends BaseActivity {
 
         buttonRefreshProjects.setOnClickListener(view -> this.refresh());
 
-        buttonNewProject.setOnClickListener(view -> formActivityResultLauncher.launch(new Intent(ProjectsActivity.this, ProjectAccessActivity.class)));
+        super.authorizedFunctions.observe(this, authorizedFunctions -> prepareButtonNew());
 
         this.initTable();
 
@@ -74,6 +75,15 @@ public class ProjectsActivity extends BaseActivity {
         listProjects.setContentField("description");
         listProjects.setAction(PROJECT_ACTION);
         listProjects.setError(null);
+    }
+
+    private void prepareButtonNew() {
+        if (super.isAuthorized(getString(R.string.new_project_path))) {
+            buttonNewProject.setVisibility(View.VISIBLE);
+            buttonNewProject.setOnClickListener(view -> formActivityResultLauncher.launch(new Intent(ProjectsActivity.this, ProjectAccessActivity.class)));
+        } else {
+            buttonNewProject.setVisibility(View.GONE);
+        }
     }
 
     private void fetchNewProject(String id) {

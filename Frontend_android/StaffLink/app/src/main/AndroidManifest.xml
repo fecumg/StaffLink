@@ -37,7 +37,7 @@
                 <data android:scheme="@string/staff_link_scheme" />
                 <data
                     android:host="@string/default_host"
-                    android:path="@string/projects_path"
+                    android:path="@string/authorized_projects_path"
                     android:port="@string/default_port" />
             </intent-filter>
         </activity>

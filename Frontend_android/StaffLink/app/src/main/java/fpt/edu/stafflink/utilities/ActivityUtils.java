@@ -1,15 +1,18 @@
 package fpt.edu.stafflink.utilities;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.apache.commons.lang3.StringUtils;
 
+import fpt.edu.stafflink.BaseActivity;
 import fpt.edu.stafflink.retrofit.RetrofitManager;
 
 public class ActivityUtils {
@@ -28,7 +31,13 @@ public class ActivityUtils {
         if (StringUtils.isNotEmpty(destination)) {
             Uri uri = Uri.parse(RetrofitManager.getAppUrl(context, destination));
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            activity.startActivity(intent);
+
+            try {
+                activity.startActivity(intent);
+            } catch (ActivityNotFoundException e){
+                e.printStackTrace();
+                ((BaseActivity) activity).pushToast("Path not found");
+            }
         }
     }
 

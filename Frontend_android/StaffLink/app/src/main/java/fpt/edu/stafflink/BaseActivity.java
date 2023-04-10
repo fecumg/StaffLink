@@ -280,11 +280,13 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected void setNavigationFunctions(List<FunctionResponse> functionResponses) {
         Uri uri = ActivityUtils.getUri(this);
-        if (uri != null) {
-            baseNavigationComponent.setFunctions(functionResponses, uri.getPath());
-        } else {
-            baseNavigationComponent.setFunctions(functionResponses);
-        }
+        runOnUiThread(() -> {
+            if (uri != null) {
+                baseNavigationComponent.setFunctions(functionResponses, uri.getPath());
+            } else {
+                baseNavigationComponent.setFunctions(functionResponses);
+            }
+        });
     }
 
     public void pushToast(String text) {

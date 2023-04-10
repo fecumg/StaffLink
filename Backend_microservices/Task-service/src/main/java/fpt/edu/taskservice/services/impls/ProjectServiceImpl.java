@@ -65,6 +65,7 @@ public class ProjectServiceImpl extends BaseService<Project> implements ProjectS
                 .zipWith(Mono.just(projectRequest), ((project, request) -> {
                     Project preparedProject = modelMapper.map(request, Project.class);
                     super.setUpdatedBy(preparedProject, exchange);
+                    preparedProject.setCreatedBy(project.getCreatedBy());
                     preparedProject.setId(id);
                     return preparedProject;
                 }))

@@ -25,6 +25,7 @@ import reactor.core.Disposable;
 
 public class TasksFragment extends BaseFragment {
     private static final String ERROR_TAG = "InitiatedFragment";
+    private static final String TASK_ACTION = "TaskAction";
 
     CustomInputTextComponent inputTextSearchTasks;
     CustomListComponent<TaskResponse> listTasks;
@@ -60,6 +61,8 @@ public class TasksFragment extends BaseFragment {
         }
     }
 
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -68,6 +71,8 @@ public class TasksFragment extends BaseFragment {
 
         inputTextSearchTasks = view.findViewById(R.id.inputTextSearchTasks);
         listTasks = view.findViewById(R.id.listTasks);
+
+        this.initList();
 
         if (this.accessType == PROJECT_ACCESS_TYPE_AUTHORIZED) {
             if (StringUtils.isNotEmpty(this.id)) {
@@ -90,8 +95,14 @@ public class TasksFragment extends BaseFragment {
             }
         }
 
-
         return view;
+    }
+
+    private void initList() {
+        listTasks.setTitleField("name");
+        listTasks.setContentField("description");
+        listTasks.setAction(TASK_ACTION);
+        listTasks.setError(null);
     }
 
     private void fetchAuthorizedTasks() {

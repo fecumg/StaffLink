@@ -5,9 +5,11 @@ import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.text.InputFilter;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
@@ -45,6 +47,10 @@ public class CustomInputTextComponent extends LinearLayout {
         customInputTextComponentMainElement = view.findViewById(R.id.customInputTextComponentMainElement);
 
         this.setAttributes(attrs);
+    }
+
+    public void setOnTextChanged(TextWatcher textWatcher) {
+        customInputTextComponentMainElement.addTextChangedListener(textWatcher);
     }
 
     public void setHint(CharSequence hint) {

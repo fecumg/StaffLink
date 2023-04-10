@@ -7,26 +7,36 @@ import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_PROJECT_ACCESS_TYPE;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_STRING_ID;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.gson.reflect.TypeToken;
+
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
-import fpt.edu.stafflink.BaseActivity;
 import fpt.edu.stafflink.R;
 import fpt.edu.stafflink.components.CustomInputTextComponent;
+import fpt.edu.stafflink.components.CustomListComponent;
+import fpt.edu.stafflink.components.CustomSelectedListComponent;
+import fpt.edu.stafflink.debouncing.Debouncer;
+import fpt.edu.stafflink.models.others.SelectedUser;
 import fpt.edu.stafflink.models.requestDtos.ProjectRequest;
 import fpt.edu.stafflink.models.responseDtos.ProjectResponse;
+import fpt.edu.stafflink.models.responseDtos.UserResponse;
+import fpt.edu.stafflink.pagination.Pagination;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -36,10 +46,15 @@ import okhttp3.RequestBody;
 
 public class ProjectInfoFragment extends BaseFragment {
     private static final String ERROR_TAG = "ProjectInfoFragment";
+    private static final String SELECT_USER_ACTION = "searchUserAction";
+    private static final int MIN_SEARCH_LENGTH = 4;
 
     TextView textViewError;
     CustomInputTextComponent inputTextName;
     CustomInputTextComponent inputTextDescription;
+    CustomSelectedListComponent<SelectedUser> selectedListUsers;
+    CustomInputTextComponent inputTextSearchUsers;
+    CustomListComponent<UserResponse> listUsers;
 
     private String id;
     private int position;
@@ -79,22 +94,62 @@ public class ProjectInfoFragment extends BaseFragment {
         inputTextName = view.findViewById(R.id.inputTextName);
         inputTextDescription = view.findViewById(R.id.inputTextDescription);
 
+        selectedListUsers = view.findViewById(R.id.selectedListUsers);
+        inputTextSearchUsers = view.findViewById(R.id.inputTextSearchUsers);
+        listUsers = view.findViewById(R.id.listUsers);
+
         if (StringUtils.isNotEmpty(this.id)) {
             this.fetchDataOnEdit(this.id);
         }
 
         this.prepareProjectForm();
+        this.initSearchList();
+        this.initSelectedList();
 
         return view;
+    }
+
+    private void initSearchList() {
+        listUsers.setTitleField("name");
+        listUsers.setContentField("username");
+        listUsers.setAction(SELECT_USER_ACTION);
+        listUsers.setError(null);
+    }
+
+    private void initSelectedList() {
+        selectedListUsers.setMainField("name");
     }
 
     private void prepareProjectForm() {
         if (this.accessType == PROJECT_ACCESS_TYPE_AUTHORIZED || StringUtils.isEmpty(this.id)) {
             inputTextName.setEditable(true);
             inputTextDescription.setEditable(true);
+            selectedListUsers.setCancellable(true);
+            inputTextSearchUsers.setVisibility(View.VISIBLE);
+
+            Debouncer debouncer = new Debouncer();
+            inputTextSearchUsers.setOnTextChanged(new TextWatcher() {
+                CharSequence searchText;
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    searchText = charSequence;
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    debouncer.call(() -> getBaseActivity().runOnUiThread(() -> searchUsers(searchText.toString().trim())), 500);
+                }
+            });
         } else {
             inputTextName.setEditable(false);
             inputTextDescription.setEditable(false);
+            selectedListUsers.setCancellable(false);
+            inputTextSearchUsers.setVisibility(View.GONE);
         }
     }
 
@@ -119,6 +174,44 @@ public class ProjectInfoFragment extends BaseFragment {
                             getBaseActivity().pushToast(error.getMessage());
                             textViewError.setText(error.getMessage());
                         });
+
+        getBaseActivity().compositeDisposable.add(disposable);
+    }
+
+    private void searchUsers(String search) {
+        if (StringUtils.isEmpty(search) || search.length() < MIN_SEARCH_LENGTH) {
+            listUsers.setError(null);
+            listUsers.setObjects(new ArrayList<>());
+            return;
+        }
+        Pagination pagination = new Pagination();
+
+        Disposable disposable = RetrofitServiceManager.getUserService(getContext())
+                .getUsers(search, pagination)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        response ->
+                                getBaseActivity().handleResponse(
+                                        response,
+                                        (responseBody, gson) -> {
+                                            listUsers.setError(null);
+                                            Type type = new TypeToken<List<UserResponse>>() {}.getType();
+                                            List<UserResponse> userResponses = gson.fromJson(gson.toJson(responseBody), type);
+                                            listUsers.setObjects(userResponses);
+                                        },
+                                        errorApiResponse -> {
+                                            listUsers.setError(errorApiResponse.getMessage());
+//                                            listUsers.setObjects(new ArrayList<>());
+                                        }
+                                ),
+                        error -> {
+                            Log.e(ERROR_TAG, "SearchUsers: " + error.getMessage(), error);
+                            getBaseActivity().pushToast(error.getMessage());
+                            listUsers.setError(error.getMessage());
+//                            listUsers.setObjects(new ArrayList<>());
+                        }
+                );
 
         getBaseActivity().compositeDisposable.add(disposable);
     }

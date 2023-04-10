@@ -182,25 +182,26 @@ public class CustomTableAdapter<T> extends BaseAdapter<T, CustomTableAdapter.Vie
     }
 
     public void setData(List<T> objects, String[] displayedFields) {
+        int formerItemCount = getItemCount();
         super.objects = objects;
         this.displayedFields = displayedFields;
-        notifyItemRangeChanged(0, getItemCount());
+        notifyItemRangeChanged(0, formerItemCount > getItemCount() ? formerItemCount : getItemCount());
     }
 
     public void setData(List<T> objects, String[] displayedFields, String[] imageFields) {
+        int formerItemCount = getItemCount();
         super.objects = objects;
         this.displayedFields = displayedFields;
         this.imageFields = imageFields;
-        notifyItemRangeChanged(0, getItemCount());
-    }
+        notifyItemRangeChanged(0, formerItemCount > getItemCount() ? formerItemCount : getItemCount());    }
 
     public void setData(List<T> objects, String[] displayedFields, String[] imageFields, int imageShape) {
+        int formerItemCount = getItemCount();
         super.objects = objects;
         this.displayedFields = displayedFields;
         this.imageFields = imageFields;
         this.imageShape = imageShape;
-        notifyItemRangeChanged(0, getItemCount());
-    }
+        notifyItemRangeChanged(0, formerItemCount > getItemCount() ? formerItemCount : getItemCount());    }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         LinearLayout itemTableLayout;

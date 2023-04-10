@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -26,6 +27,7 @@ import java.util.List;
 
 import fpt.edu.stafflink.R;
 import fpt.edu.stafflink.components.CustomImageComponentOval;
+import fpt.edu.stafflink.utilities.DimenUtils;
 import fpt.edu.stafflink.utilities.GenericUtils;
 
 public class CustomListAdapter<T> extends BaseAdapter<T, CustomListAdapter.ViewHolder>{
@@ -35,6 +37,8 @@ public class CustomListAdapter<T> extends BaseAdapter<T, CustomListAdapter.ViewH
 
     private String titleField;
     private String contentField;
+    private int maxLines;
+    private int height;
 
     public CustomListAdapter(List<T> objects, String titleField, String contentField) {
         super(objects);
@@ -80,13 +84,21 @@ public class CustomListAdapter<T> extends BaseAdapter<T, CustomListAdapter.ViewH
             holder.itemListContent.setText(GenericUtils.getFieldValue(object, this.contentField));
         }
 
-        holder.itemListLayout.setOnClickListener(view -> this.onClickItem(view, this.getObjectStringId(object), position));
+        holder.itemListLayout.setOnClickListener(view -> this.onClickItem(view, GenericUtils.getObjectId(object), this.getObjectStringId(object), position));
+
+        if (maxLines > 0) {
+            holder.itemListContent.setMaxLines(maxLines);
+        }
+        if (height > 0) {
+            holder.itemListLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, this.height));
+        }
     }
 
-    private void onClickItem(View view, String id, int position) {
+    private void onClickItem(View view, int id, String stringId, int position) {
         if (StringUtils.isNotEmpty(action)) {
             Intent intent = new Intent(action);
-            intent.putExtra(PARAM_STRING_ID, id);
+            intent.putExtra(PARAM_ID, id);
+            intent.putExtra(PARAM_STRING_ID, stringId);
             intent.putExtra(PARAM_POSITION, position);
             LocalBroadcastManager.getInstance(view.getContext()).sendBroadcast(intent);
         }
@@ -99,10 +111,7 @@ public class CustomListAdapter<T> extends BaseAdapter<T, CustomListAdapter.ViewH
             }
             Method method = object.getClass().getMethod("getId");
             Object idObject = method.invoke(object);
-            if (idObject instanceof String) {
-                return (String) idObject;
-            }
-            return "";
+            return String.valueOf(idObject);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return "";
@@ -120,10 +129,33 @@ public class CustomListAdapter<T> extends BaseAdapter<T, CustomListAdapter.ViewH
     }
 
     public void setData(List<T> objects, String titleField, String contentField) {
+        int formerItemCount = getItemCount();
         super.objects = objects;
         this.titleField = titleField;
         this.contentField = contentField;
-        notifyItemRangeChanged(0, getItemCount());
+        notifyItemRangeChanged(0, formerItemCount > getItemCount() ? formerItemCount : getItemCount());
+    }
+
+    public void setMaxLines(int maxLines) {
+        if (maxLines > 0) {
+            this.maxLines = maxLines;
+            notifyItemRangeChanged(0, getItemCount());
+        }
+    }
+
+    public int getMaxLines() {
+        return this.maxLines;
+    }
+
+    public void setHeight(int height) {
+        if (height > 0) {
+            this.height = height;
+            notifyItemRangeChanged(0, getItemCount());
+        }
+    }
+
+    public int getHeight() {
+        return this.height;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

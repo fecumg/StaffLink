@@ -140,7 +140,7 @@ public class UsersActivity extends BaseActivity {
         Pagination pagination = new Pagination(pageNumber, PAGE_SIZE);
 
         Disposable disposable = RetrofitServiceManager.getUserService(this)
-                .getUsers(pagination)
+                .getUsers("", pagination)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(

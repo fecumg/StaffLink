@@ -53,13 +53,17 @@ public class CustomNavigationAdapter extends BaseAdapter<FunctionResponse, Custo
 
         Context context = holder.itemNavigationMainElement.getContext();
         if (StringUtils.isNotEmpty(function.getUri().trim())) {
-            holder.itemNavigationMainElement.setOnClickListener(view -> this.onClickItem(view, function));
+            holder.itemNavigationMainLayout.setOnClickListener(view -> this.onClickItem(view, function));
+            holder.itemNavigationMainElement.setTextColor(ContextCompat.getColor(context, R.color.dark));
         } else {
+            holder.itemNavigationMainLayout.setOnClickListener(null);
             holder.itemNavigationMainElement.setTextColor(ContextCompat.getColor(context, R.color.secondary));
         }
 
         if (StringUtils.isNotEmpty(this.uri) && this.uri.equals(function.getUri())) {
             holder.itemNavigationMainElement.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent_shadow_40));
+        } else {
+            holder.itemNavigationMainElement.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
         }
     }
 

@@ -53,10 +53,11 @@ public class CustomCheckBoxAdapter<T> extends BaseAdapter<T, CustomCheckBoxAdapt
     }
 
     public void setData(List<T> objects, LinkedList<T> checkedObjects, String mainField) {
+        int formerItemCount = getItemCount();
         super.objects = objects;
         this.checkedObjects = checkedObjects;
         this.mainField = mainField;
-        notifyItemRangeChanged(0, getItemCount());
+        notifyItemRangeChanged(0, formerItemCount > getItemCount() ? formerItemCount : getItemCount());
     }
 
     public void setParentField(String parentField) {
@@ -137,6 +138,7 @@ public class CustomCheckBoxAdapter<T> extends BaseAdapter<T, CustomCheckBoxAdapt
         holder.itemCheckBoxMainElement.setOnCheckedChangeListener((compoundButton, b) -> {
             if (b) {
                 this.checkedObjects.add(object);
+                System.out.println(getParentMap(object));
                 this.getParentMap(object).forEach((parentPosition, parent) -> {
                     CheckBox parentCheckBox = mRecyclerView.getChildAt(parentPosition).findViewById(R.id.itemCheckBoxMainElement);
                     if (!parentCheckBox.isChecked()) {
