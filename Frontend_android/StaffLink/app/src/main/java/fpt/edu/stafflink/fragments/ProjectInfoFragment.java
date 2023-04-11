@@ -2,12 +2,17 @@ package fpt.edu.stafflink.fragments;
 
 import static android.app.Activity.RESULT_OK;
 import static fpt.edu.stafflink.ProjectsActivity.PROJECT_ACCESS_TYPE_AUTHORIZED;
+import static fpt.edu.stafflink.constants.AdapterActionParam.DEFAULT_ID;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_ID;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_PROJECT_ACCESS_TYPE;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_STRING_ID;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_TITLE;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 
 import android.text.Editable;
@@ -16,7 +21,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -26,6 +34,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import fpt.edu.stafflink.R;
 import fpt.edu.stafflink.components.CustomInputTextComponent;
@@ -48,10 +57,13 @@ public class ProjectInfoFragment extends BaseFragment {
     private static final String ERROR_TAG = "ProjectInfoFragment";
     private static final String SELECT_USER_ACTION = "searchUserAction";
     private static final int MIN_SEARCH_LENGTH = 4;
+    private static final int DEBOUNCING_DELAY = 1000;
 
     TextView textViewError;
+    ScrollView scrollViewWrapper;
     CustomInputTextComponent inputTextName;
     CustomInputTextComponent inputTextDescription;
+    CustomInputTextComponent inputTextCreateBy;
     CustomSelectedListComponent<SelectedUser> selectedListUsers;
     CustomInputTextComponent inputTextSearchUsers;
     CustomListComponent<UserResponse> listUsers;
@@ -59,6 +71,9 @@ public class ProjectInfoFragment extends BaseFragment {
     private String id;
     private int position;
     private int accessType;
+
+
+    private UserResponse createdBy;
 
     public ProjectInfoFragment() {
         // Required empty public constructor
@@ -91,8 +106,10 @@ public class ProjectInfoFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.fragment_project_info, container, false);
 
         textViewError = view.findViewById(R.id.textViewError);
+        scrollViewWrapper = view.findViewById(R.id.scrollViewWrapper);
         inputTextName = view.findViewById(R.id.inputTextName);
         inputTextDescription = view.findViewById(R.id.inputTextDescription);
+        inputTextCreateBy = view.findViewById(R.id.inputTextCreateBy);
 
         selectedListUsers = view.findViewById(R.id.selectedListUsers);
         inputTextSearchUsers = view.findViewById(R.id.inputTextSearchUsers);
@@ -105,6 +122,7 @@ public class ProjectInfoFragment extends BaseFragment {
         this.prepareProjectForm();
         this.initSearchList();
         this.initSelectedList();
+        this.listenToAdapterOnClick();
 
         return view;
     }
@@ -121,7 +139,10 @@ public class ProjectInfoFragment extends BaseFragment {
     }
 
     private void prepareProjectForm() {
-        if (this.accessType == PROJECT_ACCESS_TYPE_AUTHORIZED || StringUtils.isEmpty(this.id)) {
+        if (
+                (this.accessType == PROJECT_ACCESS_TYPE_AUTHORIZED && getBaseActivity().isAuthorized(getString(R.string.edit_project_path))) ||
+                StringUtils.isEmpty(this.id)
+        ) {
             inputTextName.setEditable(true);
             inputTextDescription.setEditable(true);
             selectedListUsers.setCancellable(true);
@@ -142,7 +163,7 @@ public class ProjectInfoFragment extends BaseFragment {
 
                 @Override
                 public void afterTextChanged(Editable editable) {
-                    debouncer.call(() -> getBaseActivity().runOnUiThread(() -> searchUsers(searchText.toString().trim())), 500);
+                    debouncer.call(() -> getBaseActivity().runOnUiThread(() -> searchUsers(searchText.toString().trim())), DEBOUNCING_DELAY);
                 }
             });
         } else {
@@ -166,11 +187,72 @@ public class ProjectInfoFragment extends BaseFragment {
                                         textViewError.setText(null);
                                         ProjectResponse projectResponse = gson.fromJson(gson.toJson(responseBody), ProjectResponse.class);
                                         this.bindEditedProject(projectResponse);
+                                        this.fetchCreatedBy(projectResponse.getCreatedBy());
+                                        projectResponse.getUserIds()
+                                                .forEach(this::fetchAuthorizedUser);
                                     },
                                     errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
                             ),
                         error -> {
                             Log.e(ERROR_TAG, "fetchDataOnEdit: " + error.getMessage(), error);
+                            getBaseActivity().pushToast(error.getMessage());
+                            textViewError.setText(error.getMessage());
+                        });
+
+        getBaseActivity().compositeDisposable.add(disposable);
+    }
+
+    private void fetchCreatedBy(int userId) {
+        if (userId == DEFAULT_ID) {
+            this.bindCreatedBy(null);
+            return;
+        }
+        Disposable disposable = RetrofitServiceManager.getUserService(getContext())
+                .getUser(userId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        response ->
+                                getBaseActivity().handleResponse(
+                                        response,
+                                        (responseBody, gson) -> {
+                                            textViewError.setText(null);
+                                            UserResponse userResponse = gson.fromJson(gson.toJson(responseBody), UserResponse.class);
+                                            this.bindCreatedBy(userResponse);
+                                        },
+                                        errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
+                                ),
+                        error -> {
+                            Log.e(ERROR_TAG, "fetchCreatedBy: " + error.getMessage(), error);
+                            getBaseActivity().pushToast(error.getMessage());
+                            textViewError.setText(error.getMessage());
+                        });
+
+        getBaseActivity().compositeDisposable.add(disposable);
+    }
+
+    private void fetchAuthorizedUser(int userId) {
+        if (userId == DEFAULT_ID) {
+            this.bindCreatedBy(null);
+            return;
+        }
+        Disposable disposable = RetrofitServiceManager.getUserService(getContext())
+                .getUser(userId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        response ->
+                                getBaseActivity().handleResponse(
+                                        response,
+                                        (responseBody, gson) -> {
+                                            textViewError.setText(null);
+                                            UserResponse userResponse = gson.fromJson(gson.toJson(responseBody), UserResponse.class);
+                                            this.bindAuthorizedUser(userResponse);
+                                        },
+                                        errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
+                                ),
+                        error -> {
+                            Log.e(ERROR_TAG, "fetchAuthorizedUser: " + error.getMessage(), error);
                             getBaseActivity().pushToast(error.getMessage());
                             textViewError.setText(error.getMessage());
                         });
@@ -198,18 +280,25 @@ public class ProjectInfoFragment extends BaseFragment {
                                             listUsers.setError(null);
                                             Type type = new TypeToken<List<UserResponse>>() {}.getType();
                                             List<UserResponse> userResponses = gson.fromJson(gson.toJson(responseBody), type);
-                                            listUsers.setObjects(userResponses);
+                                            List<UserResponse> userResponsesExceptCreatedBy = userResponses.stream()
+                                                            .filter(userResponse -> userResponse.getId() != this.createdBy.getId())
+                                                            .collect(Collectors.toList());
+
+                                            listUsers.setObjects(userResponsesExceptCreatedBy);
+                                            if (scrollViewWrapper.getScrollY() < 200) {
+                                                scrollViewWrapper.smoothScrollBy(0, 400);
+                                            }
                                         },
                                         errorApiResponse -> {
                                             listUsers.setError(errorApiResponse.getMessage());
-//                                            listUsers.setObjects(new ArrayList<>());
+                                            listUsers.setObjects(new ArrayList<>());
                                         }
                                 ),
                         error -> {
                             Log.e(ERROR_TAG, "SearchUsers: " + error.getMessage(), error);
                             getBaseActivity().pushToast(error.getMessage());
                             listUsers.setError(error.getMessage());
-//                            listUsers.setObjects(new ArrayList<>());
+                            listUsers.setObjects(new ArrayList<>());
                         }
                 );
 
@@ -286,9 +375,15 @@ public class ProjectInfoFragment extends BaseFragment {
             inputTextDescription.setError(null);
         }
 
+        List<Integer> userIds = selectedListUsers.getObjects()
+                .stream()
+                .map(SelectedUser::getId)
+                .collect(Collectors.toList());
+
         return new ProjectRequest(
                 name,
-                description);
+                description,
+                userIds);
     }
 
     public RequestBody buildProjectRequestBody(ProjectRequest projectRequest) {
@@ -307,12 +402,48 @@ public class ProjectInfoFragment extends BaseFragment {
             }
         }
 
+        projectRequest.getUserIds()
+                .forEach(userId -> builder.addFormDataPart("userIds", String.valueOf(userId)));
+
         return builder.build();
     }
 
     private void bindEditedProject(ProjectResponse projectResponse) {
         inputTextName.setText(projectResponse.getName());
         inputTextDescription.setText(projectResponse.getDescription());
+    }
+    private void bindCreatedBy(UserResponse userResponse) {
+        if (userResponse == null) {
+            inputTextCreateBy.setText(getString(R.string.unidentified));
+        } else {
+            inputTextCreateBy.setText(userResponse.getName());
+            this.createdBy = userResponse;
+        }
+    }
+    private void bindAuthorizedUser(UserResponse userResponse) {
+        if (userResponse != null) {
+            SelectedUser selectedUser = new SelectedUser(userResponse.getId(), userResponse.getName());
+            selectedListUsers.addNewItem(selectedUser);
+        }
+    }
+
+    private void listenToAdapterOnClick() {
+        LocalBroadcastManager.getInstance(super.retrieveContext())
+                .registerReceiver(new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        int id = intent.getIntExtra(PARAM_ID, DEFAULT_ID);
+                        String title = intent.getStringExtra(PARAM_TITLE);
+                        if (id != DEFAULT_ID) {
+                            SelectedUser selectedUser = new SelectedUser(id, title);
+                            performSelectUser(selectedUser);
+                        }
+                    }
+                }, new IntentFilter(SELECT_USER_ACTION));
+    }
+
+    private void performSelectUser(SelectedUser selectedUser) {
+        selectedListUsers.addNewItem(selectedUser);
     }
 
     private void backToProjects() {

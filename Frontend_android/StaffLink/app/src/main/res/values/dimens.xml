@@ -4,7 +4,7 @@
     <dimen name="oval_corner_size">50%</dimen>
     <dimen name="rectangle_corner_size">10dp</dimen>
 
-    <dimen name="tiny_icon_size">30dp</dimen>
+    <dimen name="tiny_icon_size">20dp</dimen>
     <dimen name="small_icon_size">50dp</dimen>
     <dimen name="medium_icon_size">80dp</dimen>
 

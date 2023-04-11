@@ -307,7 +307,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         return sharedPreferences.getString(getString(R.string.authorization_sharedPreference), "");
     }
 
-    protected boolean isAuthorized(String functionPath) {
+    public boolean isAuthorized(String functionPath) {
         if (this.authorizedFunctions.getValue() != null) {
             return this.authorizedFunctions.getValue().stream()
                     .anyMatch(functionResponse -> functionPath.equals(functionResponse.getUri()));

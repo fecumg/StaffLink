@@ -6,6 +6,7 @@ public class ProjectResponse extends BaseResponse{
     private String id;
     private String name;
     private String description;
+    private List<Integer> userIds;
     private List<TaskResponse> tasks;
 
     public String getId() {
@@ -30,6 +31,14 @@ public class ProjectResponse extends BaseResponse{
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public List<Integer> getUserIds() {
+        return userIds;
+    }
+
+    public void setUserIds(List<Integer> userIds) {
+        this.userIds = userIds;
     }
 
     public List<TaskResponse> getTasks() {

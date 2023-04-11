@@ -134,6 +134,9 @@ public class CustomInputTextComponent extends LinearLayout {
     public void setEditable(boolean editable) {
         this.editable = editable;
         customInputTextComponentMainElement.setEnabled(editable);
+        if (!editable) {
+            this.setColor(ContextCompat.getColor(getContext(), R.color.secondary));
+        }
     }
 
     public boolean isEditable() {

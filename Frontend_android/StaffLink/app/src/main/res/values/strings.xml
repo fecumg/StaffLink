@@ -3,6 +3,8 @@
     <string name="authorization_header">Authorization</string>
     <string name="authorization_sharedPreference">Authorization</string>
 
+    <string name="unidentified">unidentified</string>
+
     <string name="uri_extra">uri</string>
     <string name="no_response">no response when calling api</string>
 

@@ -15,8 +15,8 @@
 
     <ImageButton
         android:id="@+id/itemSelectedListRemoveButton"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:background="@drawable/background_circular_stated"
         android:src="@drawable/ic_cancel_light_foreground_trimmed_tiny"
         app:tint="@color/dark"

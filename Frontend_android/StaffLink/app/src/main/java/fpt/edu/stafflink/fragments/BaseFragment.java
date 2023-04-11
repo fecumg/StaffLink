@@ -10,10 +10,14 @@ import androidx.fragment.app.Fragment;
 import fpt.edu.stafflink.BaseActivity;
 
 public class BaseFragment extends Fragment {
-    BaseActivity baseActivity;
+    private BaseActivity baseActivity;
+    private Context context;
 
     protected BaseActivity getBaseActivity() {
         return baseActivity;
+    }
+    protected Context retrieveContext() {
+        return this.context;
     }
 
     @Override
@@ -22,6 +26,7 @@ public class BaseFragment extends Fragment {
         if (context instanceof BaseActivity){
             baseActivity = (BaseActivity) context;
         }
+        this.context = context;
     }
 
     @Override

@@ -1,5 +1,7 @@
 package fpt.edu.taskservice.dtos.responseDtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fpt.edu.taskservice.entities.Task;
 import fpt.edu.taskservice.enums.TaskStatus;
 import lombok.AllArgsConstructor;
@@ -22,7 +24,11 @@ public class TaskResponse extends BaseResponse {
     private String id;
     private String name;
     private String description;
+
+    @JsonSerialize(as = Date.class)
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="GMT")
     private Date dueAt;
+
     private List<Integer> userIds;
     private String status;
     private int statusCode;

@@ -1,8 +1,10 @@
 package fpt.edu.stafflink.adapters;
 
+import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_CONTENT;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_ID;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_STRING_ID;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_TITLE;
 
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
@@ -27,7 +29,6 @@ import java.util.List;
 
 import fpt.edu.stafflink.R;
 import fpt.edu.stafflink.components.CustomImageComponentOval;
-import fpt.edu.stafflink.utilities.DimenUtils;
 import fpt.edu.stafflink.utilities.GenericUtils;
 
 public class CustomListAdapter<T> extends BaseAdapter<T, CustomListAdapter.ViewHolder>{
@@ -77,14 +78,14 @@ public class CustomListAdapter<T> extends BaseAdapter<T, CustomListAdapter.ViewH
         }
 
         T object = super.getObjects().get(position);
-        if (StringUtils.isNotEmpty(this.titleField)) {
-            holder.itemListTitle.setText(GenericUtils.getFieldValue(object, this.titleField));
-        }
-        if (StringUtils.isNotEmpty(this.contentField)) {
-            holder.itemListContent.setText(GenericUtils.getFieldValue(object, this.contentField));
-        }
 
-        holder.itemListLayout.setOnClickListener(view -> this.onClickItem(view, GenericUtils.getObjectId(object), this.getObjectStringId(object), position));
+        String title = GenericUtils.getFieldValue(object, this.titleField);
+        holder.itemListTitle.setText(title);
+
+        String content = GenericUtils.getFieldValue(object, this.contentField);
+        holder.itemListContent.setText(content);
+
+        holder.itemListLayout.setOnClickListener(view -> this.onClickItem(view, GenericUtils.getObjectId(object), this.getObjectStringId(object), position, title, content));
 
         if (maxLines > 0) {
             holder.itemListContent.setMaxLines(maxLines);
@@ -94,12 +95,14 @@ public class CustomListAdapter<T> extends BaseAdapter<T, CustomListAdapter.ViewH
         }
     }
 
-    private void onClickItem(View view, int id, String stringId, int position) {
+    private void onClickItem(View view, int id, String stringId, int position, String title, String content) {
         if (StringUtils.isNotEmpty(action)) {
             Intent intent = new Intent(action);
             intent.putExtra(PARAM_ID, id);
             intent.putExtra(PARAM_STRING_ID, stringId);
             intent.putExtra(PARAM_POSITION, position);
+            intent.putExtra(PARAM_TITLE, title);
+            intent.putExtra(PARAM_CONTENT, content);
             LocalBroadcastManager.getInstance(view.getContext()).sendBroadcast(intent);
         }
     }

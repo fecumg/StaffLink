@@ -15,12 +15,13 @@ import java.util.List;
 
 import fpt.edu.stafflink.R;
 import fpt.edu.stafflink.adapters.CustomSelectedListAdapter;
+import fpt.edu.stafflink.utilities.GenericUtils;
 
 public class CustomSelectedListComponent<T> extends LinearLayout {
     private static final String DEFAULT_MAIN_FIELD = "id";
 
     RecyclerView customSelectedListComponentMainElement;
-    CustomSelectedListAdapter<T> adapter;
+    public CustomSelectedListAdapter<T> adapter;
 
     public CustomSelectedListComponent(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -48,6 +49,13 @@ public class CustomSelectedListComponent<T> extends LinearLayout {
 
     public List<T> getObjects() {
         return this.adapter.getObjects();
+    }
+
+    public void addNewItem(T object) {
+        int index = GenericUtils.getIndexOf(object, getObjects());
+        if (index == -1) {
+            this.adapter.addNewItem(object);
+        }
     }
 
     public void setMainField(String mainField) {
