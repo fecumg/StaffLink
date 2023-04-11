@@ -58,6 +58,9 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
     @Value("${rabbitmq.routing-key.attachment-processing}")
     private String ATTACHMENT_PROCESSING_ROUTING_KEY;
 
+    @Value("${rabbitmq.routing-key.attachment-removal}")
+    private String ATTACHMENT_REMOVAL_ROUTING_KEY;
+
     private static final String DEFAULT_REQUEST_DATE_PATTERN = "dd-MM-yyyy";
 
     @Autowired
@@ -78,6 +81,7 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
     @Override
     public Mono<TaskResponse> save(NewTaskRequest newTaskRequest, ServerWebExchange exchange) {
         validationHandler.validate(newTaskRequest);
+
         return projectRepository.findById(newTaskRequest.getProjectId())
                 .switchIfEmpty(Mono.error(new NotFoundException( "Project not found")))
                 .zipWith(Mono.just(newTaskRequest), ((project, request) -> {
@@ -96,6 +100,8 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
 
     @Override
     public Mono<TaskResponse> update(String id, EditTaskRequest editTaskRequest, ServerWebExchange exchange) {
+        validationHandler.validate(editTaskRequest);
+
         return taskRepository.findById(id)
                 .switchIfEmpty(Mono.error(new NotFoundException( "Project not found")))
                 .zipWith(Mono.just(editTaskRequest), ((currentTask, request) -> {
@@ -109,6 +115,7 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
                 .flatMap(preparedTask -> setDueAt(preparedTask, editTaskRequest))
                 .flatMap(preparedTask -> taskRepository.save(preparedTask))
                 .flatMap(task -> this.saveNewAttachments(editTaskRequest, task, exchange))
+                .flatMap(task -> this.removeAttachments(editTaskRequest, task))
                 .flatMap(super::buildTaskResponse)
                 .doOnSuccess(taskResponse -> log.info("Task with id '{}' saved successfully", taskResponse.getId()))
                 .doOnError(throwable -> log.error(throwable.getMessage()));
@@ -261,6 +268,28 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
 
                     return filePart;
                 });
+    }
+
+    private Mono<Task> removeAttachments(EditTaskRequest editTaskRequest, Task task) {
+        return Mono.justOrEmpty(editTaskRequest)
+                .map(EditTaskRequest::getRemovedAttachments)
+                .flatMapMany(attachmentIds -> attachmentRepository.findAllById(attachmentIds))
+                .map(attachment -> {
+                    ExchangeAttachment exchangeAttachment = new ExchangeAttachment(task.getId(), attachment.getName());
+
+//                    delete temporary file if exists
+                    super.deleteTemporaryAttachmentFile(exchangeAttachment);
+
+//                    send message to File-service to delete attachment file
+                    rabbitTemplate.convertAndSend(EXCHANGE_NAME, ATTACHMENT_REMOVAL_ROUTING_KEY, exchangeAttachment);
+                    log.info("Message has been published via routing key '{}'", ATTACHMENT_REMOVAL_ROUTING_KEY);
+
+                    return attachment;
+                })
+                .collectList()
+                .flatMap(attachments -> attachmentRepository.deleteAll(attachments).thenReturn(task))
+                .doOnError(throwable -> log.error(throwable.getMessage()))
+                .defaultIfEmpty(task);
     }
 
     private Mono<Task> setDueAt(Task task, Object taskRequest){

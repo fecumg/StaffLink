@@ -1,9 +1,13 @@
 package fpt.edu.stafflink;
 
 import static fpt.edu.stafflink.constants.AdapterActionParam.DEFAULT_POSITION;
+import static fpt.edu.stafflink.constants.AdapterActionParam.FORM_STATUS_DONE;
+import static fpt.edu.stafflink.constants.AdapterActionParam.FORM_STATUS_NONE;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_FORM_STATUS;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_PROJECT_ACCESS_TYPE;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_STRING_ID;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_AUTHORIZED;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -36,9 +40,6 @@ import io.reactivex.schedulers.Schedulers;
 public class ProjectsActivity extends BaseActivity {
     private static final String ERROR_TAG = "AllProjectsActivity";
     private static final String PROJECT_ACTION = "ProjectAction";
-    public static final int PROJECT_ACCESS_TYPE_OBSERVABLE = 0;
-    public static final int PROJECT_ACCESS_TYPE_ASSIGNED = 1;
-    public static final int PROJECT_ACCESS_TYPE_AUTHORIZED = 2;
 
     private int pageNumber = 1;
     private static final int PAGE_SIZE = 20;
@@ -99,7 +100,6 @@ public class ProjectsActivity extends BaseActivity {
                                             listProjects.setError(null);
                                             ProjectResponse projectResponse = gson.fromJson(gson.toJson(responseBody), ProjectResponse.class);
                                             listProjects.adapter.addNewItem(projectResponse);
-                                            super.pushToast("project with name: " + projectResponse.getName() + " added successfully");
                                             listProjects.scrollTo(listProjects.getObjects().indexOf(projectResponse));
                                         },
                                         errorApiResponse -> listProjects.setError(errorApiResponse.getMessage())
@@ -127,7 +127,6 @@ public class ProjectsActivity extends BaseActivity {
                                             listProjects.setError(null);
                                             ProjectResponse projectResponse = gson.fromJson(gson.toJson(responseBody), ProjectResponse.class);
                                             listProjects.adapter.modifyItem(position, projectResponse);
-                                            super.pushToast("project with name: " + projectResponse.getName() + " edited successfully");
                                             listProjects.scrollTo(position);
                                         },
                                         errorApiResponse -> listProjects.setError(errorApiResponse.getMessage())
@@ -202,7 +201,8 @@ public class ProjectsActivity extends BaseActivity {
         if (result.getResultCode() == RESULT_OK && result.getData() != null) {
             String id = result.getData().getStringExtra(PARAM_STRING_ID);
             int position = result.getData().getIntExtra(PARAM_POSITION, DEFAULT_POSITION);
-            if (StringUtils.isNotEmpty(id)) {
+            int formStatus = result.getData().getIntExtra(PARAM_FORM_STATUS, FORM_STATUS_NONE);
+            if (StringUtils.isNotEmpty(id) && formStatus == FORM_STATUS_DONE) {
                 if (position == DEFAULT_POSITION) {
                     this.fetchNewProject(id);
                 } else {

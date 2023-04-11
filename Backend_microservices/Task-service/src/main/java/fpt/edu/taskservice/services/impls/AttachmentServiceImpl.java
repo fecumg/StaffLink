@@ -3,6 +3,7 @@ package fpt.edu.taskservice.services.impls;
 import fpt.edu.taskservice.dtos.exchangeDtos.ExchangeAttachment;
 import fpt.edu.taskservice.services.AttachmentService;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -21,7 +22,7 @@ import java.nio.file.Paths;
 
 @Service
 @Log4j2
-public class AttachmentServiceImpl implements AttachmentService {
+public class AttachmentServiceImpl extends BaseService implements AttachmentService {
 
     @Value("${folder.uploads}")
     private String UPLOADS_TMP;
@@ -41,5 +42,10 @@ public class AttachmentServiceImpl implements AttachmentService {
         DataBufferFactory dbf = new DefaultDataBufferFactory();
         return DataBufferUtils.read(path, dbf, 10000)
                 .doOnError(throwable -> log.error(throwable.getMessage()));
+    }
+
+    @RabbitListener(queues = {"${rabbitmq.queue.attachment-processing-done}"})
+    private void listenToAttachmentProcessingDone(ExchangeAttachment exchangeAttachment) {
+        super.deleteTemporaryAttachmentFile(exchangeAttachment);
     }
 }

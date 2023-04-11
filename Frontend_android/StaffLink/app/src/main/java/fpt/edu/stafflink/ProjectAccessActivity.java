@@ -1,8 +1,9 @@
 package fpt.edu.stafflink;
 
-import static fpt.edu.stafflink.ProjectsActivity.PROJECT_ACCESS_TYPE_ASSIGNED;
-import static fpt.edu.stafflink.ProjectsActivity.PROJECT_ACCESS_TYPE_AUTHORIZED;
-import static fpt.edu.stafflink.ProjectsActivity.PROJECT_ACCESS_TYPE_OBSERVABLE;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_FORM_STATUS;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_ASSIGNED;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_AUTHORIZED;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_OBSERVABLE;
 import static fpt.edu.stafflink.constants.AdapterActionParam.DEFAULT_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_PROJECT_ACCESS_TYPE;
@@ -53,6 +54,7 @@ public class ProjectAccessActivity extends BaseActivity {
     private String id;
     private int position;
     private int accessType;
+    private int formStatus;
 
     @Override
     protected void onSubCreate(Bundle savedInstanceState) {
@@ -90,7 +92,7 @@ public class ProjectAccessActivity extends BaseActivity {
 //        this.initByCases();
         super.authorizedFunctions.observe(this, authorizedFunctions -> this.initByCases());
 
-        buttonBackToProjects.setOnClickListener(view -> onBackPressed());
+        buttonBackToProjects.setOnClickListener(view -> backToProjects());
     }
 
     private void initByCases() {
@@ -172,6 +174,7 @@ public class ProjectAccessActivity extends BaseActivity {
     }
 
     private void showInfoOnNew() {
+        textViewProjectAccessTitle.setText(getString(R.string.project_access_title_new));
         projectAccessMenu.setVisibility(View.GONE);
         ProjectInfoFragment projectInfoFragment = ProjectInfoFragment.newInstance(this.id, this.position, this.accessType);
         this.replaceFragment(projectInfoFragment);
@@ -196,6 +199,10 @@ public class ProjectAccessActivity extends BaseActivity {
         }
     }
 
+    public void setTitleOnEdit(String title) {
+        textViewProjectAccessTitle.setText(title);
+    }
+
     private void showTasks(int status) {
         buttonSubmitProject.setVisibility(View.GONE);
         TasksFragment tasksFragment = TasksFragment.newInstance(this.id, this.position, this.accessType, status);
@@ -218,6 +225,23 @@ public class ProjectAccessActivity extends BaseActivity {
             RequestBody projectRequestBody = projectInfoFragment.buildProjectRequestBody(projectRequest);
             projectInfoFragment.submitEditProject(this.id, projectRequestBody);
         }
+    }
+
+    public void setProjectId(String id) {
+        this.id = id;
+    }
+
+    public void setFormStatus(int formStatus) {
+        this.formStatus = formStatus;
+    }
+
+    private void backToProjects() {
+        Intent intent = new Intent();
+        intent.putExtra(PARAM_STRING_ID, this.id);
+        intent.putExtra(PARAM_POSITION, this.position);
+        intent.putExtra(PARAM_FORM_STATUS, this.formStatus);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
 }

@@ -53,6 +53,8 @@
     <string name="authentication_title_login">Login</string>
     <string name="authentication_title_edit">Personal information</string>
 
+    <string name="project_access_title_new">New project</string>
+
     <string name="project_access_menu_info">Info</string>
     <string name="project_access_menu_initiated">Initiated</string>
     <string name="project_access_menu_inProgress">In progress</string>

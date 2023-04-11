@@ -22,7 +22,7 @@ public class NewTaskRequest {
     private String name;
 
     @NotNull(message = "Description cannot be empty")
-    @Size(max = 500, message = "Description cannot exceed {max} characters")
+    @Size(max = 1000, message = "Description cannot exceed {max} characters")
     private String description;
 
     private String dueDate;

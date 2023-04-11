@@ -6,6 +6,8 @@ import jakarta.ws.rs.NotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.bouncycastle.util.io.BufferingOutputStream;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -38,9 +40,17 @@ public class AttachmentServiceImpl extends BaseService implements AttachmentServ
     @Value("${folder.uploads.attachments}")
     private String ATTACHMENTS;
 
+    @Value("${rabbitmq.exchange}")
+    private String EXCHANGE_NAME;
+    @Value("${rabbitmq.routing-key.attachment-processing-done}")
+    private String ATTACHMENT_PROCESSING_DONE_ROUTING_KEY;
+
     @Autowired
     private WebClient.Builder webClientBuilder;
-
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private MessageConverter jsonConverter;
     @Autowired
     private Environment env;
 
@@ -72,9 +82,15 @@ public class AttachmentServiceImpl extends BaseService implements AttachmentServ
                                 String filePath = folderDirectory + File.separator + filename;
                                 File file = new File(filePath);
 
-            //                    write data to file
+//                                write data to file
                                 try (BufferingOutputStream stream = new BufferingOutputStream(new FileOutputStream(file))) {
                                     stream.write(bytes);
+
+//                                    send message to Task-service to delete temporary file
+                                    rabbitTemplate.setMessageConverter(jsonConverter);
+                                    rabbitTemplate.convertAndSend(EXCHANGE_NAME, ATTACHMENT_PROCESSING_DONE_ROUTING_KEY, exchangeAttachment);
+                                    log.info("Message has been published via routing key '{}'", ATTACHMENT_PROCESSING_DONE_ROUTING_KEY);
+
                                 } catch (IOException e) {
                                     log.error(e.getMessage());
                                 }
@@ -82,6 +98,27 @@ public class AttachmentServiceImpl extends BaseService implements AttachmentServ
                         error -> log.error(error.getMessage()),
                         () -> log.info("Attachment {}/{} has been added to {}", taskId, filename, attachmentFolderDirectory)
                 );
+    }
+
+    @RabbitListener(queues = {"${rabbitmq.queue.attachment-removal}"}, messageConverter = "jsonConverter")
+    private void removeAttachment(ExchangeAttachment exchangeAttachment) {
+        String attachmentFolderDirectory = System.getProperty("user.dir") + File.separator + UPLOADS + File.separator + ATTACHMENTS;
+        String taskId = exchangeAttachment.getTaskId();
+        String filename = exchangeAttachment.getFilename();
+
+        log.info("Receive file-removal request for {}/{} from queue '{}'", taskId, filename, env.getProperty("rabbitmq.queue.attachment-processing"));
+
+        String folderDirectory = attachmentFolderDirectory + File.separator + taskId;
+        String filePath = folderDirectory + File.separator + filename;
+
+        File file = new File(filePath);
+
+        boolean isDeleted = file.delete();
+        if (isDeleted) {
+            log.info("Attachment file '{}' has been deleted", filePath);
+        } else {
+            log.info("Attachment file '{}' doesn't exist", filePath);
+        }
     }
 
     private ByteArrayResource retrieveAttachment(ExchangeAttachment exchangeAttachment) {

@@ -1,12 +1,11 @@
 package fpt.edu.stafflink.fragments;
 
-import static android.app.Activity.RESULT_OK;
-import static fpt.edu.stafflink.ProjectsActivity.PROJECT_ACCESS_TYPE_AUTHORIZED;
+import static fpt.edu.stafflink.constants.AdapterActionParam.FORM_STATUS_DONE;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_AUTHORIZED;
 import static fpt.edu.stafflink.constants.AdapterActionParam.DEFAULT_ID;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_ID;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_PROJECT_ACCESS_TYPE;
-import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_STRING_ID;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_TITLE;
 
 import android.content.BroadcastReceiver;
@@ -36,6 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import fpt.edu.stafflink.BaseActivity;
+import fpt.edu.stafflink.ProjectAccessActivity;
 import fpt.edu.stafflink.R;
 import fpt.edu.stafflink.components.CustomInputTextComponent;
 import fpt.edu.stafflink.components.CustomListComponent;
@@ -72,8 +73,9 @@ public class ProjectInfoFragment extends BaseFragment {
     private int position;
     private int accessType;
 
-
     private UserResponse createdBy;
+
+    ProjectAccessActivity projectAccessActivity;
 
     public ProjectInfoFragment() {
         // Required empty public constructor
@@ -117,12 +119,18 @@ public class ProjectInfoFragment extends BaseFragment {
 
         if (StringUtils.isNotEmpty(this.id)) {
             this.fetchDataOnEdit(this.id);
+        } else {
+            UserResponse authUser = super.getBaseActivity().getAuthUser();
+            if (authUser != null) {
+                this.bindCreatedBy(authUser);
+            }
         }
 
         this.prepareProjectForm();
         this.initSearchList();
         this.initSelectedList();
         this.listenToAdapterOnClick();
+        this.setProjectAccessActivity();
 
         return view;
     }
@@ -232,10 +240,6 @@ public class ProjectInfoFragment extends BaseFragment {
     }
 
     private void fetchAuthorizedUser(int userId) {
-        if (userId == DEFAULT_ID) {
-            this.bindCreatedBy(null);
-            return;
-        }
         Disposable disposable = RetrofitServiceManager.getUserService(getContext())
                 .getUser(userId)
                 .subscribeOn(Schedulers.io())
@@ -281,7 +285,7 @@ public class ProjectInfoFragment extends BaseFragment {
                                             Type type = new TypeToken<List<UserResponse>>() {}.getType();
                                             List<UserResponse> userResponses = gson.fromJson(gson.toJson(responseBody), type);
                                             List<UserResponse> userResponsesExceptCreatedBy = userResponses.stream()
-                                                            .filter(userResponse -> userResponse.getId() != this.createdBy.getId())
+                                                            .filter(userResponse -> this.createdBy == null || userResponse.getId() != this.createdBy.getId())
                                                             .collect(Collectors.toList());
 
                                             listUsers.setObjects(userResponsesExceptCreatedBy);
@@ -317,8 +321,11 @@ public class ProjectInfoFragment extends BaseFragment {
                                         (responseBody, gson) -> {
                                             textViewError.setText(null);
                                             ProjectResponse projectResponse = gson.fromJson(gson.toJson(responseBody), ProjectResponse.class);
-                                            this.id = projectResponse.getId();
-                                            this.backToProjects();
+                                            super.getBaseActivity().pushToast("project added successfully");
+                                            if (this.projectAccessActivity != null) {
+                                                this.projectAccessActivity.setFormStatus(FORM_STATUS_DONE);
+                                                this.projectAccessActivity.setProjectId(projectResponse.getId());
+                                            }
                                         },
                                         errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
                                 ),
@@ -342,7 +349,10 @@ public class ProjectInfoFragment extends BaseFragment {
                                         response,
                                         (responseBody, gson) -> {
                                             textViewError.setText(null);
-                                            this.backToProjects();
+                                            super.getBaseActivity().pushToast("project edited successfully");
+                                            if (this.projectAccessActivity != null) {
+                                                this.projectAccessActivity.setFormStatus(FORM_STATUS_DONE);
+                                            }
                                         },
                                         errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
                                 ),
@@ -411,6 +421,10 @@ public class ProjectInfoFragment extends BaseFragment {
     private void bindEditedProject(ProjectResponse projectResponse) {
         inputTextName.setText(projectResponse.getName());
         inputTextDescription.setText(projectResponse.getDescription());
+
+        if (this.projectAccessActivity != null) {
+            this.projectAccessActivity.setTitleOnEdit(projectResponse.getName());
+        }
     }
     private void bindCreatedBy(UserResponse userResponse) {
         if (userResponse == null) {
@@ -446,11 +460,10 @@ public class ProjectInfoFragment extends BaseFragment {
         selectedListUsers.addNewItem(selectedUser);
     }
 
-    private void backToProjects() {
-        Intent intent = new Intent();
-        intent.putExtra(PARAM_STRING_ID, this.id);
-        intent.putExtra(PARAM_POSITION, this.position);
-        getBaseActivity().setResult(RESULT_OK, intent);
-        getBaseActivity().finish();
+    private void setProjectAccessActivity() {
+        BaseActivity baseActivity = super.getBaseActivity();
+        if (baseActivity instanceof ProjectAccessActivity) {
+            this.projectAccessActivity = (ProjectAccessActivity) baseActivity;
+        }
     }
 }

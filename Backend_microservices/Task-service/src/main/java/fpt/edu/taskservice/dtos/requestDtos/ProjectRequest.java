@@ -21,7 +21,7 @@ public class ProjectRequest {
     private String name;
 
     @NotNull(message = "Description cannot be empty")
-    @Size(max = 500, message = "Description cannot exceed {max} characters")
+    @Size(max = 1000, message = "Description cannot exceed {max} characters")
     private String description;
 
     protected List<Integer> userIds;

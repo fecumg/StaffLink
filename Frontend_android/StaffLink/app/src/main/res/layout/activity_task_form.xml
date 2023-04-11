@@ -5,14 +5,14 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RoleFormActivity">
+    tools:context=".TaskFormActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <ImageButton
-            android:id="@+id/buttonBackToRoles"
+            android:id="@+id/buttonBack"
             android:layout_width="@dimen/small_icon_size"
             android:layout_height="@dimen/small_icon_size"
             android:src="@drawable/ic_back_light_foreground"
@@ -20,7 +20,7 @@
             android:layout_alignParentStart="true"/>
 
         <TextView
-            android:id="@+id/textViewRoleFormTitle"
+            android:id="@+id/textViewTaskFormTitle"
             android:layout_width="@dimen/title_width"
             android:layout_height="wrap_content"
             android:textSize="@dimen/header_text_size"
@@ -31,7 +31,7 @@
             android:layout_centerInParent="true"/>
 
         <ImageButton
-            android:id="@+id/buttonSubmitRole"
+            android:id="@+id/buttonSubmitTask"
             android:layout_width="@dimen/small_icon_size"
             android:layout_height="@dimen/small_icon_size"
             android:src="@drawable/ic_check_light_foreground"

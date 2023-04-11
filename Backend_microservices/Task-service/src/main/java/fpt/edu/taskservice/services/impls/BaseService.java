@@ -1,5 +1,6 @@
 package fpt.edu.taskservice.services.impls;
 
+import fpt.edu.taskservice.dtos.exchangeDtos.ExchangeAttachment;
 import fpt.edu.taskservice.dtos.responseDtos.AttachmentResponse;
 import fpt.edu.taskservice.dtos.responseDtos.TaskResponse;
 import fpt.edu.taskservice.entities.Project;
@@ -17,6 +18,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -35,6 +37,11 @@ public class BaseService<T> {
 
     @Value("${http.request.auth.id}")
     private String AUTH_ID;
+
+    @Value("${folder.uploads}")
+    private String UPLOADS_TMP;
+    @Value("${folder.uploads.attachments}")
+    private String ATTACHMENT_FOLDER;
 
     @Autowired
     private AttachmentRepository attachmentRepository;
@@ -168,5 +175,20 @@ public class BaseService<T> {
 
         return projectRepository.findAll()
                 .filter(project -> project.getCreatedBy() == authId || (project.getUserIds() != null && project.getUserIds().contains(authId)));
+    }
+
+    protected void deleteTemporaryAttachmentFile(ExchangeAttachment exchangeAttachment) {
+        String attachmentFolderDirectory = System.getProperty("user.dir") + File.separator + UPLOADS_TMP + File.separator + ATTACHMENT_FOLDER;
+        String folderDirectory = attachmentFolderDirectory + File.separator + exchangeAttachment.getTaskId();
+        String filePath = folderDirectory + File.separator + exchangeAttachment.getFilename();
+
+        File file = new File(filePath);
+
+        boolean isDeleted = file.delete();
+        if (isDeleted) {
+            log.info("Temporary file '{}' has been deleted", filePath);
+        } else {
+            log.info("Temporary file '{}' doesn't exist", filePath);
+        }
     }
 }

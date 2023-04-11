@@ -1,7 +1,7 @@
 package fpt.edu.stafflink.fragments;
 
-import static fpt.edu.stafflink.ProjectsActivity.PROJECT_ACCESS_TYPE_ASSIGNED;
-import static fpt.edu.stafflink.ProjectsActivity.PROJECT_ACCESS_TYPE_AUTHORIZED;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_ASSIGNED;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_AUTHORIZED;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_ID;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_PROJECT_ACCESS_TYPE;
@@ -60,8 +60,6 @@ public class TasksFragment extends BaseFragment {
             this.taskStatus = getArguments().getInt(PARAM_TASK_STATUS);
         }
     }
-
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

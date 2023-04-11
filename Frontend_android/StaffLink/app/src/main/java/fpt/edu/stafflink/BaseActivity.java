@@ -70,6 +70,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
 
     protected MutableLiveData<List<FunctionResponse>> authorizedFunctions;
+    private UserResponse authUser;
 
     Toast toast;
 
@@ -260,6 +261,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     private void bindAuthInformation(Context context, UserResponse userResponse) {
+        this.authUser = userResponse;
+
         baseNavigationLoginButtonLayout.setVisibility(View.GONE);
         baseNavigationAuthLayout.setVisibility(View.VISIBLE);
         baseNavigationImageAvatar.setUrl(RetrofitManager.getImageUrl(context, userResponse.getAvatar()));
@@ -314,6 +317,10 @@ public abstract class BaseActivity extends AppCompatActivity {
         } else {
             return false;
         }
+    }
+
+    public UserResponse getAuthUser() {
+        return this.authUser;
     }
 
     @Override

@@ -22,7 +22,7 @@ public class EditTaskRequest {
     private String name;
 
     @NotNull(message = "Description cannot be empty")
-    @Size(max = 500, message = "Description cannot exceed {max} characters")
+    @Size(max = 1000, message = "Description cannot exceed {max} characters")
     private String description;
 
     private String dueDate;
@@ -32,4 +32,5 @@ public class EditTaskRequest {
     private List<Integer> userIds;
 
     private List<FilePart> attachments;
+    private List<String> removedAttachments;
 }
