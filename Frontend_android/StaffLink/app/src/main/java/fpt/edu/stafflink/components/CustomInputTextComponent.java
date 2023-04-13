@@ -143,6 +143,10 @@ public class CustomInputTextComponent extends LinearLayout {
         return this.editable;
     }
 
+    public void setOnClick(OnClickListener onClickListener) {
+        customInputTextComponentMainElement.setOnClickListener(onClickListener);
+    }
+
     private void setAttributes(AttributeSet attrs) {
         TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.CustomInputTextComponent, 0, 0);
         try {

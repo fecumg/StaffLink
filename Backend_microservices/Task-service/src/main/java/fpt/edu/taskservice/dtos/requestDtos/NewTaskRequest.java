@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.http.codec.multipart.FilePart;
 
 import java.util.List;
 
@@ -28,8 +27,6 @@ public class NewTaskRequest {
     private String dueDate;
 
     private List<Integer> userIds;
-
-    private List<FilePart> attachments;
 
     private String projectId;
 }

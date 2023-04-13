@@ -1,5 +1,6 @@
 package fpt.edu.stafflink.fragments;
 
+import static fpt.edu.stafflink.ProjectAccessActivity.TASK_ACTION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_ASSIGNED;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_AUTHORIZED;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_ID;
@@ -25,12 +26,11 @@ import reactor.core.Disposable;
 
 public class TasksFragment extends BaseFragment {
     private static final String ERROR_TAG = "InitiatedFragment";
-    private static final String TASK_ACTION = "TaskAction";
 
     CustomInputTextComponent inputTextSearchTasks;
     CustomListComponent<TaskResponse> listTasks;
 
-    private String id;
+    private String projectId;
     private int position;
     private int accessType;
     private int taskStatus;
@@ -54,7 +54,7 @@ public class TasksFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            this.id = getArguments().getString(PARAM_ID);
+            this.projectId = getArguments().getString(PARAM_ID);
             this.position = getArguments().getInt(PARAM_POSITION);
             this.accessType = getArguments().getInt(PARAM_PROJECT_ACCESS_TYPE);
             this.taskStatus = getArguments().getInt(PARAM_TASK_STATUS);
@@ -73,21 +73,21 @@ public class TasksFragment extends BaseFragment {
         this.initList();
 
         if (this.accessType == PROJECT_ACCESS_TYPE_AUTHORIZED) {
-            if (StringUtils.isNotEmpty(this.id)) {
-                this.fetchAuthorizedTasksByProject(this.id);
+            if (StringUtils.isNotEmpty(this.projectId)) {
+                this.fetchAuthorizedTasksByProject(this.projectId);
             } else {
                 this.fetchAuthorizedTasks();
             }
         } else if (this.accessType == PROJECT_ACCESS_TYPE_ASSIGNED) {
-            if (StringUtils.isNotEmpty(this.id)) {
-                this.fetchAssignedTasksByProject(this.id);
+            if (StringUtils.isNotEmpty(this.projectId)) {
+                this.fetchAssignedTasksByProject(this.projectId);
             } else {
                 this.fetchAssignedTasks();
             }
         } else {
 //            observable access type
-            if (StringUtils.isNotEmpty(this.id)) {
-                this.fetchTasksByProject(this.id);
+            if (StringUtils.isNotEmpty(this.projectId)) {
+                this.fetchTasksByProject(this.projectId);
             } else {
                 this.fetchTasks();
             }
@@ -183,9 +183,6 @@ public class TasksFragment extends BaseFragment {
         getBaseActivity().reactorCompositeDisposable.add(disposable);
     }
 
-
-
-
     private void fetchTasks() {
         MultiValuePagination pagination = new MultiValuePagination();
 
@@ -224,5 +221,13 @@ public class TasksFragment extends BaseFragment {
                 );
 
         getBaseActivity().reactorCompositeDisposable.add(disposable);
+    }
+
+    public int getTaskStatus() {
+        return this.taskStatus;
+    }
+
+    public CustomListComponent<TaskResponse> getListTasks() {
+        return this.listTasks;
     }
 }

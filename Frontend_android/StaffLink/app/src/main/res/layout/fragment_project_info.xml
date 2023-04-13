@@ -87,7 +87,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="400dp"/>
+                android:layout_height="@dimen/search_result_padding"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

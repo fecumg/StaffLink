@@ -3,6 +3,7 @@ package fpt.edu.taskservice.services.impls;
 import fpt.edu.taskservice.dtos.exchangeDtos.ExchangeAttachment;
 import fpt.edu.taskservice.dtos.responseDtos.AttachmentResponse;
 import fpt.edu.taskservice.dtos.responseDtos.TaskResponse;
+import fpt.edu.taskservice.entities.Attachment;
 import fpt.edu.taskservice.entities.Project;
 import fpt.edu.taskservice.entities.Task;
 import fpt.edu.taskservice.exceptions.UnauthorizedException;
@@ -148,6 +149,18 @@ public class BaseService<T> {
                 return sortedObjectFlux;
             }
         }
+    }
+
+    protected Mono<Task> buildTask(Task task) {
+        Mono<List<Attachment>> attachmentListMono = attachmentRepository.findAllByTask(task)
+                .collectList();
+
+        return Mono.just(task)
+                .zipWith(attachmentListMono, (preparedTask, attachments) -> {
+                    preparedTask.setAttachments(attachments);
+                    return preparedTask;
+                })
+                .doOnError(throwable -> log.error(throwable.getMessage()));
     }
 
     protected Mono<TaskResponse> buildTaskResponse(Task task) {

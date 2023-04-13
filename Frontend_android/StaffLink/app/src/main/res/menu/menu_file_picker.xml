@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/menuFilePickerDownload"
+        android:icon="@drawable/ic_download_light_foreground"
+        android:title="@string/file_picker_menu_download" />
+
+    <item android:id="@+id/menuFilePickerRemove"
+        android:icon="@drawable/ic_delete_light_foreground"
+        android:title="@string/file_picker_menu_remove" />
+</menu>

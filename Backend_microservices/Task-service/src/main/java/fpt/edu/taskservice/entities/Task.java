@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
@@ -32,6 +33,10 @@ public class Task extends BaseEntity {
     private Project project;
 
     protected List<Integer> userIds;
+
+    @DocumentReference(lazy = true, lookup = "{ 'task' : ?#{#self._id} }")
+    @ReadOnlyProperty
+    private List<Attachment> attachments;
 
     private int createdBy;
 

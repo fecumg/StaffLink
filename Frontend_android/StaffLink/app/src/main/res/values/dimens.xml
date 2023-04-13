@@ -30,4 +30,9 @@
 
     <dimen name="title_width">200dp</dimen>
     <dimen name="title_width_without_refresh">280dp</dimen>
+
+    <dimen name="file_picker_item_height">80dp</dimen>
+    <dimen name="file_picker_item_width">250dp</dimen>
+
+    <dimen name="search_result_padding">400dp</dimen>
 </resources>

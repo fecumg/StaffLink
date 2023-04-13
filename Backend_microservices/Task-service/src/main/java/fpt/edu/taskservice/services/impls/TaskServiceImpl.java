@@ -1,10 +1,8 @@
 package fpt.edu.taskservice.services.impls;
 
-import fpt.edu.taskservice.dtos.exchangeDtos.ExchangeAttachment;
 import fpt.edu.taskservice.dtos.requestDtos.EditTaskRequest;
 import fpt.edu.taskservice.dtos.requestDtos.NewTaskRequest;
 import fpt.edu.taskservice.dtos.responseDtos.TaskResponse;
-import fpt.edu.taskservice.entities.Attachment;
 import fpt.edu.taskservice.entities.Task;
 import fpt.edu.taskservice.pagination.Pagination;
 import fpt.edu.taskservice.repositories.AttachmentRepository;
@@ -17,9 +15,7 @@ import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
-import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -27,16 +23,11 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * @author Truong Duc Duong
@@ -46,21 +37,6 @@ import java.util.Objects;
 @Transactional(rollbackFor = Exception.class)
 @Log4j2
 public class TaskServiceImpl extends BaseService<Task> implements TaskService {
-
-    @Value("${folder.uploads}")
-    private String UPLOADS_TMP;
-    @Value("${folder.uploads.attachments}")
-    private String ATTACHMENT_FOLDER;
-
-    @Value("${rabbitmq.exchange}")
-    private String EXCHANGE_NAME;
-
-    @Value("${rabbitmq.routing-key.attachment-processing}")
-    private String ATTACHMENT_PROCESSING_ROUTING_KEY;
-
-    @Value("${rabbitmq.routing-key.attachment-removal}")
-    private String ATTACHMENT_REMOVAL_ROUTING_KEY;
-
     private static final String DEFAULT_REQUEST_DATE_PATTERN = "dd-MM-yyyy";
 
     @Autowired
@@ -92,7 +68,6 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
                 }))
                 .flatMap(preparedTask -> setDueAt(preparedTask, newTaskRequest))
                 .flatMap(preparedTask -> taskRepository.save(preparedTask))
-                .flatMap(task -> this.saveNewAttachments(newTaskRequest, task, exchange))
                 .flatMap(super::buildTaskResponse)
                 .doOnSuccess(taskResponse -> log.info("Task with id '{}' saved successfully", taskResponse.getId()))
                 .doOnError(throwable -> log.error(throwable.getMessage()));
@@ -114,8 +89,6 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
                 }))
                 .flatMap(preparedTask -> setDueAt(preparedTask, editTaskRequest))
                 .flatMap(preparedTask -> taskRepository.save(preparedTask))
-                .flatMap(task -> this.saveNewAttachments(editTaskRequest, task, exchange))
-                .flatMap(task -> this.removeAttachments(editTaskRequest, task))
                 .flatMap(super::buildTaskResponse)
                 .doOnSuccess(taskResponse -> log.info("Task with id '{}' saved successfully", taskResponse.getId()))
                 .doOnError(throwable -> log.error(throwable.getMessage()));
@@ -205,91 +178,6 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
                 .filter(task -> task.getStatus() == status);
 
         return this.buildTaskResponseFlux(authorizedTaskFlux, pagination);
-    }
-
-    @SuppressWarnings("unchecked")
-    private Mono<Task> saveNewAttachments(Object taskRequest, Task task, ServerWebExchange exchange) {
-        List<FilePart> newAttachments;
-        try {
-            Method method = taskRequest.getClass().getMethod("getAttachments");
-            newAttachments = (List<FilePart>) method.invoke(taskRequest);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-
-        return Mono.justOrEmpty(newAttachments)
-                .filter(Objects::nonNull)
-                .flatMapMany(Flux::fromIterable)
-                .flatMap(filePart -> this.processAttachmentFile(filePart, task))
-                .map(filePart -> new Attachment(filePart.filename(), task))
-                .map(attachment -> {
-                    this.setCreatedBy(attachment, exchange);
-                    return attachment;
-                })
-                .collectList()
-                .flatMap(attachments -> attachmentRepository.saveAll(attachments).collectList())
-                .map(attachments -> {
-                    List<String> filenames = attachments.stream()
-                            .map(Attachment::getName)
-                            .toList();
-                    log.info("Attachments {} have been attached to task {}", filenames, task.getName());
-
-                    return task;
-                })
-                .doOnError(throwable -> log.error(throwable.getMessage()))
-                .defaultIfEmpty(task);
-    }
-
-    private Mono<FilePart> processAttachmentFile(FilePart filePart, Task task) {
-        String attachmentFolderDirectory = System.getProperty("user.dir") + File.separator + UPLOADS_TMP + File.separator + ATTACHMENT_FOLDER;
-
-//        create folder in case of non-existing
-        String folderDirectory = attachmentFolderDirectory + File.separator + task.getId();
-        Path folderPath = Paths.get(folderDirectory);
-        File folder = folderPath.toFile();
-        if (!folder.exists()) {
-            boolean newFolderResult = folder.mkdirs();
-            if (newFolderResult) {
-                log.info("Create new folder {}" , folderDirectory);
-            } else {
-                log.error("Failed to create new folder: {}", folderDirectory);
-            }
-        }
-
-        return filePart.transferTo(folderPath.resolve(filePart.filename()))
-                .thenReturn(filePart)
-                .doOnSuccess(fp -> log.info("File {} has been stored in folder {}", filePart.filename(), folderDirectory))
-                .map(fp ->  {
-                    ExchangeAttachment exchangeAttachment = new ExchangeAttachment(task.getId(), filePart.filename());
-
-//                    send message to ask File-service to retrieve uploaded attachments
-                    rabbitTemplate.convertAndSend(EXCHANGE_NAME, ATTACHMENT_PROCESSING_ROUTING_KEY, exchangeAttachment);
-                    log.info("Message has been published via routing key '{}'", ATTACHMENT_PROCESSING_ROUTING_KEY);
-
-                    return filePart;
-                });
-    }
-
-    private Mono<Task> removeAttachments(EditTaskRequest editTaskRequest, Task task) {
-        return Mono.justOrEmpty(editTaskRequest)
-                .map(EditTaskRequest::getRemovedAttachments)
-                .flatMapMany(attachmentIds -> attachmentRepository.findAllById(attachmentIds))
-                .map(attachment -> {
-                    ExchangeAttachment exchangeAttachment = new ExchangeAttachment(task.getId(), attachment.getName());
-
-//                    delete temporary file if exists
-                    super.deleteTemporaryAttachmentFile(exchangeAttachment);
-
-//                    send message to File-service to delete attachment file
-                    rabbitTemplate.convertAndSend(EXCHANGE_NAME, ATTACHMENT_REMOVAL_ROUTING_KEY, exchangeAttachment);
-                    log.info("Message has been published via routing key '{}'", ATTACHMENT_REMOVAL_ROUTING_KEY);
-
-                    return attachment;
-                })
-                .collectList()
-                .flatMap(attachments -> attachmentRepository.deleteAll(attachments).thenReturn(task))
-                .doOnError(throwable -> log.error(throwable.getMessage()))
-                .defaultIfEmpty(task);
     }
 
     private Mono<Task> setDueAt(Task task, Object taskRequest){

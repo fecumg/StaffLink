@@ -32,7 +32,6 @@ import fpt.edu.stafflink.response.RetrofitResponse.MergedResponse;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MultipartBody;
@@ -73,8 +72,6 @@ public class FunctionFormActivity extends BaseActivity {
         inputTextUri = findViewById(R.id.inputTextUri);
         selectParent = findViewById(R.id.selectParent);
         switchDisplayed = findViewById(R.id.switchDisplayed);
-
-        compositeDisposable = new CompositeDisposable();
 
         Intent intent = getIntent();
         this.id = intent.getIntExtra(PARAM_ID, DEFAULT_ID);

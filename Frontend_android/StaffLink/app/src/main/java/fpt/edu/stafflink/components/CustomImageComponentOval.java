@@ -3,16 +3,13 @@ package fpt.edu.stafflink.components;
 import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewTreeObserver;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import fpt.edu.stafflink.R;
-import fpt.edu.stafflink.utilities.DimenUtils;
 
 public class CustomImageComponentOval extends CustomImageComponent{
     public CustomImageComponentOval(Context context, @Nullable AttributeSet attrs) {

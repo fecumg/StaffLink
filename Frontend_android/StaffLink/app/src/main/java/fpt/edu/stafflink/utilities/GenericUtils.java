@@ -60,4 +60,19 @@ public class GenericUtils {
         }
         return -1;
     }
+
+    public static int getIndexOfStringIdObject(Object object, List<?> objects) {
+        int i = 0;
+        String objectId = getFieldValue(object, "id");
+        if (StringUtils.isEmpty(objectId)) {
+            return -1;
+        }
+        for (Object listObject: objects) {
+            if (objectId.equals(getFieldValue(listObject, "id"))) {
+                return i;
+            }
+            i++;
+        }
+        return -1;
+    }
 }

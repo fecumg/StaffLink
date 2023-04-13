@@ -27,7 +27,6 @@ import fpt.edu.stafflink.models.responseDtos.UserResponse;
 import fpt.edu.stafflink.pagination.Pagination;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -50,8 +49,6 @@ public class UsersActivity extends BaseActivity {
         buttonNewUser = findViewById(R.id.buttonNewUser);
         buttonRefreshUsers = findViewById(R.id.buttonRefreshUsers);
         tableUsers = findViewById(R.id.tableUsers);
-
-        compositeDisposable = new CompositeDisposable();
 
         this.setFormActivityResultLauncher();
 

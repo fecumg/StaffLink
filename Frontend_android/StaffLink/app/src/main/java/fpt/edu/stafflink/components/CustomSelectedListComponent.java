@@ -26,6 +26,7 @@ public class CustomSelectedListComponent<T> extends LinearLayout {
     public CustomSelectedListComponent(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         this.initView(context);
+        this.setAttributes(attrs);
     }
 
     private void initView(Context context) {

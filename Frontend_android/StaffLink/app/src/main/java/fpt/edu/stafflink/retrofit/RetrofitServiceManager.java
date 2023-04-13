@@ -6,6 +6,7 @@ import fpt.edu.stafflink.retrofit.services.AuthenticationService;
 import fpt.edu.stafflink.retrofit.services.FunctionService;
 import fpt.edu.stafflink.retrofit.services.ProjectService;
 import fpt.edu.stafflink.retrofit.services.RoleService;
+import fpt.edu.stafflink.retrofit.services.TaskService;
 import fpt.edu.stafflink.retrofit.services.UserService;
 
 public class RetrofitServiceManager {
@@ -37,5 +38,11 @@ public class RetrofitServiceManager {
         return RetrofitManager
                 .getRetrofitInstance(context)
                 .create(ProjectService.class);
+    }
+
+    public static TaskService getTaskService(Context context) {
+        return RetrofitManager
+                .getRetrofitInstance(context)
+                .create(TaskService.class);
     }
 }

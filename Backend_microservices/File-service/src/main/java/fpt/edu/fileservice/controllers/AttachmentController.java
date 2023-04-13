@@ -16,7 +16,7 @@ import java.io.IOException;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/attachments")
+@RequestMapping("/files")
 public class AttachmentController {
 
     @Autowired

@@ -43,6 +43,7 @@
     <declare-styleable name="CustomSelectComponent">
         <attr name="nullable" format="boolean"/>
         <attr name="nullValue" format="string"/>
+        <attr name="android:enabled"/>
     </declare-styleable>
 
     <declare-styleable name="CustomListComponent">
@@ -52,5 +53,10 @@
 
     <declare-styleable name="CustomSelectedListComponent">
         <attr name="removable" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="CustomFilePickerComponent">
+        <attr name="deletable" format="boolean"/>
+        <attr name="downloadable" format="boolean"/>
     </declare-styleable>
 </resources>

@@ -27,7 +27,6 @@ import fpt.edu.stafflink.models.responseDtos.RoleResponse;
 import fpt.edu.stafflink.pagination.Pagination;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -49,8 +48,6 @@ public class RolesActivity extends BaseActivity {
         buttonNewRole = findViewById(R.id.buttonNewRole);
         buttonRefreshRoles = findViewById(R.id.buttonRefreshRoles);
         tableRoles = findViewById(R.id.tableRoles);
-
-        compositeDisposable = new CompositeDisposable();
 
         this.setFormActivityResultLauncher();
 

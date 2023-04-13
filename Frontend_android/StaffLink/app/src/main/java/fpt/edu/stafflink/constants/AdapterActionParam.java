@@ -3,6 +3,7 @@ package fpt.edu.stafflink.constants;
 public class AdapterActionParam {
     public static final String PARAM_ID = "id";
     public static final String PARAM_STRING_ID = "stringId";
+    public static final String PARAM_PARENT_STRING_ID = "parentStringId";
     public static final String PARAM_POSITION = "position";
     public static final String PARAM_TITLE = "title";
     public static final String PARAM_CONTENT = "content";

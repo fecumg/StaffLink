@@ -30,6 +30,7 @@ public class CustomSelectComponent<T> extends LinearLayout {
     private boolean nullable;
     private CharSequence nullValue;
     private CharSequence error;
+    private boolean enabled;
 
     public CustomSelectComponent(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -114,6 +115,15 @@ public class CustomSelectComponent<T> extends LinearLayout {
         return error;
     }
 
+    public void setEditable(boolean enabled) {
+        this.enabled = enabled;
+        customSelectComponentMainElement.setEnabled(enabled);
+    }
+
+    public boolean isEditable() {
+        return this.enabled;
+    }
+
     private void initiateSpinner() {
         if (StringUtils.isEmpty(this.mainField) || this.options == null || this.options.size() == 0) {
             return;
@@ -152,6 +162,9 @@ public class CustomSelectComponent<T> extends LinearLayout {
             if (typedArray.hasValue(R.styleable.CustomSelectComponent_nullValue)) {
                 this.setNullValue(typedArray.getText(R.styleable.CustomSelectComponent_nullValue));
             }
+
+            boolean enabled = typedArray.getBoolean(R.styleable.CustomSelectComponent_android_enabled, true);
+            this.setEditable(enabled);
         } finally {
             typedArray.recycle();
         }

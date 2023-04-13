@@ -49,7 +49,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingHorizontal="5dp">
+        android:paddingHorizontal="5dp"
+        android:id="@+id/scrollViewWrapper">
 
         <LinearLayout
             android:orientation="vertical"
@@ -76,11 +77,70 @@
                 android:inputType="textMultiLine"
                 android:layout_marginBottom="10dp"/>
 
-            <fpt.edu.stafflink.components.CustomCheckBoxComponent
-                android:id="@+id/checkBoxFunctions"
+            <fpt.edu.stafflink.components.CustomInputTextComponent
+                android:id="@+id/inputTextDueDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:hint="Due date"
+                app:startIconDrawable="@drawable/ic_calendar_light_foreground"
+                app:color="@color/primary"
+                android:inputType="text"
                 android:layout_marginBottom="10dp"/>
+
+            <fpt.edu.stafflink.components.CustomSelectComponent
+                android:id="@+id/selectStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:nullable="false"/>
+
+            <fpt.edu.stafflink.components.CustomInputTextComponent
+                android:id="@+id/inputTextCreateBy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Created by"
+                app:startIconDrawable="@drawable/ic_person_light_foreground"
+                app:color="@color/primary"
+                android:enabled="false"
+                android:layout_marginBottom="10dp"/>
+
+            <fpt.edu.stafflink.components.CustomFilePickerComponent
+                android:id="@+id/filePickerAttachments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Assigned users: "
+                android:textColor="@color/primary"
+                android:layout_marginBottom="10dp"/>
+
+            <fpt.edu.stafflink.components.CustomSelectedListComponent
+                android:id="@+id/selectedListUsers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:layout_marginStart="20dp"/>
+
+            <fpt.edu.stafflink.components.CustomInputTextComponent
+                android:id="@+id/inputTextSearchUsers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Search users"
+                app:startIconDrawable="@drawable/ic_search_light_foreground"
+                app:color="@color/primary"
+                android:inputType="text"/>
+
+            <fpt.edu.stafflink.components.CustomListComponent
+                android:id="@+id/listUsers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:itemHeight="70dp"
+                app:itemMaxLines="1"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/search_result_padding"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

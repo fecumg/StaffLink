@@ -38,7 +38,6 @@ import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import fpt.edu.stafflink.utilities.ValidationUtils;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
@@ -88,8 +87,6 @@ public class UserFormActivity extends BaseActivity {
         inputTextConfirmPassword = findViewById(R.id.inputTextConfirmPassword);
         imageAvatar = findViewById(R.id.imageAvatar);
         checkBoxRoles = findViewById(R.id.checkBoxRoles);
-
-        compositeDisposable = new CompositeDisposable();
 
         Intent intent = getIntent();
         this.id = intent.getIntExtra(PARAM_ID, DEFAULT_ID);

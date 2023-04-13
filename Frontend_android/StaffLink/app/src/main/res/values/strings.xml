@@ -21,6 +21,9 @@
     <string name="file_path_prefix">files</string>
 
 
+    <string name="date_pattern">dd-MM-yyyy</string>
+
+
     <string name="login_path">/login</string>
     <string name="personal_information_path">/auth</string>
     <string name="unauthorized_path">/unauthorized</string>
@@ -35,8 +38,13 @@
     <string name="edit_project_path">/projects/edit</string>
 
     <string name="tasks_path">/tasks</string>
+    <string name="new_task_path">/tasks/new</string>
+    <string name="edit_task_path">/tasks/edit</string>
     <string name="authorized_tasks_path">/tasks/authorized</string>
     <string name="assigned_tasks_path">/tasks/assigned</string>
+
+
+    <string name="attachment_files_path">/attachments</string>
 
 
     <string name="navigation_greeting">Hello, </string>
@@ -55,6 +63,8 @@
 
     <string name="project_access_title_new">New project</string>
 
+    <string name="task_form_title_new">New Task</string>
+
     <string name="project_access_menu_info">Info</string>
     <string name="project_access_menu_initiated">Initiated</string>
     <string name="project_access_menu_inProgress">In progress</string>
@@ -62,4 +72,8 @@
     <string name="project_access_menu_completed">Completed</string>
     <string name="project_access_menu_overdue">Overdue</string>
     <string name="project_access_menu_failed">Failed</string>
+
+
+    <string name="file_picker_menu_download">download</string>
+    <string name="file_picker_menu_remove">remove</string>
 </resources>

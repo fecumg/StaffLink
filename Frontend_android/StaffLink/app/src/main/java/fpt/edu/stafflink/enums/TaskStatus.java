@@ -45,4 +45,11 @@ public enum TaskStatus {
                 .map(TaskStatus::getCode)
                 .orElse(FAILED.getCode());
     }
+
+    public static TaskStatus getTaskStatusFormCode(int code) {
+        return Arrays.stream(TaskStatus.values())
+                .filter(status -> status.getCode() == code)
+                .findFirst()
+                .orElse(TaskStatus.INITIATED);
+    }
 }

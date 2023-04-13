@@ -31,7 +31,6 @@ import fpt.edu.stafflink.response.RetrofitResponse.MergedResponse;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MultipartBody;
@@ -39,7 +38,6 @@ import okhttp3.RequestBody;
 import retrofit2.Response;
 
 public class RoleFormActivity extends BaseActivity {
-
     private static final String ERROR_TAG = "RoleFormActivity";
 
     ImageButton buttonBackToRoles;
@@ -69,8 +67,6 @@ public class RoleFormActivity extends BaseActivity {
         inputTextName = findViewById(R.id.inputTextName);
         inputTextDescription = findViewById(R.id.inputTextDescription);
         checkBoxFunctions = findViewById(R.id.checkBoxFunctions);
-
-        compositeDisposable = new CompositeDisposable();
 
         checkBoxFunctions.setParentField("parent");
 

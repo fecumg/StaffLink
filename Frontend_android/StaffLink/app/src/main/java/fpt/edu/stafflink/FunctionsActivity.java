@@ -27,7 +27,6 @@ import fpt.edu.stafflink.models.responseDtos.FunctionResponse;
 import fpt.edu.stafflink.pagination.Pagination;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -48,8 +47,6 @@ public class FunctionsActivity extends BaseActivity {
         buttonNewFunction = findViewById(R.id.buttonNewFunction);
         buttonRefreshFunctions = findViewById(R.id.buttonRefreshFunctions);
         tableFunctions = findViewById(R.id.tableFunctions);
-
-        compositeDisposable = new CompositeDisposable();
 
         this.setFormActivityResultLauncher();
 

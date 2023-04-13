@@ -56,7 +56,7 @@ import okhttp3.RequestBody;
 
 public class ProjectInfoFragment extends BaseFragment {
     private static final String ERROR_TAG = "ProjectInfoFragment";
-    private static final String SELECT_USER_ACTION = "searchUserAction";
+    private static final String SELECT_AUTHORIZED_USER_ACTION = "selectAuthorizedUserAction";
     private static final int MIN_SEARCH_LENGTH = 4;
     private static final int DEBOUNCING_DELAY = 1000;
 
@@ -69,7 +69,7 @@ public class ProjectInfoFragment extends BaseFragment {
     CustomInputTextComponent inputTextSearchUsers;
     CustomListComponent<UserResponse> listUsers;
 
-    private String id;
+    private String projectId;
     private int position;
     private int accessType;
 
@@ -95,7 +95,7 @@ public class ProjectInfoFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            this.id = getArguments().getString(PARAM_ID);
+            this.projectId = getArguments().getString(PARAM_ID);
             this.position = getArguments().getInt(PARAM_POSITION);
             this.accessType = getArguments().getInt(PARAM_PROJECT_ACCESS_TYPE);
         }
@@ -117,8 +117,8 @@ public class ProjectInfoFragment extends BaseFragment {
         inputTextSearchUsers = view.findViewById(R.id.inputTextSearchUsers);
         listUsers = view.findViewById(R.id.listUsers);
 
-        if (StringUtils.isNotEmpty(this.id)) {
-            this.fetchDataOnEdit(this.id);
+        if (StringUtils.isNotEmpty(this.projectId)) {
+            this.fetchDataOnEdit(this.projectId);
         } else {
             UserResponse authUser = super.getBaseActivity().getAuthUser();
             if (authUser != null) {
@@ -138,7 +138,7 @@ public class ProjectInfoFragment extends BaseFragment {
     private void initSearchList() {
         listUsers.setTitleField("name");
         listUsers.setContentField("username");
-        listUsers.setAction(SELECT_USER_ACTION);
+        listUsers.setAction(SELECT_AUTHORIZED_USER_ACTION);
         listUsers.setError(null);
     }
 
@@ -149,7 +149,7 @@ public class ProjectInfoFragment extends BaseFragment {
     private void prepareProjectForm() {
         if (
                 (this.accessType == PROJECT_ACCESS_TYPE_AUTHORIZED && getBaseActivity().isAuthorized(getString(R.string.edit_project_path))) ||
-                StringUtils.isEmpty(this.id)
+                StringUtils.isEmpty(this.projectId)
         ) {
             inputTextName.setEditable(true);
             inputTextDescription.setEditable(true);
@@ -453,7 +453,7 @@ public class ProjectInfoFragment extends BaseFragment {
                             performSelectUser(selectedUser);
                         }
                     }
-                }, new IntentFilter(SELECT_USER_ACTION));
+                }, new IntentFilter(SELECT_AUTHORIZED_USER_ACTION));
     }
 
     private void performSelectUser(SelectedUser selectedUser) {
@@ -465,5 +465,9 @@ public class ProjectInfoFragment extends BaseFragment {
         if (baseActivity instanceof ProjectAccessActivity) {
             this.projectAccessActivity = (ProjectAccessActivity) baseActivity;
         }
+    }
+
+    public void setTextViewError(String error) {
+        this.textViewError.setText(error);
     }
 }

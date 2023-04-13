@@ -33,7 +33,6 @@ import fpt.edu.stafflink.pagination.MultiValuePagination;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import fpt.edu.stafflink.webClient.WebClientServiceManager;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -56,8 +55,6 @@ public class ProjectsActivity extends BaseActivity {
         buttonRefreshProjects = findViewById(R.id.buttonRefreshProjects);
         buttonNewProject = findViewById(R.id.buttonNewProject);
         listProjects = findViewById(R.id.listProjects);
-
-        compositeDisposable = new CompositeDisposable();
 
         this.setFormActivityResultLauncher();
 
@@ -179,7 +176,7 @@ public class ProjectsActivity extends BaseActivity {
                             accessProjectIntent.putExtra(PARAM_STRING_ID, objectId);
                             accessProjectIntent.putExtra(PARAM_POSITION, objectPosition);
 
-                            setProjectAccessType(accessProjectIntent);
+                            setIntentProjectAccessType(accessProjectIntent);
 
                             formActivityResultLauncher.launch(accessProjectIntent);
                         }
@@ -193,7 +190,7 @@ public class ProjectsActivity extends BaseActivity {
                 this::doOnBackFromForm);
     }
 
-    private void setProjectAccessType(Intent accessProjectIntent) {
+    private void setIntentProjectAccessType(Intent accessProjectIntent) {
         accessProjectIntent.putExtra(PARAM_PROJECT_ACCESS_TYPE, PROJECT_ACCESS_TYPE_AUTHORIZED);
     }
 

@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.http.codec.multipart.FilePart;
 
 import java.util.List;
 
@@ -30,7 +29,5 @@ public class EditTaskRequest {
     private int status;
 
     private List<Integer> userIds;
-
-    private List<FilePart> attachments;
     private List<String> removedAttachments;
 }
