@@ -5,7 +5,6 @@ import fpt.edu.taskservice.dtos.requestDtos.NewTaskRequest;
 import fpt.edu.taskservice.dtos.responseDtos.TaskResponse;
 import fpt.edu.taskservice.entities.Task;
 import fpt.edu.taskservice.pagination.Pagination;
-import fpt.edu.taskservice.repositories.AttachmentRepository;
 import fpt.edu.taskservice.repositories.ProjectRepository;
 import fpt.edu.taskservice.repositories.TaskRepository;
 import fpt.edu.taskservice.services.TaskService;
@@ -13,7 +12,6 @@ import fpt.edu.taskservice.services.validations.ValidationHandler;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -42,13 +40,9 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
     @Autowired
     private TaskRepository taskRepository;
     @Autowired
-    private AttachmentRepository attachmentRepository;
-    @Autowired
     ProjectRepository projectRepository;
     @Autowired
     private ModelMapper modelMapper;
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
     @Autowired
     private ValidationHandler validationHandler;
     @Autowired
@@ -59,7 +53,7 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
         validationHandler.validate(newTaskRequest);
 
         return projectRepository.findById(newTaskRequest.getProjectId())
-                .switchIfEmpty(Mono.error(new NotFoundException( "Project not found")))
+                .switchIfEmpty(Mono.error(new NotFoundException("Project id '" + newTaskRequest.getProjectId() + "' not found")))
                 .zipWith(Mono.just(newTaskRequest), ((project, request) -> {
                     Task preparedTask = modelMapper.map(request, Task.class);
                     preparedTask.setProject(project);
@@ -78,7 +72,8 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
         validationHandler.validate(editTaskRequest);
 
         return taskRepository.findById(id)
-                .switchIfEmpty(Mono.error(new NotFoundException( "Project not found")))
+                .switchIfEmpty(Mono.error(new NotFoundException("Task not found")))
+                .flatMap(super::buildTask)
                 .zipWith(Mono.just(editTaskRequest), ((currentTask, request) -> {
                     Task preparedTask = modelMapper.map(request, Task.class);
                     preparedTask.setProject(currentTask.getProject());
@@ -105,7 +100,7 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
     @Override
     public Mono<TaskResponse> get(String id) {
         return taskRepository.findById(id)
-                .switchIfEmpty(Mono.error(new NotFoundException( "Task not found")))
+                .switchIfEmpty(Mono.error(new NotFoundException("Task not found")))
                 .flatMap(super::buildTaskResponse)
                 .doOnError(throwable -> log.error(throwable.getMessage()));
     }

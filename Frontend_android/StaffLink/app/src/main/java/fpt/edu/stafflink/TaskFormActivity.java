@@ -13,19 +13,23 @@ import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_TITLE;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_AUTHORIZED;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_OBSERVABLE;
 
+import android.app.DatePickerDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.core.widget.NestedScrollView;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.gson.reflect.TypeToken;
@@ -36,6 +40,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,6 +53,7 @@ import fpt.edu.stafflink.components.CustomSelectedListComponent;
 import fpt.edu.stafflink.debouncing.Debouncer;
 import fpt.edu.stafflink.enums.TaskStatus;
 import fpt.edu.stafflink.models.others.SelectedUser;
+import fpt.edu.stafflink.models.others.TaskStatusDto;
 import fpt.edu.stafflink.models.requestDtos.taskRequestDtos.EditTaskRequest;
 import fpt.edu.stafflink.models.requestDtos.taskRequestDtos.NewTaskRequest;
 import fpt.edu.stafflink.models.responseDtos.TaskResponse;
@@ -72,11 +79,12 @@ public class TaskFormActivity extends BaseActivity {
 
     TextView textViewError;
 
-    ScrollView scrollViewWrapper;
+    NestedScrollView scrollViewWrapper;
     CustomInputTextComponent inputTextName;
     CustomInputTextComponent inputTextDescription;
+    CustomInputTextComponent inputTextCreatedAt;
     CustomInputTextComponent inputTextDueDate;
-    CustomSelectComponent<TaskStatus> selectStatus;
+    CustomSelectComponent<TaskStatusDto> selectStatus;
     CustomInputTextComponent inputTextCreateBy;
     CustomFilePickerComponent filePickerAttachments;
     CustomSelectedListComponent<SelectedUser> selectedListUsers;
@@ -90,6 +98,8 @@ public class TaskFormActivity extends BaseActivity {
     private int formStatus;
 
     private UserResponse createdBy;
+
+    final Calendar calendar= Calendar.getInstance();
 
     @Override
     protected void onSubCreate(Bundle savedInstanceState) {
@@ -105,6 +115,7 @@ public class TaskFormActivity extends BaseActivity {
         scrollViewWrapper = findViewById(R.id.scrollViewWrapper);
         inputTextName = findViewById(R.id.inputTextName);
         inputTextDescription = findViewById(R.id.inputTextDescription);
+        inputTextCreatedAt = findViewById(R.id.inputTextCreatedAt);
         inputTextDueDate = findViewById(R.id.inputTextDueDate);
         selectStatus = findViewById(R.id.selectStatus);
         inputTextCreateBy = findViewById(R.id.inputTextCreateBy);
@@ -115,6 +126,8 @@ public class TaskFormActivity extends BaseActivity {
         inputTextSearchUsers = findViewById(R.id.inputTextSearchUsers);
         listUsers = findViewById(R.id.listUsers);
 
+        listUsers.setNestedScrollingEnabled(false);
+
         Intent intent = getIntent();
         this.projectId = intent.getStringExtra(PARAM_PARENT_STRING_ID);
         this.id = intent.getStringExtra(PARAM_STRING_ID);
@@ -124,27 +137,32 @@ public class TaskFormActivity extends BaseActivity {
         if (StringUtils.isNotEmpty(this.id)) {
             this.fetchDataOnEdit(this.id);
         } else {
-            UserResponse authUser = super.getAuthUser();
-            if (authUser != null) {
-                this.bindCreatedBy(authUser);
-            }
+            super.authUser.observe(this, authorizedFunctions -> {
+                UserResponse authUser = super.getAuthUser();
+                if (authUser != null) {
+                    this.bindCreatedBy(authUser);
+                }
+                super.authorizedFunctions.removeObservers(this);
+            });
+
         }
+
+        this.initSelectStatus();
+        this.initSearchList();
+        this.initSelectedList();
+        this.initInputTextDueDate();
+        this.listenToAdapterOnClick();
 
         super.authorizedFunctions.observe(this, authorizedFunctions -> {
             this.toggleByCases();
             this.prepareTaskForm();
         });
 
-        this.initSelectStatus();
-        this.initSearchList();
-        this.initSelectedList();
-        this.listenToAdapterOnClick();
-
         buttonBack.setOnClickListener(view -> back());
     }
 
     private void toggleByCases() {
-        if (StringUtils.isNotEmpty(this.id)) {
+        if (StringUtils.isEmpty(this.id)) {
             this.showOnNew();
         } else {
             this.showOnEdit();
@@ -178,7 +196,11 @@ public class TaskFormActivity extends BaseActivity {
 
     private void initSelectStatus() {
         selectStatus.setMainField("message");
-        selectStatus.setOptions(Arrays.stream(TaskStatus.values()).collect(Collectors.toList()));
+
+        List<TaskStatusDto> taskStatusDtos = Arrays.stream(TaskStatus.values())
+                .map(TaskStatusDto::new)
+                .collect(Collectors.toList());
+        selectStatus.setOptions(taskStatusDtos);
     }
 
     private void initSearchList() {
@@ -190,6 +212,42 @@ public class TaskFormActivity extends BaseActivity {
 
     private void initSelectedList() {
         selectedListUsers.setMainField("name");
+    }
+
+    private void initInputTextDueDate() {
+        DatePickerDialog.OnDateSetListener date = (view, year, month, day) -> {
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.MONTH,month);
+            calendar.set(Calendar.DAY_OF_MONTH,day);
+            inputTextDueDate.setText(DateUtils.dateToString(calendar.getTime(), getString(R.string.date_pattern)));
+        };
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, date, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+
+        inputTextDueDate.setOnClick(view -> datePickerDialog.show());
+        inputTextDueDate.setOnFocus((view, b) -> {
+            if (b) {
+                datePickerDialog.show();
+            }
+        });
+        inputTextDueDate.setOnTextChanged(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (!DateUtils.validate(charSequence.toString().trim(), getString(R.string.date_pattern))) {
+                    datePickerDialog.show();
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
     }
 
     private void performOnclickSubmitNew() {
@@ -237,6 +295,16 @@ public class TaskFormActivity extends BaseActivity {
                     debouncer.call(() -> runOnUiThread(() -> searchUsers(searchText.toString().trim())), DEBOUNCING_DELAY);
                 }
             });
+
+            if (StringUtils.isEmpty(this.id)) {
+                calendar.setTime(new Date());
+                Date currentDate = calendar.getTime();
+                calendar.add(Calendar.WEEK_OF_YEAR, 2);
+                Date autoGeneratedDueAt = calendar.getTime();
+
+                inputTextCreatedAt.setText(DateUtils.dateToString(currentDate, getString(R.string.date_pattern)));
+                inputTextDueDate.setText(DateUtils.dateToString(autoGeneratedDueAt, getString(R.string.date_pattern)));
+            }
         } else {
             inputTextName.setEditable(false);
             inputTextDescription.setEditable(false);
@@ -260,8 +328,10 @@ public class TaskFormActivity extends BaseActivity {
                                             TaskResponse taskResponse = gson.fromJson(gson.toJson(responseBody), TaskResponse.class);
                                             this.bindEditedTask(taskResponse);
                                             this.fetchCreatedBy(taskResponse.getCreatedBy());
-                                            taskResponse.getUserIds()
-                                                    .forEach(this::fetchAssignedUser);
+                                            if (taskResponse.getUserIds() != null) {
+                                                taskResponse.getUserIds()
+                                                        .forEach(this::fetchAssignedUser);
+                                            }
                                         },
                                         errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
                                 ),
@@ -353,8 +423,14 @@ public class TaskFormActivity extends BaseActivity {
                                                     .collect(Collectors.toList());
 
                                             listUsers.setObjects(userResponsesExceptCreatedBy);
-                                            if (scrollViewWrapper.getScrollY() < 300) {
-                                                scrollViewWrapper.smoothScrollBy(0, 400);
+
+                                            int[] matrix = new int[2];
+                                            listUsers.getLocationOnScreen(matrix);
+                                            int listUsersPositionY = matrix[1];
+                                            int screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
+
+                                            if (screenHeight - listUsersPositionY < screenHeight / 2.5) {
+                                                scrollViewWrapper.smoothScrollBy(0, screenHeight / 5);
                                             }
                                         },
                                         errorApiResponse -> {
@@ -446,7 +522,6 @@ public class TaskFormActivity extends BaseActivity {
         }
 
         String dueDate = inputTextDueDate.getText().toString().trim();
-        String projectId = this.projectId;
 
         List<Integer> userIds = selectedListUsers.getObjects()
                 .stream()
@@ -458,7 +533,7 @@ public class TaskFormActivity extends BaseActivity {
                 description,
                 dueDate,
                 userIds,
-                projectId);
+                this.projectId);
     }
 
     public EditTaskRequest validateEditTask() {
@@ -517,8 +592,6 @@ public class TaskFormActivity extends BaseActivity {
         newTaskRequest.getUserIds()
                 .forEach(userId -> builder.addFormDataPart("userIds", String.valueOf(userId)));
 
-        builder.addFormDataPart("projectId", newTaskRequest.getProjectId());
-
         return builder.build();
     }
 
@@ -552,7 +625,9 @@ public class TaskFormActivity extends BaseActivity {
         inputTextName.setText(taskResponse.getName());
         inputTextDescription.setText(taskResponse.getDescription());
         inputTextDueDate.setText(DateUtils.dateToString(taskResponse.getDueAt(), getString(R.string.date_pattern)));
-        selectStatus.setSelectedOption(TaskStatus.getTaskStatusFormCode(taskResponse.getStatusCode()));
+
+        TaskStatusDto taskStatusDto = new TaskStatusDto(TaskStatus.getTaskStatusFormCode(taskResponse.getStatusCode()));
+        selectStatus.setSelectedOption(taskStatusDto);
     }
     private void bindCreatedBy(UserResponse userResponse) {
         if (userResponse == null) {

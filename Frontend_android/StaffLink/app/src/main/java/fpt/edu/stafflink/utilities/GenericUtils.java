@@ -46,32 +46,30 @@ public class GenericUtils {
         }
     }
 
+    public static String getStringId(Object object) {
+        try {
+            if (object == null) {
+                return "";
+            }
+            Method method = object.getClass().getMethod("getId");
+            Object idObject = method.invoke(object);
+            if (idObject instanceof String) {
+                return (String) idObject;
+            }
+            return "";
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
     public static int getIndexOf(Object object, List<?> objects) {
         int i = 0;
-        int objectId = getObjectId(object);
-        if (objectId == 0) {
-            return -1;
-        }
         for (Object listObject: objects) {
-            if (objectId == getObjectId(listObject)) {
+            if (object.equals(listObject)) {
                 return i;
             }
             i ++;
-        }
-        return -1;
-    }
-
-    public static int getIndexOfStringIdObject(Object object, List<?> objects) {
-        int i = 0;
-        String objectId = getFieldValue(object, "id");
-        if (StringUtils.isEmpty(objectId)) {
-            return -1;
-        }
-        for (Object listObject: objects) {
-            if (objectId.equals(getFieldValue(listObject, "id"))) {
-                return i;
-            }
-            i++;
         }
         return -1;
     }

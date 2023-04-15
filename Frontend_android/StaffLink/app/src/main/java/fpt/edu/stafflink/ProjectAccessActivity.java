@@ -27,7 +27,6 @@ import android.widget.TextView;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -56,6 +55,7 @@ public class ProjectAccessActivity extends BaseActivity {
     ImageButton buttonBackToProjects;
     TextView textViewProjectAccessTitle;
     ImageButton buttonSubmitProject;
+    ImageButton buttonNewTask;
     FrameLayout fragmentProjectInfo;
 
     HorizontalScrollView projectAccessMenu;
@@ -84,6 +84,7 @@ public class ProjectAccessActivity extends BaseActivity {
         buttonBackToProjects = findViewById(R.id.buttonBackToProjects);
         textViewProjectAccessTitle = findViewById(R.id.textViewProjectAccessTitle);
         buttonSubmitProject = findViewById(R.id.buttonSubmitProject);
+        buttonNewTask = findViewById(R.id.buttonNewTask);
         fragmentProjectInfo = findViewById(R.id.fragmentProjectInfo);
 
         projectAccessMenu = findViewById(R.id.projectAccessMenu);
@@ -116,9 +117,10 @@ public class ProjectAccessActivity extends BaseActivity {
             super.authorizedFunctions.removeObservers(this);
         });
 
+        this.setFormActivityResultLauncher();
+
         buttonBackToProjects.setOnClickListener(view -> backToProjects());
 
-        this.setFormActivityResultLauncher();
         this.listenToAdapterOnClick();
     }
 
@@ -158,6 +160,19 @@ public class ProjectAccessActivity extends BaseActivity {
         }
     }
 
+    private void prepareButtonNew(View menuItem) {
+        if (this.accessType == PROJECT_ACCESS_TYPE_AUTHORIZED && super.isAuthorized(getString(R.string.new_task_path)) && !menuItem.equals(projectAccessMenuInfo)) {
+            buttonNewTask.setVisibility(View.VISIBLE);
+
+            Intent newTaskIntent = new Intent(ProjectAccessActivity.this, TaskFormActivity.class);
+            newTaskIntent.putExtra(PARAM_PROJECT_ACCESS_TYPE, this.accessType);
+            newTaskIntent.putExtra(PARAM_PARENT_STRING_ID, this.projectId);
+            buttonNewTask.setOnClickListener(view -> formActivityResultLauncher.launch(newTaskIntent));
+        } else {
+            buttonNewTask.setVisibility(View.GONE);
+        }
+    }
+
     private void setOnclickMenuItems() {
         int color = ContextCompat.getColor(this, R.color.project_access_menu_color);
         int highlightColor = ContextCompat.getColor(this, R.color.project_access_menu_color_highlight);
@@ -169,6 +184,7 @@ public class ProjectAccessActivity extends BaseActivity {
                                     view.setBackgroundColor(highlightColor);
 
                                     this.alterScreenByCase(view);
+                                    this.prepareButtonNew(view);
                                 }
                         )
                 );
@@ -372,14 +388,16 @@ public class ProjectAccessActivity extends BaseActivity {
                         String objectId = intent.getStringExtra(PARAM_STRING_ID);
                         int objectPosition = intent.getIntExtra(PARAM_POSITION, DEFAULT_POSITION);
                         if (StringUtils.isNotEmpty(objectId)) {
-                            Intent accessProjectIntent = new Intent(ProjectAccessActivity.this, TaskFormActivity.class);
-                            accessProjectIntent.putExtra(PARAM_PARENT_STRING_ID, projectId);
-                            accessProjectIntent.putExtra(PARAM_STRING_ID, objectId);
-                            accessProjectIntent.putExtra(PARAM_POSITION, objectPosition);
+                            Intent taskIntend = new Intent(ProjectAccessActivity.this, TaskFormActivity.class);
+                            taskIntend.putExtra(PARAM_PARENT_STRING_ID, projectId);
+                            taskIntend.putExtra(PARAM_STRING_ID, objectId);
+                            taskIntend.putExtra(PARAM_POSITION, objectPosition);
 
-                            accessProjectIntent.putExtra(PARAM_PROJECT_ACCESS_TYPE, accessType);
+                            taskIntend.putExtra(PARAM_PROJECT_ACCESS_TYPE, accessType);
 
-                            formActivityResultLauncher.launch(accessProjectIntent);
+                            if (formActivityResultLauncher != null) {
+                                formActivityResultLauncher.launch(taskIntend);
+                            }
                         }
                     }
                 }, new IntentFilter(TASK_ACTION));
@@ -406,5 +424,11 @@ public class ProjectAccessActivity extends BaseActivity {
                 System.out.println("hehehehehe");
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        formActivityResultLauncher = null;
     }
 }

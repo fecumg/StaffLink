@@ -1,5 +1,9 @@
 package fpt.edu.stafflink.models.responseDtos;
 
+import androidx.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 
 public class ProjectResponse extends BaseResponse{
@@ -47,5 +51,13 @@ public class ProjectResponse extends BaseResponse{
 
     public void setTasks(List<TaskResponse> tasks) {
         this.tasks = tasks;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (obj instanceof ProjectResponse) {
+            return StringUtils.isNotEmpty(this.id) && ((ProjectResponse) obj).getId().equals(this.id);
+        }
+        return false;
     }
 }

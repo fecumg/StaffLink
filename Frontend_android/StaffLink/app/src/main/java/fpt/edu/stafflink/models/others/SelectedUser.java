@@ -1,5 +1,7 @@
 package fpt.edu.stafflink.models.others;
 
+import androidx.annotation.Nullable;
+
 public class SelectedUser {
     private int id;
     private String name;
@@ -23,5 +25,13 @@ public class SelectedUser {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (obj instanceof SelectedUser) {
+            return this.id != 0 && ((SelectedUser) obj).getId() == this.id;
+        }
+        return false;
     }
 }

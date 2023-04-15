@@ -36,7 +36,8 @@
             android:layout_height="@dimen/small_icon_size"
             android:src="@drawable/ic_check_light_foreground"
             android:backgroundTint="@color/primary"
-            android:layout_alignParentEnd="true"/>
+            android:layout_alignParentEnd="true"
+            android:visibility="gone"/>
     </RelativeLayout>
 
     <TextView
@@ -45,7 +46,7 @@
         android:layout_height="wrap_content"
         android:textColor="@color/danger"/>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -78,6 +79,16 @@
                 android:layout_marginBottom="10dp"/>
 
             <fpt.edu.stafflink.components.CustomInputTextComponent
+                android:id="@+id/inputTextCreatedAt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Date created"
+                app:startIconDrawable="@drawable/ic_calendar_light_foreground"
+                app:color="@color/primary"
+                android:enabled="false"
+                android:layout_marginBottom="10dp"/>
+
+            <fpt.edu.stafflink.components.CustomInputTextComponent
                 android:id="@+id/inputTextDueDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -91,7 +102,8 @@
                 android:id="@+id/selectStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:nullable="false"/>
+                app:nullable="false"
+                android:visibility="gone"/>
 
             <fpt.edu.stafflink.components.CustomInputTextComponent
                 android:id="@+id/inputTextCreateBy"
@@ -106,7 +118,8 @@
             <fpt.edu.stafflink.components.CustomFilePickerComponent
                 android:id="@+id/filePickerAttachments"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -129,7 +142,8 @@
                 android:hint="Search users"
                 app:startIconDrawable="@drawable/ic_search_light_foreground"
                 app:color="@color/primary"
-                android:inputType="text"/>
+                android:inputType="text"
+                android:visibility="gone"/>
 
             <fpt.edu.stafflink.components.CustomListComponent
                 android:id="@+id/listUsers"
@@ -142,5 +156,5 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/search_result_padding"/>
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>

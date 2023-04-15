@@ -49,10 +49,6 @@ public class CustomInputTextComponent extends LinearLayout {
         this.setAttributes(attrs);
     }
 
-    public void setOnTextChanged(TextWatcher textWatcher) {
-        customInputTextComponentMainElement.addTextChangedListener(textWatcher);
-    }
-
     public void setHint(CharSequence hint) {
         this.hint = hint;
         customInputTextComponentLayout.setHint(hint);
@@ -145,6 +141,14 @@ public class CustomInputTextComponent extends LinearLayout {
 
     public void setOnClick(OnClickListener onClickListener) {
         customInputTextComponentMainElement.setOnClickListener(onClickListener);
+    }
+
+    public void setOnFocus(OnFocusChangeListener onFocusChangeListener) {
+        customInputTextComponentMainElement.setOnFocusChangeListener(onFocusChangeListener);
+    }
+
+    public void setOnTextChanged(TextWatcher textWatcher) {
+        customInputTextComponentMainElement.addTextChangedListener(textWatcher);
     }
 
     private void setAttributes(AttributeSet attrs) {

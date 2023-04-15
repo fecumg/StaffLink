@@ -70,6 +70,7 @@ public abstract class BaseAdapter<T, TViewHolder extends RecyclerView.ViewHolder
     public void removeItem(int position) {
         this.objects.remove(position);
         notifyItemRemoved(position);
+        notifyItemRangeChanged(0, getItemCount());
     }
 
     public void removeAll() {

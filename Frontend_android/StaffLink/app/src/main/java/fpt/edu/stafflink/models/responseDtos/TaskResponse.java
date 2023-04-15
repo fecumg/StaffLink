@@ -1,7 +1,13 @@
 package fpt.edu.stafflink.models.responseDtos;
 
+import androidx.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Date;
 import java.util.List;
+
+import fpt.edu.stafflink.utilities.GenericUtils;
 
 /**
  * @author Truong Duc Duong
@@ -79,5 +85,13 @@ public class TaskResponse extends BaseResponse {
 
     public void setAttachments(List<AttachmentResponse> attachments) {
         this.attachments = attachments;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (obj instanceof TaskResponse) {
+            return StringUtils.isNotEmpty(this.id) && ((TaskResponse) obj).getId().equals(this.id);
+        }
+        return false;
     }
 }

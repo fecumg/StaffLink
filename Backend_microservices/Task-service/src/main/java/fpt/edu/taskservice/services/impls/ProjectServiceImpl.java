@@ -108,7 +108,7 @@ public class ProjectServiceImpl extends BaseService<Project> implements ProjectS
         int authId = super.getAuthId(exchange);
 
         Flux<Project> assignedProjectFlux = projectRepository.findAll()
-                .flatMap(this::buildProject)
+                .flatMap(super::buildProject)
                 .filter(project ->
                         project.getTasks()
                                 .stream()
@@ -126,18 +126,6 @@ public class ProjectServiceImpl extends BaseService<Project> implements ProjectS
                 .doOnError(throwable -> log.error(throwable.getMessage()))
                 .doOnSuccess(voidValue -> log.info("Tasks related to project '{}' deleted", project.getId()))
                 .thenReturn(project);
-    }
-
-    private Mono<Project> buildProject(Project project) {
-        Mono<List<Task>> taskListMono = taskRepository.findAllByProject(project)
-                .collectList();
-
-        return Mono.just(project)
-                .zipWith(taskListMono, (preparedProject, tasks) -> {
-                    preparedProject.setTasks(tasks);
-                    return preparedProject;
-                })
-                .doOnError(throwable -> log.error(throwable.getMessage()));
     }
 
     private Mono<ProjectResponse> buildProjectResponse(Project project) {

@@ -38,6 +38,7 @@ public class CustomSelectedListComponent<T> extends LinearLayout {
 
         adapter = new CustomSelectedListAdapter<>(new ArrayList<>(), DEFAULT_MAIN_FIELD);
         customSelectedListComponentMainElement.setAdapter(adapter);
+
     }
 
     public void setData(List<T> objects, String mainField) {

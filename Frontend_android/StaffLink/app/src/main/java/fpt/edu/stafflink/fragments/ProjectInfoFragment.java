@@ -1,28 +1,28 @@
 package fpt.edu.stafflink.fragments;
 
-import static fpt.edu.stafflink.constants.AdapterActionParam.FORM_STATUS_DONE;
-import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_AUTHORIZED;
 import static fpt.edu.stafflink.constants.AdapterActionParam.DEFAULT_ID;
+import static fpt.edu.stafflink.constants.AdapterActionParam.FORM_STATUS_DONE;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_ID;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_PROJECT_ACCESS_TYPE;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_TITLE;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_AUTHORIZED;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.os.Bundle;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.core.widget.NestedScrollView;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.gson.reflect.TypeToken;
@@ -61,7 +61,7 @@ public class ProjectInfoFragment extends BaseFragment {
     private static final int DEBOUNCING_DELAY = 1000;
 
     TextView textViewError;
-    ScrollView scrollViewWrapper;
+    NestedScrollView scrollViewWrapper;
     CustomInputTextComponent inputTextName;
     CustomInputTextComponent inputTextDescription;
     CustomInputTextComponent inputTextCreateBy;
@@ -116,6 +116,8 @@ public class ProjectInfoFragment extends BaseFragment {
         selectedListUsers = view.findViewById(R.id.selectedListUsers);
         inputTextSearchUsers = view.findViewById(R.id.inputTextSearchUsers);
         listUsers = view.findViewById(R.id.listUsers);
+
+        listUsers.setNestedScrollingEnabled(false);
 
         if (StringUtils.isNotEmpty(this.projectId)) {
             this.fetchDataOnEdit(this.projectId);
@@ -196,8 +198,10 @@ public class ProjectInfoFragment extends BaseFragment {
                                         ProjectResponse projectResponse = gson.fromJson(gson.toJson(responseBody), ProjectResponse.class);
                                         this.bindEditedProject(projectResponse);
                                         this.fetchCreatedBy(projectResponse.getCreatedBy());
-                                        projectResponse.getUserIds()
-                                                .forEach(this::fetchAuthorizedUser);
+                                        if (projectResponse.getUserIds() != null) {
+                                            projectResponse.getUserIds()
+                                                    .forEach(this::fetchAuthorizedUser);
+                                        }
                                     },
                                     errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
                             ),
@@ -289,8 +293,14 @@ public class ProjectInfoFragment extends BaseFragment {
                                                             .collect(Collectors.toList());
 
                                             listUsers.setObjects(userResponsesExceptCreatedBy);
-                                            if (scrollViewWrapper.getScrollY() < 200) {
-                                                scrollViewWrapper.smoothScrollBy(0, 400);
+
+                                            int[] matrix = new int[2];
+                                            listUsers.getLocationOnScreen(matrix);
+                                            int listUsersPositionY = matrix[1];
+                                            int screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
+
+                                            if (screenHeight - listUsersPositionY < screenHeight / 2.5) {
+                                                scrollViewWrapper.smoothScrollBy(0, screenHeight / 5);
                                             }
                                         },
                                         errorApiResponse -> {

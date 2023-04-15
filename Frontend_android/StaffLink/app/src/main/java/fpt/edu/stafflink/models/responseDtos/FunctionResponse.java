@@ -1,5 +1,9 @@
 package fpt.edu.stafflink.models.responseDtos;
 
+import androidx.annotation.Nullable;
+
+import fpt.edu.stafflink.utilities.GenericUtils;
+
 /**
  * @author Truong Duc Duong
  */
@@ -57,5 +61,13 @@ public class FunctionResponse extends BaseResponse {
 
     public void setDisplayed(boolean displayed) {
         this.displayed = displayed;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (obj instanceof FunctionResponse) {
+            return this.id != 0 && ((FunctionResponse) obj).getId() == this.id;
+        }
+        return false;
     }
 }

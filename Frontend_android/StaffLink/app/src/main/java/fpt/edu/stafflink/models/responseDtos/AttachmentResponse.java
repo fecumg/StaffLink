@@ -1,5 +1,9 @@
 package fpt.edu.stafflink.models.responseDtos;
 
+import androidx.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Date;
 
 /**
@@ -43,5 +47,13 @@ public class AttachmentResponse {
 
     public void setCreatedBy(int createdBy) {
         this.createdBy = createdBy;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (obj instanceof AttachmentResponse) {
+            return StringUtils.isNotEmpty(this.id) && ((AttachmentResponse) obj).getId().equals(this.id);
+        }
+        return false;
     }
 }

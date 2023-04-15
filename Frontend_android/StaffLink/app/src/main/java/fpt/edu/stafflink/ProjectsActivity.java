@@ -78,7 +78,10 @@ public class ProjectsActivity extends BaseActivity {
     private void prepareButtonNew() {
         if (super.isAuthorized(getString(R.string.new_project_path))) {
             buttonNewProject.setVisibility(View.VISIBLE);
-            buttonNewProject.setOnClickListener(view -> formActivityResultLauncher.launch(new Intent(ProjectsActivity.this, ProjectAccessActivity.class)));
+
+            Intent newProjectIntent = new Intent(ProjectsActivity.this, ProjectAccessActivity.class);
+            setIntentProjectAccessType(newProjectIntent);
+            buttonNewProject.setOnClickListener(view -> formActivityResultLauncher.launch(newProjectIntent));
         } else {
             buttonNewProject.setVisibility(View.GONE);
         }

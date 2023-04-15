@@ -1,5 +1,9 @@
 package fpt.edu.stafflink.models.others;
 
+import androidx.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+
 public class SelectedAttachment {
 
     private String id;
@@ -39,5 +43,13 @@ public class SelectedAttachment {
 
     public void setTaskId(String taskId) {
         this.taskId = taskId;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (obj instanceof SelectedAttachment) {
+            return StringUtils.isNotEmpty(this.id) && ((SelectedAttachment) obj).getId().equals(this.id);
+        }
+        return false;
     }
 }

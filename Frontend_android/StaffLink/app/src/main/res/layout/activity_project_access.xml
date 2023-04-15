@@ -36,6 +36,14 @@
             android:layout_height="@dimen/small_icon_size"
             android:src="@drawable/ic_check_light_foreground"
             android:backgroundTint="@color/primary"
+            android:layout_alignParentEnd="true" />
+
+        <ImageButton
+            android:id="@+id/buttonNewTask"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:src="@drawable/ic_add_light_foreground"
+            android:backgroundTint="@color/primary"
             android:layout_alignParentEnd="true"/>
     </RelativeLayout>
 

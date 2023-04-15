@@ -10,6 +10,7 @@ import fpt.edu.taskservice.exceptions.UnauthorizedException;
 import fpt.edu.taskservice.pagination.Pagination;
 import fpt.edu.taskservice.repositories.AttachmentRepository;
 import fpt.edu.taskservice.repositories.ProjectRepository;
+import fpt.edu.taskservice.repositories.TaskRepository;
 import jakarta.ws.rs.BadRequestException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,8 @@ public class BaseService<T> {
     private AttachmentRepository attachmentRepository;
     @Autowired
     private ProjectRepository projectRepository;
+    @Autowired
+    private TaskRepository taskRepository;
 
     protected void setCreatedBy(Object object, ServerWebExchange exchange) {
         String authUserIdString = exchange.getRequest().getHeaders().getFirst(AUTH_ID);
@@ -151,13 +154,37 @@ public class BaseService<T> {
         }
     }
 
+    protected Mono<Project> buildProject(Project project) {
+        Mono<List<Task>> taskListMono = taskRepository.findAllByProject(project)
+                .collectList();
+
+        return Mono.just(project)
+                .zipWith(taskListMono, (preparedProject, tasks) -> {
+                    preparedProject.setTasks(tasks);
+                    return preparedProject;
+                })
+                .doOnError(throwable -> log.error(throwable.getMessage()));
+    }
+
     protected Mono<Task> buildTask(Task task) {
         Mono<List<Attachment>> attachmentListMono = attachmentRepository.findAllByTask(task)
+                .collectList();
+
+        Mono<List<Project>> projectListMono = projectRepository.findAll()
+                .flatMap(this::buildProject)
                 .collectList();
 
         return Mono.just(task)
                 .zipWith(attachmentListMono, (preparedTask, attachments) -> {
                     preparedTask.setAttachments(attachments);
+                    return preparedTask;
+                })
+                .zipWith(projectListMono, (preparedTask, projects) -> {
+                    Project parentProject = projects.stream()
+                            .filter(project -> project.getTasks().stream().anyMatch(childTask -> preparedTask.getId().equals(childTask.getId())))
+                            .findFirst()
+                            .orElse(null);
+                    preparedTask.setProject(parentProject);
                     return preparedTask;
                 })
                 .doOnError(throwable -> log.error(throwable.getMessage()));

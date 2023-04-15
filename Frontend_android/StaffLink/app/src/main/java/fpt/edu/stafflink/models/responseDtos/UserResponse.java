@@ -1,7 +1,11 @@
 package fpt.edu.stafflink.models.responseDtos;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import fpt.edu.stafflink.utilities.GenericUtils;
 
 /**
  * @author Truong Duc Duong
@@ -74,5 +78,13 @@ public class UserResponse extends BaseResponse {
 
     public void setRoles(List<RoleResponse> roles) {
         this.roles = roles;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (obj instanceof UserResponse) {
+            return this.id != 0 && ((UserResponse) obj).getId() == this.id;
+        }
+        return false;
     }
 }

@@ -2,6 +2,7 @@ package fpt.edu.stafflink;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -70,7 +71,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
 
     protected MutableLiveData<List<FunctionResponse>> authorizedFunctions;
-    private UserResponse authUser;
+    protected MutableLiveData<UserResponse> authUser;
 
     Toast toast;
 
@@ -92,6 +93,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
 
         authorizedFunctions = new MutableLiveData<>();
+        authUser = new MutableLiveData<>();
 
         this.onSubCreate(savedInstanceState);
     }
@@ -261,7 +263,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     private void bindAuthInformation(Context context, UserResponse userResponse) {
-        this.authUser = userResponse;
+        this.authUser.setValue(userResponse);
 
         baseNavigationLoginButtonLayout.setVisibility(View.GONE);
         baseNavigationAuthLayout.setVisibility(View.VISIBLE);
@@ -313,14 +315,28 @@ public abstract class BaseActivity extends AppCompatActivity {
     public boolean isAuthorized(String functionPath) {
         if (this.authorizedFunctions.getValue() != null) {
             return this.authorizedFunctions.getValue().stream()
-                    .anyMatch(functionResponse -> functionPath.equals(functionResponse.getUri()));
+                    .anyMatch(functionResponse -> {
+                        String functionUri = functionResponse.getUri().startsWith("/") ? functionResponse.getUri() : ("/" + functionResponse.getUri());
+                        return functionPath.equals(functionUri);
+                    });
         } else {
             return false;
         }
     }
 
     public UserResponse getAuthUser() {
-        return this.authUser;
+        return this.authUser.getValue();
+    }
+
+    protected boolean isOnScreen(View view) {
+        Rect rect = new Rect();
+        view.getGlobalVisibleRect(rect);
+
+        int visibleHeight = rect.bottom - rect.top;
+
+        int actualHeight = view.getHeight();
+
+        return actualHeight == visibleHeight;
     }
 
     @Override
