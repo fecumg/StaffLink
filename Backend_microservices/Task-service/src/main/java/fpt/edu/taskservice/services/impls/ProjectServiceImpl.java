@@ -4,7 +4,6 @@ import fpt.edu.taskservice.dtos.requestDtos.ProjectRequest;
 import fpt.edu.taskservice.dtos.responseDtos.ProjectResponse;
 import fpt.edu.taskservice.dtos.responseDtos.TaskResponse;
 import fpt.edu.taskservice.entities.Project;
-import fpt.edu.taskservice.entities.Task;
 import fpt.edu.taskservice.pagination.Pagination;
 import fpt.edu.taskservice.repositories.ProjectRepository;
 import fpt.edu.taskservice.repositories.TaskRepository;
@@ -64,8 +63,9 @@ public class ProjectServiceImpl extends BaseService<Project> implements ProjectS
                 .switchIfEmpty(Mono.error(new NotFoundException("Project not found")))
                 .zipWith(Mono.just(projectRequest), ((project, request) -> {
                     Project preparedProject = modelMapper.map(request, Project.class);
-                    super.setUpdatedBy(preparedProject, exchange);
+                    preparedProject.setCreatedAt(project.getCreatedAt());
                     preparedProject.setCreatedBy(project.getCreatedBy());
+                    super.setUpdatedBy(preparedProject, exchange);
                     preparedProject.setId(id);
                     return preparedProject;
                 }))

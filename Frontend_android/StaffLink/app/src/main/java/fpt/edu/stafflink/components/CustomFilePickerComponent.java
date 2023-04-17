@@ -1,33 +1,75 @@
 package fpt.edu.stafflink.components;
 
+import static android.app.Activity.RESULT_OK;
+
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
+
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
+import android.net.Uri;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.tbruyelle.rxpermissions3.RxPermissions;
+
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import fpt.edu.stafflink.BaseActivity;
 import fpt.edu.stafflink.R;
 import fpt.edu.stafflink.adapters.CustomFilePickerAdapter;
 import fpt.edu.stafflink.models.others.SelectedAttachment;
+import fpt.edu.stafflink.utilities.ActivityUtils;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 public class CustomFilePickerComponent extends LinearLayout {
     private static final String DEFAULT_MAIN_FIELD = "id";
 
     RecyclerView customFilePickerComponentMainElement;
     public CustomFilePickerAdapter adapter;
+    ImageButton customFilePickerComponentButton;
 
-    private DownloadHandler downloadHandler;
+    private boolean ableToPickFile;
+
+    private UploadHandler uploadHandler;
     private RemoveHandler removeHandler;
 
+    private ActivityResultLauncher<Intent> pickFileActivityResultLauncher;
+
+    private RxPermissions rxPermissions;
+    private Disposable permissionDisposal;
 
     public CustomFilePickerComponent(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -36,8 +78,9 @@ public class CustomFilePickerComponent extends LinearLayout {
     }
 
     private void initView(Context context) {
-        View view = inflate(context, R.layout.component_selected_list_custom, this);
-        customFilePickerComponentMainElement = view.findViewById(R.id.customSelectedListComponentMainElement);
+        View view = inflate(context, R.layout.component_file_picker_custom, this);
+        customFilePickerComponentMainElement = view.findViewById(R.id.customFilePickerComponentMainElement);
+        customFilePickerComponentButton = view.findViewById(R.id.customFilePickerComponentButton);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         customFilePickerComponentMainElement.setLayoutManager(layoutManager);
@@ -55,6 +98,7 @@ public class CustomFilePickerComponent extends LinearLayout {
     public void showMenuOnLongClickItem(View view, int position, SelectedAttachment selectedAttachment) {
         PopupMenu popupMenu = new PopupMenu(getContext(), view);
         popupMenu.getMenuInflater().inflate(R.menu.menu_file_picker, popupMenu.getMenu());
+        popupMenu.show();
 
         popupMenu.getMenu().findItem(R.id.menuFilePickerDownload).setEnabled(this.adapter.isDownloadable());
         popupMenu.getMenu().findItem(R.id.menuFilePickerRemove).setEnabled(this.adapter.isDownloadable());
@@ -82,73 +126,148 @@ public class CustomFilePickerComponent extends LinearLayout {
         alert.show();
     }
 
-    public void deleteAttachment(int position, SelectedAttachment selectedAttachment) {
-        if (removeHandler != null) {
-            removeHandler.handle(position, selectedAttachment);
+    private void deleteAttachment(int position, SelectedAttachment selectedAttachment) {
+        if (this.removeHandler != null) {
+            this.removeHandler.handle(position, selectedAttachment);
         }
     }
 
     public void downloadAttachment(int position, SelectedAttachment selectedAttachment) {
-        if (downloadHandler != null) {
-            downloadHandler.handle(position, selectedAttachment);
+        CustomFilePickerAdapter.ViewHolder viewHolder = (CustomFilePickerAdapter.ViewHolder) customFilePickerComponentMainElement.getChildViewHolder(customFilePickerComponentMainElement.getChildAt(position));
+        ProgressBar progressBar = viewHolder.itemFilePickerProgressbar;
+
+        progressBar.setVisibility(VISIBLE);
+
+        ExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+
+//        download folder
+        String downloadFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + getContext().getString(R.string.download_folder);
+        File downloadFolder = new File(downloadFolderPath);
+        if (!downloadFolder.exists()) {
+            downloadFolder.mkdirs();
         }
-//        CustomFilePickerAdapter.ViewHolder viewHolder = (CustomFilePickerAdapter.ViewHolder) customFilePickerComponentMainElement.getChildViewHolder(customFilePickerComponentMainElement.getChildAt(position));
-//        ProgressBar progressBar = viewHolder.itemFilePickerProgressbar;
-//
-//        progressBar.setVisibility(VISIBLE);
-//
-//        ExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-//        Handler handler = new Handler(Looper.getMainLooper());
-//
-//        executor.execute(() -> {
-//            try {
-//                StringBuilder stringBuilder = new StringBuilder();
-//                stringBuilder.append(getContext().getString(R.string.default_domain));
-//                stringBuilder.append(getContext().getString(R.string.attachment_files_path));
-//                stringBuilder.append("/");
-//                stringBuilder.append(selectedAttachment.getTaskId());
-//                stringBuilder.append("/");
-//                stringBuilder.append(selectedAttachment.getName());
-//
-//                URL url = new URL(stringBuilder.toString());
-//                URLConnection connection = url.openConnection();
-//                connection.connect();
-//
-//                int lengthOfFile = connection.getContentLength();
-//
-////                download file
-//                InputStream input = connection.getInputStream();
-//                OutputStream output = Files.newOutputStream(Paths.get(Environment.getExternalStorageDirectory().toString() + File.separator + selectedAttachment));
-//
-//                byte[] bytes = new byte[1024];
-//
-//                long total = 0;
-//                int count;
-//                while ((count = input.read(bytes)) != -1) {
-//                    total += count;
-//
-////                    publish the progress
-//                    this.publishProgress(progressBar, (int) ((total * 100) / lengthOfFile));
-//
-//                    output.write(bytes, 0, count);
-//                }
-////                flushing output
-//                output.flush();
-//
-////                closing streams
-//                output.close();
-//                input.close();
-//
-//                handler.post(() -> {
-////                    UI Thread work here
-//                    progressBar.setVisibility(View.GONE);
-//                });
-//
-//
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        });
+
+//        download link
+        String attachmentFilesPath = getContext().getString(R.string.attachment_files_path);
+        String rootUri = attachmentFilesPath.startsWith("/") ? attachmentFilesPath.substring(1) : attachmentFilesPath;
+
+        String downloadLink = getContext().getString(R.string.default_domain) +
+                rootUri +
+                "/" +
+                selectedAttachment.getTaskId() +
+                "/" +
+                selectedAttachment.getName();
+
+        executor.execute(() -> {
+            try {
+                this.writeFile(downloadLink, downloadFolderPath, selectedAttachment.getName(), progressBar, handler);
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private void writeFile(String downloadLink, String downloadFolderPath, String filename, ProgressBar progressBar, Handler handler) throws IOException {
+        URL url = new URL(downloadLink);
+        URLConnection connection = url.openConnection();
+        connection.connect();
+
+        try (InputStream input = connection.getInputStream();
+             OutputStream output = Files.newOutputStream(Paths.get(downloadFolderPath + File.separator + filename), CREATE_NEW)) {
+
+            byte[] bytes = new byte[1024];
+
+            long total = 0;
+            int count;
+            while ((count = input.read(bytes)) != -1) {
+                total += count;
+
+                System.out.println(total);
+
+//                    publish the progress
+                this.publishProgress(progressBar, (int) ((total * 100) / connection.getContentLength()));
+
+                output.write(bytes, 0, count);
+            }
+
+            handler.postDelayed(() -> {
+//                UI Thread work here
+                progressBar.setVisibility(View.GONE);
+            }, 2000);
+        } catch (FileAlreadyExistsException e) {
+            String newFilename = this.generateParallelFilename(filename);
+            this.writeFile(downloadLink, downloadFolderPath, newFilename, progressBar, handler);
+        }
+    }
+
+    private String generateParallelFilename(String filename) {
+        String extension = filename.substring(filename.lastIndexOf("."));
+        String filenameWithoutExtension = filename.substring(0, filename.lastIndexOf("."));
+        int lastIndexOfLodash = filenameWithoutExtension.lastIndexOf("_");
+        String defaultResult = filenameWithoutExtension + "_" + 1 + extension;
+        if (lastIndexOfLodash < 0) {
+            return defaultResult;
+        } else {
+            if (lastIndexOfLodash == filename.length() - 1) {
+                return filenameWithoutExtension + 1 + extension;
+            }
+            String suffix = filenameWithoutExtension.substring(lastIndexOfLodash + 1);
+            if (StringUtils.isEmpty(suffix)) {
+                return defaultResult;
+            }
+            try {
+                int suffixInt = Integer.parseInt(suffix);
+                return filenameWithoutExtension.substring(0, lastIndexOfLodash + 1) + (++suffixInt) + extension;
+            } catch (Exception e) {
+                return defaultResult;
+            }
+        }
+    }
+
+    private void enablePickFile() {
+        AppCompatActivity activity = ActivityUtils.getActivity(getContext());
+        if (activity == null) {
+            return;
+        }
+        rxPermissions = new RxPermissions(activity);
+
+        customFilePickerComponentButton.setOnClickListener((view) ->
+                permissionDisposal = rxPermissions.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+               .subscribe(granted -> {
+                   if (granted) {
+                       Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                       intent.setType("*/*");
+                       intent.addCategory(Intent.CATEGORY_OPENABLE);
+                       pickFileActivityResultLauncher.launch(Intent.createChooser(intent, "Pick a file"));
+                   } else {
+                       Toast.makeText(activity, "Storage access denied", Toast.LENGTH_SHORT).show();
+                   }
+               }));
+    }
+
+    public void registerPickFileActivityResultLauncher() {
+        AppCompatActivity activity = ActivityUtils.getActivity(getContext());
+        if (activity == null) {
+            return;
+        }
+        pickFileActivityResultLauncher = activity.registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                this::pickFile
+        );
+    }
+
+    private void pickFile(ActivityResult result) {
+        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+            Uri uri = result.getData().getData();
+
+            if (this.uploadHandler != null) {
+                this.uploadHandler.handle(uri);
+            }
+
+            permissionDisposal.dispose();
+        }
     }
 
     private void publishProgress(ProgressBar progressBar, Integer... progress) {
@@ -203,12 +322,26 @@ public class CustomFilePickerComponent extends LinearLayout {
         return this.adapter.isDownloadable();
     }
 
-    public void setDownloadHandler(DownloadHandler downloadHandler) {
-        this.downloadHandler = downloadHandler;
+    public void setUploadHandler(UploadHandler uploadHandler) {
+        this.uploadHandler = uploadHandler;
     }
 
     public void setRemoveHandler(RemoveHandler removeHandler) {
         this.removeHandler = removeHandler;
+    }
+
+    public void setAbleToPickFile(boolean ableToPickFile) {
+        this.ableToPickFile = ableToPickFile;
+        if (ableToPickFile) {
+            customFilePickerComponentButton.setVisibility(VISIBLE);
+            this.enablePickFile();
+        } else {
+            customFilePickerComponentButton.setVisibility(GONE);
+        }
+    }
+
+    public boolean isAbleToPickFile() {
+        return this.ableToPickFile;
     }
 
     private void setAttributes(AttributeSet attrs) {
@@ -219,13 +352,16 @@ public class CustomFilePickerComponent extends LinearLayout {
 
             boolean downloadable = typedArray.getBoolean(R.styleable.CustomFilePickerComponent_downloadable, false);
             this.setDownloadable(downloadable);
+
+            boolean ableToPickFile = typedArray.getBoolean(R.styleable.CustomFilePickerComponent_ableToPickFile, true);
+            this.setAbleToPickFile(ableToPickFile);
         } finally {
             typedArray.recycle();
         }
     }
 
-    public interface DownloadHandler {
-        void handle(int position, SelectedAttachment selectedAttachment);
+    public interface UploadHandler {
+        void handle(Uri uri);
     }
 
     public interface RemoveHandler {

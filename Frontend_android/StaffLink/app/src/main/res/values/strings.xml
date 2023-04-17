@@ -5,6 +5,8 @@
 
     <string name="unidentified">unidentified</string>
 
+    <string name="download_folder">Download</string>
+
     <string name="uri_extra">uri</string>
     <string name="no_response">no response when calling api</string>
 
@@ -44,7 +46,7 @@
     <string name="assigned_tasks_path">/tasks/assigned</string>
 
 
-    <string name="attachment_files_path">/attachments</string>
+    <string name="attachment_files_path">/files</string>
 
 
     <string name="navigation_greeting">Hello, </string>

@@ -295,8 +295,8 @@ public class ProjectAccessActivity extends BaseActivity {
                                 super.handleResponse(
                                         response,
                                         (responseBody, gson) -> {
+                                            TaskResponse taskResponse = gson.fromJson(gson.toJson(responseBody), TaskResponse.class);
                                             if (this.fragment instanceof TasksFragment && TaskStatus.INITIATED.getCode() == ((TasksFragment) this.fragment).getTaskStatus()) {
-                                                TaskResponse taskResponse = gson.fromJson(gson.toJson(responseBody), TaskResponse.class);
                                                 CustomListComponent<TaskResponse> listTasks = ((TasksFragment) this.fragment).getListTasks();
 
                                                 listTasks.adapter.addNewItem(taskResponse);
@@ -304,6 +304,12 @@ public class ProjectAccessActivity extends BaseActivity {
                                                 listTasks.setError(null);
                                             } else {
                                                 this.performClickByStatus(TaskStatus.INITIATED.getCode());
+                                                ((TasksFragment) this.fragment).setOnListInitiatedListener(() -> {
+                                                    CustomListComponent<TaskResponse> listTasks = ((TasksFragment) this.fragment).getListTasks();
+                                                    listTasks.scrollTo(listTasks.getObjects().indexOf(taskResponse));
+                                                    listTasks.setError(null);
+                                                    System.out.println("done");
+                                                });
                                             }
                                         },
                                         errorApiResponse -> this.setFragmentError(errorApiResponse.getMessage())
@@ -337,10 +343,11 @@ public class ProjectAccessActivity extends BaseActivity {
                                                 listTasks.setError(null);
                                             } else {
                                                 performClickByStatus(taskResponse.getStatusCode());
-                                                CustomListComponent<TaskResponse> listTasks = ((TasksFragment) this.fragment).getListTasks();
-
-                                                listTasks.scrollTo(listTasks.getObjects().indexOf(taskResponse));
-                                                listTasks.setError(null);
+                                                ((TasksFragment) this.fragment).setOnListInitiatedListener(() -> {
+                                                    CustomListComponent<TaskResponse> listTasks = ((TasksFragment) this.fragment).getListTasks();
+                                                    listTasks.scrollTo(listTasks.getObjects().indexOf(taskResponse));
+                                                    listTasks.setError(null);
+                                                });
                                             }
                                         },
                                         errorApiResponse -> this.setFragmentError(errorApiResponse.getMessage())

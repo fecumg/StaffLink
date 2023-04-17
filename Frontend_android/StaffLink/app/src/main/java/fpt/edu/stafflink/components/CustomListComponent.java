@@ -64,6 +64,10 @@ public class CustomListComponent<T> extends LinearLayout {
         this.adapter.setObjects(objects);
     }
 
+    public void addItem(T object) {
+        this.adapter.addNewItem(object);
+    }
+
     public List<T> getObjects() {
         return this.adapter.getObjects();
     }

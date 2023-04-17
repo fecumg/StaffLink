@@ -36,6 +36,9 @@ public class DateUtils {
     }
 
     public static String dateToString(Date date, String pattern) {
+        if (date == null) {
+            return "unidentified";
+        }
         DateFormat dateFormat = new SimpleDateFormat(pattern, Locale.getDefault());
         return dateFormat.format(date);
     }

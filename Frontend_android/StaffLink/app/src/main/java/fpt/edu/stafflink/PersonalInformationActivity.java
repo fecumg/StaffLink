@@ -53,12 +53,8 @@ public class PersonalInformationActivity extends BaseActivity {
         inputTextEmail = findViewById(R.id.inputTextEmail);
         imageAvatar = findViewById(R.id.imageAvatar);
 
-        this.initiate();
-    }
+        imageAvatar.registerPickImageActivityResultLauncher();
 
-    @Override
-    protected void onResume() {
-        super.onResume();
         this.initiate();
     }
 

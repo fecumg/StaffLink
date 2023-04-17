@@ -123,6 +123,8 @@ public class UserFormActivity extends BaseActivity {
             });
         }
 
+        imageAvatar.registerPickImageActivityResultLauncher();
+
         buttonBackToUsers.setOnClickListener(view -> onBackPressed());
     }
 

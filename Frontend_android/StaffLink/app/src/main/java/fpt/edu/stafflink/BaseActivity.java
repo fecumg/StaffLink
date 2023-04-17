@@ -117,8 +117,10 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         baseNavigationComponent.setDrawerLayout(baseDrawerLayout);
 
-        this.fetchAuthorizedFunctions();
-        this.fetchAuthUser(this);
+        baseNavigationImageAvatar.registerPickImageActivityResultLauncher();
+
+//        this.fetchAuthorizedFunctions();
+//        this.fetchAuthUser(this);
     }
 
     @Override
@@ -151,6 +153,32 @@ public abstract class BaseActivity extends AppCompatActivity {
                 Log.e(ERROR_TAG, "handleResponse: " + e.getMessage(), e);
             }
         }
+    }
+
+    public <T> void handleGenericResponse(Response<T> response, ResponseHandlerSecond<T> handler, ErrorResponseHandler errorHandler) {
+        Gson gson = new GsonBuilder().create();
+        if (response.isSuccessful()) {
+            T resBody = response.body();
+            handler.handle(resBody);
+        } else {
+            if (response.code() == 401) {
+                ActivityUtils.goTo(this, getString(R.string.unauthorized_path));
+            }
+            try (ResponseBody responseBody = response.errorBody()) {
+                if (responseBody != null) {
+                    ErrorApiResponse errorApiResponse = gson.fromJson(responseBody.string(), ErrorApiResponse.class);
+                    errorHandler.handle(errorApiResponse);
+                    this.pushToast(errorApiResponse.getMessage());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e(ERROR_TAG, "handleGenericResponse: " + e.getMessage(), e);
+            }
+        }
+    }
+
+    public interface ResponseHandlerSecond<T> {
+        void handle(T responseBody);
     }
 
     public void handleMergedResponse(MergedResponse mergedResponse, MergedResponseHandler handler, ErrorResponseHandler errorHandler) {

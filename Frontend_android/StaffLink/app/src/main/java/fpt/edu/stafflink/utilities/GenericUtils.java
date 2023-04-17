@@ -65,6 +65,9 @@ public class GenericUtils {
 
     public static int getIndexOf(Object object, List<?> objects) {
         int i = 0;
+        if (object == null) {
+            return -1;
+        }
         for (Object listObject: objects) {
             if (object.equals(listObject)) {
                 return i;

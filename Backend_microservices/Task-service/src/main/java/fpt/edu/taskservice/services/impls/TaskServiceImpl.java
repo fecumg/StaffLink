@@ -77,8 +77,9 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
                 .zipWith(Mono.just(editTaskRequest), ((currentTask, request) -> {
                     Task preparedTask = modelMapper.map(request, Task.class);
                     preparedTask.setProject(currentTask.getProject());
-                    super.setUpdatedBy(preparedTask, exchange);
+                    preparedTask.setCreatedAt(currentTask.getCreatedAt());
                     preparedTask.setCreatedBy(currentTask.getCreatedBy());
+                    super.setUpdatedBy(preparedTask, exchange);
                     preparedTask.setId(id);
                     return preparedTask;
                 }))

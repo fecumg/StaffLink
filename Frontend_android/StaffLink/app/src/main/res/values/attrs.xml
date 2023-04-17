@@ -58,5 +58,6 @@
     <declare-styleable name="CustomFilePickerComponent">
         <attr name="deletable" format="boolean"/>
         <attr name="downloadable" format="boolean"/>
+        <attr name="ableToPickFile" format="boolean"/>
     </declare-styleable>
 </resources>

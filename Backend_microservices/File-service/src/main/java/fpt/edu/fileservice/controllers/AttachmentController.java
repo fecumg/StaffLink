@@ -1,6 +1,7 @@
 package fpt.edu.fileservice.controllers;
 
 import fpt.edu.fileservice.services.AttachmentService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class AttachmentController {
     private AttachmentService attachmentService;
 
     @GetMapping(value = "/{taskId}/{filename}", produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<ByteArrayResource> getImage(@PathVariable("taskId") String taskId, @PathVariable("filename") String filename) throws IOException {
+    public ResponseEntity<ByteArrayResource> getImage(@PathVariable("taskId") String taskId, @PathVariable("filename") String filename, HttpServletRequest request) throws IOException {
 
         ByteArrayResource resource = attachmentService.downloadAttachment(taskId, filename);
 

@@ -1,26 +1,26 @@
 package fpt.edu.stafflink.models.requestDtos;
 
-import java.io.File;
+import android.net.Uri;
 
 /**
  * @author Truong Duc Duong
  */
 
 public class AttachmentRequest {
-    private File attachment;
+    private Uri uri;
     private String taskId;
 
-    public AttachmentRequest(File attachment, String taskId) {
-        this.attachment = attachment;
+    public AttachmentRequest(Uri uri, String taskId) {
+        this.uri = uri;
         this.taskId = taskId;
     }
 
-    public File getAttachment() {
-        return attachment;
+    public Uri getUri() {
+        return uri;
     }
 
-    public void setAttachment(File attachment) {
-        this.attachment = attachment;
+    public void setAttachment(Uri uri) {
+        this.uri = uri;
     }
 
     public String getTaskId() {

@@ -75,6 +75,8 @@ public class CustomImageComponent extends RelativeLayout {
     private boolean cancellable;
     private int index;
 
+    private ActivityResultLauncher<Intent> pickImageActivityResultLauncher;
+
     private RxPermissions rxPermissions;
     private Disposable permissionDisposal;
 
@@ -100,39 +102,46 @@ public class CustomImageComponent extends RelativeLayout {
     @SuppressLint("ClickableViewAccessibility")
     private void enablePickImage() {
         AppCompatActivity activity = ActivityUtils.getActivity(getContext());
-        if (activity != null) {
-            rxPermissions = new RxPermissions(activity);
-
-            ActivityResultLauncher<Intent> pickImageActivityResultLauncher = activity.registerForActivityResult(
-                    new ActivityResultContracts.StartActivityForResult(),
-                    result -> pickImage(result, activity)
-            );
-
-            customImageComponentMainElement.setOnTouchListener((view, motionEvent) -> {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    scaleWithAnimation(customImageComponentWrapper, ORIGINAL_RATIO, ZOOM_OUT_RATIO);
-
-                    return true;
-                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    scaleWithAnimation(customImageComponentWrapper, ZOOM_OUT_RATIO, ORIGINAL_RATIO);
-
-                    customImageComponentMainElement.performClick();
-
-                    postDelayed(() -> permissionDisposal = rxPermissions.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                            .subscribe(granted -> {
-                                if (granted) {
-                                    Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                                    pickImageActivityResultLauncher.launch(intent);
-                                } else {
-                                    Toast.makeText(activity, "Gallery access denied", Toast.LENGTH_SHORT).show();
-                                }
-                            }), ZOOM_ANIMATION_DURATION);
-
-                    return true;
-                }
-                return false;
-            });
+        if (activity == null || !this.ableToPickImage) {
+            return;
         }
+        rxPermissions = new RxPermissions(activity);
+
+        customImageComponentMainElement.setOnTouchListener((view, motionEvent) -> {
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                scaleWithAnimation(customImageComponentWrapper, ORIGINAL_RATIO, ZOOM_OUT_RATIO);
+
+                return true;
+            } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                scaleWithAnimation(customImageComponentWrapper, ZOOM_OUT_RATIO, ORIGINAL_RATIO);
+
+                customImageComponentMainElement.performClick();
+
+                postDelayed(() -> permissionDisposal = rxPermissions.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        .subscribe(granted -> {
+                            if (granted) {
+                                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                pickImageActivityResultLauncher.launch(intent);
+                            } else {
+                                Toast.makeText(activity, "Gallery access denied", Toast.LENGTH_SHORT).show();
+                            }
+                        }), ZOOM_ANIMATION_DURATION);
+
+                return true;
+            }
+            return false;
+        });
+    }
+
+    public void registerPickImageActivityResultLauncher() {
+        AppCompatActivity activity = ActivityUtils.getActivity(getContext());
+        if (activity == null || !this.ableToPickImage) {
+            return;
+        }
+        pickImageActivityResultLauncher = activity.registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> pickImage(result, activity)
+        );
     }
 
     @SuppressLint("ClickableViewAccessibility")

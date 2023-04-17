@@ -19,11 +19,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -52,18 +50,24 @@ import fpt.edu.stafflink.components.CustomSelectComponent;
 import fpt.edu.stafflink.components.CustomSelectedListComponent;
 import fpt.edu.stafflink.debouncing.Debouncer;
 import fpt.edu.stafflink.enums.TaskStatus;
+import fpt.edu.stafflink.models.others.SelectedAttachment;
 import fpt.edu.stafflink.models.others.SelectedUser;
 import fpt.edu.stafflink.models.others.TaskStatusDto;
+import fpt.edu.stafflink.models.requestDtos.AttachmentRequest;
 import fpt.edu.stafflink.models.requestDtos.taskRequestDtos.EditTaskRequest;
 import fpt.edu.stafflink.models.requestDtos.taskRequestDtos.NewTaskRequest;
+import fpt.edu.stafflink.models.responseDtos.AttachmentResponse;
 import fpt.edu.stafflink.models.responseDtos.TaskResponse;
 import fpt.edu.stafflink.models.responseDtos.UserResponse;
 import fpt.edu.stafflink.pagination.Pagination;
+import fpt.edu.stafflink.retrofit.InputStreamRequestBody;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import fpt.edu.stafflink.utilities.DateUtils;
+import fpt.edu.stafflink.utilities.FileUtils;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
@@ -121,6 +125,7 @@ public class TaskFormActivity extends BaseActivity {
         inputTextCreateBy = findViewById(R.id.inputTextCreateBy);
 
         filePickerAttachments = findViewById(R.id.filePickerAttachments);
+        filePickerAttachments.registerPickFileActivityResultLauncher();
 
         selectedListUsers = findViewById(R.id.selectedListUsers);
         inputTextSearchUsers = findViewById(R.id.inputTextSearchUsers);
@@ -185,6 +190,19 @@ public class TaskFormActivity extends BaseActivity {
     private void showOnEdit() {
         selectStatus.setVisibility(View.VISIBLE);
         filePickerAttachments.setVisibility(View.VISIBLE);
+        filePickerAttachments.setMainField("name");
+
+        if (this.accessType != PROJECT_ACCESS_TYPE_OBSERVABLE) {
+            filePickerAttachments.setAbleToPickFile(true);
+            filePickerAttachments.setDownloadable(true);
+            filePickerAttachments.setCancellable(true);
+            this.setUploadHandler();
+            this.setRemoveHandler();
+        } else {
+            filePickerAttachments.setAbleToPickFile(false);
+            filePickerAttachments.setDownloadable(true);
+            filePickerAttachments.setCancellable(false);
+        }
 
         if (this.accessType == PROJECT_ACCESS_TYPE_AUTHORIZED && super.isAuthorized(getString(R.string.edit_task_path))) {
             buttonSubmitTask.setVisibility(View.VISIBLE);
@@ -624,10 +642,18 @@ public class TaskFormActivity extends BaseActivity {
 
         inputTextName.setText(taskResponse.getName());
         inputTextDescription.setText(taskResponse.getDescription());
+        inputTextCreatedAt.setText(DateUtils.dateToString(taskResponse.getCreatedAt(), getString(R.string.date_pattern)));
         inputTextDueDate.setText(DateUtils.dateToString(taskResponse.getDueAt(), getString(R.string.date_pattern)));
 
         TaskStatusDto taskStatusDto = new TaskStatusDto(TaskStatus.getTaskStatusFormCode(taskResponse.getStatusCode()));
         selectStatus.setSelectedOption(taskStatusDto);
+
+        filePickerAttachments.setObjects(
+                taskResponse.getAttachments()
+                        .stream()
+                        .map(attachmentResponse -> new SelectedAttachment(attachmentResponse.getId(), attachmentResponse.getName(), this.id))
+                        .collect(Collectors.toList())
+        );
     }
     private void bindCreatedBy(UserResponse userResponse) {
         if (userResponse == null) {
@@ -661,6 +687,77 @@ public class TaskFormActivity extends BaseActivity {
 
     private void performSelectUser(SelectedUser selectedUser) {
         selectedListUsers.addNewItem(selectedUser);
+    }
+
+    private void setUploadHandler() {
+        filePickerAttachments.setUploadHandler(uri -> {
+            AttachmentRequest attachmentRequest = new AttachmentRequest(uri, this.id);
+            RequestBody attachmentRequestBody = this.buildAttachmentRequestBody(attachmentRequest);
+            Disposable disposable = RetrofitServiceManager.getAttachmentService(this)
+                    .newAttachment(attachmentRequestBody)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            response ->
+                                    super.handleResponse(
+                                            response,
+                                            (responseBody, gson) -> {
+                                                textViewError.setText(null);
+                                                AttachmentResponse attachmentResponse = gson.fromJson(gson.toJson(responseBody), AttachmentResponse.class);
+                                                SelectedAttachment selectedAttachment = new SelectedAttachment(attachmentResponse.getId(), attachmentResponse.getName(), this.id);
+                                                filePickerAttachments.addNewItem(selectedAttachment);
+                                                super.pushToast("attachment edited successfully");
+                                            },
+                                            errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
+                                    ),
+                            error -> {
+                                Log.e(ERROR_TAG, "setUploadHandler: " + error.getMessage(), error);
+                                super.pushToast(error.getMessage());
+                                textViewError.setText(error.getMessage());
+                            });
+
+            compositeDisposable.add(disposable);
+        });
+    }
+
+    private RequestBody buildAttachmentRequestBody(AttachmentRequest attachmentRequest) {
+        MultipartBody.Builder builder = new MultipartBody.Builder();
+        builder.setType(MultipartBody.FORM);
+
+        String contentType = FileUtils.getContentType(this, attachmentRequest.getUri());
+        RequestBody fileRequestBody = new InputStreamRequestBody(MediaType.get(contentType), getContentResolver(), attachmentRequest.getUri());
+        builder.addFormDataPart("attachment", FileUtils.getFilename(this, attachmentRequest.getUri()), fileRequestBody);
+        builder.addFormDataPart("taskId", attachmentRequest.getTaskId());
+
+        return builder.build();
+    }
+
+    private void setRemoveHandler() {
+        filePickerAttachments.setRemoveHandler((position, selectedAttachment) -> {
+            Disposable disposable = RetrofitServiceManager.getAttachmentService(this)
+                    .deleteAttachment(selectedAttachment.getId())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            response ->
+                                    super.handleGenericResponse(
+                                            response,
+                                            (responseBody) -> {
+                                                textViewError.setText(null);
+                                                System.out.println("position: " + position);
+                                                filePickerAttachments.adapter.removeItem(position);
+                                                super.pushToast("attachment removed successfully");
+                                            },
+                                            errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
+                                    ),
+                            error -> {
+                                Log.e(ERROR_TAG, "setRemoveHandler: " + error.getMessage(), error);
+                                super.pushToast(error.getMessage());
+                                textViewError.setText(error.getMessage());
+                            });
+
+            compositeDisposable.add(disposable);
+        });
     }
 
     private void back() {

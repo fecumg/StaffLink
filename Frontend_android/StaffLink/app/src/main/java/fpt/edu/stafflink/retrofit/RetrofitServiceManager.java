@@ -2,6 +2,7 @@ package fpt.edu.stafflink.retrofit;
 
 import android.content.Context;
 
+import fpt.edu.stafflink.retrofit.services.AttachmentService;
 import fpt.edu.stafflink.retrofit.services.AuthenticationService;
 import fpt.edu.stafflink.retrofit.services.FunctionService;
 import fpt.edu.stafflink.retrofit.services.ProjectService;
@@ -44,5 +45,11 @@ public class RetrofitServiceManager {
         return RetrofitManager
                 .getRetrofitInstance(context)
                 .create(TaskService.class);
+    }
+
+    public static AttachmentService getAttachmentService(Context context) {
+        return RetrofitManager
+                .getRetrofitInstance(context)
+                .create(AttachmentService.class);
     }
 }

@@ -3,13 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="@dimen/file_picker_item_width"
     android:layout_height="@dimen/file_picker_item_height"
-    android:gravity="center_vertical"
-    android:id="@+id/itemFilePickerLayout">
+    android:id="@+id/itemFilePickerLayout"
+    android:background="@color/transparent_shadow_40"
+    android:padding="10dp"
+    android:layout_marginTop="7dp"
+    android:layout_marginStart="3dp">
 
     <TextView
         android:id="@+id/itemFilePickerMainElement"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"/>
 
     <ProgressBar
         android:id="@+id/itemFilePickerProgressbar"
@@ -17,5 +21,9 @@
         android:layout_height="wrap_content"
         android:max="100"
         style="?android:attr/progressBarStyleHorizontal"
+        android:indeterminate="true"
+        android:indeterminateTintMode="src_atop"
+        android:indeterminateTint="@color/dark"
+        android:layout_alignParentBottom="true"
         android:visibility="invisible"/>
 </RelativeLayout>

@@ -35,6 +35,8 @@ public class TasksFragment extends BaseFragment {
     private int accessType;
     private int taskStatus;
 
+    private OnListInitiatedListener onListInitiatedListener;
+
     public TasksFragment() {
         // Required empty public constructor
     }
@@ -112,6 +114,9 @@ public class TasksFragment extends BaseFragment {
                         taskResponse -> getBaseActivity().runOnUiThread(() -> {
                             listTasks.setError(null);
                             listTasks.adapter.addNewItem(taskResponse);
+                            if (this.onListInitiatedListener != null) {
+                                this.onListInitiatedListener.doOnListInitiatedListener();
+                            }
                         }),
                         error -> getBaseActivity().runOnUiThread(() -> {
                             Log.e(ERROR_TAG, "fetchAuthorizedTasks: " + error.getMessage(), error);
@@ -132,6 +137,9 @@ public class TasksFragment extends BaseFragment {
                         taskResponse -> getBaseActivity().runOnUiThread(() -> {
                             listTasks.setError(null);
                             listTasks.adapter.addNewItem(taskResponse);
+                            if (this.onListInitiatedListener != null) {
+                                this.onListInitiatedListener.doOnListInitiatedListener();
+                            }
                         }),
                         error -> getBaseActivity().runOnUiThread(() -> {
                             Log.e(ERROR_TAG, "fetchAuthorizedTasksByProject: " + error.getMessage(), error);
@@ -152,6 +160,9 @@ public class TasksFragment extends BaseFragment {
                         taskResponse -> getBaseActivity().runOnUiThread(() -> {
                             listTasks.setError(null);
                             listTasks.adapter.addNewItem(taskResponse);
+                            if (this.onListInitiatedListener != null) {
+                                this.onListInitiatedListener.doOnListInitiatedListener();
+                            }
                         }),
                         error -> getBaseActivity().runOnUiThread(() -> {
                             Log.e(ERROR_TAG, "fetchAssignedTasks: " + error.getMessage(), error);
@@ -172,6 +183,9 @@ public class TasksFragment extends BaseFragment {
                         taskResponse -> getBaseActivity().runOnUiThread(() -> {
                             listTasks.setError(null);
                             listTasks.adapter.addNewItem(taskResponse);
+                            if (this.onListInitiatedListener != null) {
+                                this.onListInitiatedListener.doOnListInitiatedListener();
+                            }
                         }),
                         error -> getBaseActivity().runOnUiThread(() -> {
                             Log.e(ERROR_TAG, "fetchAuthorizedTasksByProject: " + error.getMessage(), error);
@@ -192,6 +206,9 @@ public class TasksFragment extends BaseFragment {
                         taskResponse -> getBaseActivity().runOnUiThread(() -> {
                             listTasks.setError(null);
                             listTasks.adapter.addNewItem(taskResponse);
+                            if (this.onListInitiatedListener != null) {
+                                this.onListInitiatedListener.doOnListInitiatedListener();
+                            }
                         }),
                         error -> getBaseActivity().runOnUiThread(() -> {
                             Log.e(ERROR_TAG, "fetchTasks: " + error.getMessage(), error);
@@ -212,6 +229,9 @@ public class TasksFragment extends BaseFragment {
                         taskResponse -> getBaseActivity().runOnUiThread(() -> {
                             listTasks.setError(null);
                             listTasks.adapter.addNewItem(taskResponse);
+                            if (this.onListInitiatedListener != null) {
+                                this.onListInitiatedListener.doOnListInitiatedListener();
+                            }
                         }),
                         error -> getBaseActivity().runOnUiThread(() -> {
                             Log.e(ERROR_TAG, "fetchTasksByProject: " + error.getMessage(), error);
@@ -229,5 +249,13 @@ public class TasksFragment extends BaseFragment {
 
     public CustomListComponent<TaskResponse> getListTasks() {
         return this.listTasks;
+    }
+
+    public void setOnListInitiatedListener(OnListInitiatedListener onListInitiatedListener) {
+        this.onListInitiatedListener = onListInitiatedListener;
+    }
+
+    public interface OnListInitiatedListener {
+        void doOnListInitiatedListener();
     }
 }
