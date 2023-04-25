@@ -4,6 +4,8 @@ import android.content.Context;
 
 import fpt.edu.stafflink.retrofit.services.AttachmentService;
 import fpt.edu.stafflink.retrofit.services.AuthenticationService;
+import fpt.edu.stafflink.retrofit.services.CheckItemService;
+import fpt.edu.stafflink.retrofit.services.CommentService;
 import fpt.edu.stafflink.retrofit.services.FunctionService;
 import fpt.edu.stafflink.retrofit.services.ProjectService;
 import fpt.edu.stafflink.retrofit.services.RoleService;
@@ -51,5 +53,17 @@ public class RetrofitServiceManager {
         return RetrofitManager
                 .getRetrofitInstance(context)
                 .create(AttachmentService.class);
+    }
+
+    public static CheckItemService getCheckItemService(Context context) {
+        return RetrofitManager
+                .getRetrofitInstance(context)
+                .create(CheckItemService.class);
+    }
+
+    public static CommentService getCommentService(Context context) {
+        return RetrofitManager
+                .getRetrofitInstance(context)
+                .create(CommentService.class);
     }
 }

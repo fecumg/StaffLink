@@ -38,6 +38,14 @@ public class Task extends BaseEntity {
     @ReadOnlyProperty
     private List<Attachment> attachments;
 
+    @DocumentReference(lazy = true, lookup = "{ 'task' : ?#{#self._id} }")
+    @ReadOnlyProperty
+    private List<CheckItem> checkItems;
+
+    @DocumentReference(lazy = true, lookup = "{ 'task' : ?#{#self._id} }")
+    @ReadOnlyProperty
+    private List<Comment> comments;
+
     private int createdBy;
 
     private int updatedBy;

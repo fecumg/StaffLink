@@ -122,6 +122,8 @@ public class ProjectServiceImpl extends BaseService<Project> implements ProjectS
         return taskRepository.deleteAll(
                         taskRepository.findAllByProject(project)
                                 .flatMap(super::deleteAttachmentsByTask)
+                                .flatMap(super::deleteCheckItemsByTask)
+                                .flatMap(super::deleteCommentsByTask)
                 )
                 .doOnError(throwable -> log.error(throwable.getMessage()))
                 .doOnSuccess(voidValue -> log.info("Tasks related to project '{}' deleted", project.getId()))

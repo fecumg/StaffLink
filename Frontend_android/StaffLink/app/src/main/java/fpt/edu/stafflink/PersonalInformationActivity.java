@@ -59,18 +59,18 @@ public class PersonalInformationActivity extends BaseActivity {
     }
 
     private void initiate() {
-        this.fetchAuthUser(this);
+        this.fetchAuthUserPersonalInfo(this);
 
         buttonSubmitEdit.setOnClickListener(view -> {
             EditUserRequest editUserRequest = this.validateEditRequest();
             if (editUserRequest != null) {
                 RequestBody editUserRequestBody = this.buildEditUserRequestBody(editUserRequest);
-                this.submitEdit(this, editUserRequestBody);
+                this.submitEdit(editUserRequestBody);
             }
         });
     }
 
-    private void fetchAuthUser(Context context) {
+    private void fetchAuthUserPersonalInfo(Context context) {
         String bearer = super.getBearer();
         if (StringUtils.isNotEmpty(bearer.trim())) {
             Disposable disposable = RetrofitServiceManager.getUserService(this)
@@ -188,7 +188,7 @@ public class PersonalInformationActivity extends BaseActivity {
         return builder.build();
     }
 
-    private void submitEdit(Context context, RequestBody editUserRequestBody) {
+    private void submitEdit(RequestBody editUserRequestBody) {
         Disposable disposable = RetrofitServiceManager.getUserService(this)
                 .editPersonalInfo(editUserRequestBody)
                 .subscribeOn(Schedulers.io())
@@ -199,9 +199,8 @@ public class PersonalInformationActivity extends BaseActivity {
                                         response,
                                         (responseBody, gson) -> {
                                             textViewError.setText(null);
-                                            UserResponse userResponse = gson.fromJson(gson.toJson(responseBody), UserResponse.class);
-                                            this.bindAuthInformation(context, userResponse);
                                             pushToast("personal information updated successfully");
+                                            super.baseNavigationAuthLayout.postDelayed(() -> super.fetchAuthUser(this), 2000);
                                         },
                                         errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
                                 ),

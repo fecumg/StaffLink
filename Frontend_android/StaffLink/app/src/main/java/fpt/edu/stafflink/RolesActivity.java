@@ -20,9 +20,11 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 import fpt.edu.stafflink.components.CustomTableComponent;
+import fpt.edu.stafflink.models.responseDtos.FunctionResponse;
 import fpt.edu.stafflink.models.responseDtos.RoleResponse;
 import fpt.edu.stafflink.pagination.Pagination;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;

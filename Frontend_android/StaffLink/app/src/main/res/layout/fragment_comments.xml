@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="100"
+    android:paddingTop="5dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="95"
+        android:paddingHorizontal="5dp">
+
+        <ProgressBar
+            android:id="@+id/progressBarInfiniteLoading"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:progress="100"
+            android:theme="@style/progressBarSuccess"
+            android:layout_centerHorizontal="true"
+            android:indeterminate="true"
+            android:visibility="gone"/>
+
+        <fpt.edu.stafflink.components.CustomCommentsComponent
+            android:id="@+id/comments"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/textViewError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/danger" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <fpt.edu.stafflink.components.CustomInputTextComponent
+            android:id="@+id/inputTextComment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="message"
+            app:color="@color/primary"
+            android:inputType="textMultiLine"
+            android:maxLength="200"/>
+
+        <ImageButton
+            android:id="@+id/buttonSubmitComment"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:src="@drawable/ic_send_light_foreground"
+            android:backgroundTint="@color/primary"
+            android:layout_marginTop="18dp"/>
+    </LinearLayout>
+</LinearLayout>

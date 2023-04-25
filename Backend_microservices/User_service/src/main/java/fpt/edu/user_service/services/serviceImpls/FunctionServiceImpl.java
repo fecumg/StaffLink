@@ -9,7 +9,6 @@ import fpt.edu.user_service.exceptions.UnauthorizedException;
 import fpt.edu.user_service.exceptions.UniqueKeyViolationException;
 import fpt.edu.user_service.pagination.Pagination;
 import fpt.edu.user_service.repositories.FunctionRepository;
-import fpt.edu.user_service.repositories.RoleFunctionMappingRepository;
 import fpt.edu.user_service.repositories.UserRepository;
 import fpt.edu.user_service.services.FunctionService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,10 +21,6 @@ import org.modelmapper.TypeToken;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,8 +39,6 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 @Log4j2
 public class FunctionServiceImpl extends BaseService implements FunctionService {
-    @Autowired
-    private RoleFunctionMappingRepository roleFunctionMappingRepository;
 
     private static final String getAllMethodCache = "allFunctionResponses";
     private static final String getMethodCache = "FunctionResponses";
@@ -67,8 +60,8 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
     public RabbitTemplate rabbitTemplate;
 
     @Override
-    @CacheEvict(value = getAllMethodCache, allEntries = true)
-    @CachePut(value = getMethodCache, key = "#result.getId()")
+//    @CacheEvict(value = getAllMethodCache, allEntries = true)
+//    @CachePut(value = getMethodCache, key = "#result.getId()")
     public FunctionResponse save(FunctionRequest functionRequest, HttpServletRequest request) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, UniqueKeyViolationException {
 
 //        check unique uri
@@ -93,8 +86,8 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
     }
 
     @Override
-    @CacheEvict(value = getAllMethodCache, allEntries = true)
-    @CachePut(value = getMethodCache, key = "#id")
+//    @CacheEvict(value = getAllMethodCache, allEntries = true)
+//    @CachePut(value = getMethodCache, key = "#id")
     public FunctionResponse update(int id, FunctionRequest functionRequest, HttpServletRequest request) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, UniqueKeyViolationException {
         Optional<Function> optionalFunction = functionRepository.findById(id);
         if (optionalFunction.isPresent()) {
@@ -194,7 +187,7 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
     }
 
     @Override
-    @Cacheable(value = getAllMethodCache, key = "#pagination.getPageNumber()")
+//    @Cacheable(value = getAllMethodCache, key = "#pagination.getPageNumber()")
     public List<FunctionResponse> getAll(Pagination pagination) {
         List<Function> functions = Pagination.retrieve(
                 pagination,
@@ -208,7 +201,7 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
     }
 
     @Override
-    @Cacheable(value = getMethodCache, key = "#id")
+//    @Cacheable(value = getMethodCache, key = "#id")
     public FunctionResponse get(int id) {
         Function function = functionRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Function not found"));
@@ -216,11 +209,11 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
     }
 
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = getAllMethodCache),
-            @CacheEvict(value = getMethodCache, key = "#id")
-        }
-    )
+//    @Caching(evict = {
+//            @CacheEvict(value = getAllMethodCache),
+//            @CacheEvict(value = getMethodCache, key = "#id")
+//        }
+//    )
     public void delete(int id) {
         Optional<Function> optionalFunction = functionRepository.findById(id);
         if (optionalFunction.isPresent()) {

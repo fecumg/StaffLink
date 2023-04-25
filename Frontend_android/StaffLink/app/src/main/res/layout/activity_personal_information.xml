@@ -48,6 +48,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <fpt.edu.stafflink.components.CustomImageComponentOval
+                android:id="@+id/imageAvatar"
+                android:layout_width="@dimen/normal_circular_avatar_size"
+                android:layout_height="@dimen/normal_circular_avatar_size"
+                android:src="@drawable/ic_person_light_foreground"
+                app:tint="@color/primary"
+                app:ableToPickImage="true"
+                android:layout_marginBottom="10dp"
+                app:cancellable="true"/>
+
             <fpt.edu.stafflink.components.CustomInputTextComponent
                 android:id="@+id/inputTextName"
                 android:layout_width="match_parent"
@@ -97,16 +107,6 @@
                 app:color="@color/primary"
                 android:inputType="textEmailAddress"
                 android:layout_marginBottom="10dp"/>
-
-            <fpt.edu.stafflink.components.CustomImageComponentOval
-                android:id="@+id/imageAvatar"
-                android:layout_width="@dimen/normal_circular_avatar_size"
-                android:layout_height="@dimen/normal_circular_avatar_size"
-                android:src="@drawable/ic_person_light_foreground"
-                app:tint="@color/primary"
-                app:ableToPickImage="true"
-                android:layout_marginBottom="10dp"
-                app:cancellable="true"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

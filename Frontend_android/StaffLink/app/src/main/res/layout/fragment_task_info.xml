@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.TaskInfoFragment">
+
+    <TextView
+        android:id="@+id/textViewError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/danger"/>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingHorizontal="5dp"
+        android:id="@+id/scrollViewWrapper">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <fpt.edu.stafflink.components.CustomSelectComponent
+                android:id="@+id/selectStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:nullable="false"
+                android:layout_marginStart="50dp"
+                android:visibility="gone"/>
+
+            <fpt.edu.stafflink.components.CustomInputTextComponent
+                android:id="@+id/inputTextName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Name"
+                app:startIconDrawable="@drawable/ic_empty_foreground"
+                app:color="@color/primary"
+                android:inputType="text"
+                android:layout_marginBottom="10dp"/>
+
+            <fpt.edu.stafflink.components.CustomInputTextComponent
+                android:id="@+id/inputTextDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Description"
+                app:startIconDrawable="@drawable/ic_description_light_foreground"
+                app:color="@color/primary"
+                android:inputType="textMultiLine"
+                android:layout_marginBottom="10dp"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <fpt.edu.stafflink.components.CustomInputTextComponent
+                    android:id="@+id/inputTextCreatedAt"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Date created"
+                    app:startIconDrawable="@drawable/ic_calendar_light_foreground"
+                    app:color="@color/primary"
+                    android:enabled="false"
+                    android:layout_marginBottom="10dp"/>
+
+                <fpt.edu.stafflink.components.CustomInputTextComponent
+                    android:id="@+id/inputTextDueDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Due date"
+                    app:startIconDrawable="@drawable/ic_calendar_light_foreground"
+                    app:color="@color/primary"
+                    android:inputType="text"
+                    android:layout_marginBottom="10dp"/>
+            </LinearLayout>
+
+            <fpt.edu.stafflink.components.CustomInputTextComponent
+                android:id="@+id/inputTextCreateBy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Created by"
+                app:startIconDrawable="@drawable/ic_person_light_foreground"
+                app:color="@color/primary"
+                android:enabled="false"
+                android:layout_marginBottom="10dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Assigned users: "
+                android:textColor="@color/primary"
+                android:layout_marginBottom="10dp"/>
+
+            <fpt.edu.stafflink.components.CustomSelectedListComponent
+                android:id="@+id/selectedListUsers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:layout_marginStart="20dp"/>
+
+            <fpt.edu.stafflink.components.CustomInputTextComponent
+                android:id="@+id/inputTextSearchUsers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Search users"
+                app:startIconDrawable="@drawable/ic_search_light_foreground"
+                app:color="@color/primary"
+                android:inputType="text"
+                android:visibility="gone"/>
+
+            <fpt.edu.stafflink.components.CustomListComponent
+                android:id="@+id/listUsers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:itemHeight="70dp"
+                app:itemMaxLines="1"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/search_result_padding"/>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

@@ -1,5 +1,6 @@
 package fpt.edu.stafflink.retrofit.services;
 
+import fpt.edu.stafflink.models.responseDtos.TaskResponse;
 import fpt.edu.stafflink.pagination.Pagination;
 import io.reactivex.Observable;
 import okhttp3.RequestBody;
@@ -22,5 +23,8 @@ public interface TaskService {
     Observable<Response<Object>> newTask(@Body RequestBody newTaskRequestBody);
 
     @PUT("/tasks/edit/{id}")
-    Observable<Response<Object>> editTask(@Path("id") String id, @Body RequestBody editTaskRequestBody);
+    Observable<Response<TaskResponse>> editTask(@Path("id") String id, @Body RequestBody editTaskRequestBody);
+
+    @PUT("/tasks/status/{id}")
+    Observable<Response<TaskResponse>> editStatus(@Path("id") String id, @Body RequestBody editStatusRequestBody);
 }

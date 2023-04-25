@@ -4,6 +4,9 @@ import static fpt.edu.stafflink.constants.AdapterActionParam.FORM_STATUS_DONE;
 import static fpt.edu.stafflink.constants.AdapterActionParam.FORM_STATUS_NONE;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_FORM_STATUS;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_PARENT_STRING_ID;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_PROJECT_NAME;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_TASK_NAME;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_TITLE;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_ASSIGNED;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_AUTHORIZED;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_OBSERVABLE;
@@ -62,13 +65,12 @@ public class ProjectAccessActivity extends BaseActivity {
     TextView projectAccessMenuInfo;
     TextView projectAccessMenuInitiated;
     TextView projectAccessMenuInProgress;
-    TextView projectAccessMenuPending;
     TextView projectAccessMenuCompleted;
     TextView projectAccessMenuOverdue;
-    TextView projectAccessMenuFailed;
 
     TextView[] menuItems;
 
+    private String projectName;
     private String projectId;
     private int position;
     private int accessType;
@@ -91,25 +93,22 @@ public class ProjectAccessActivity extends BaseActivity {
         projectAccessMenuInfo = findViewById(R.id.projectAccessMenuInfo);
         projectAccessMenuInitiated = findViewById(R.id.projectAccessMenuInitiated);
         projectAccessMenuInProgress = findViewById(R.id.projectAccessMenuInProgress);
-        projectAccessMenuPending = findViewById(R.id.projectAccessMenuPending);
         projectAccessMenuCompleted = findViewById(R.id.projectAccessMenuCompleted);
         projectAccessMenuOverdue = findViewById(R.id.projectAccessMenuOverdue);
-        projectAccessMenuFailed = findViewById(R.id.projectAccessMenuFailed);
 
         menuItems = new TextView[] {
                 projectAccessMenuInfo,
                 projectAccessMenuInitiated,
                 projectAccessMenuInProgress,
-                projectAccessMenuPending,
                 projectAccessMenuCompleted,
                 projectAccessMenuOverdue,
-                projectAccessMenuFailed
         };
 
         Intent intent = getIntent();
         this.projectId = intent.getStringExtra(PARAM_STRING_ID);
         this.position = intent.getIntExtra(PARAM_POSITION, DEFAULT_POSITION);
         this.accessType = intent.getIntExtra(PARAM_PROJECT_ACCESS_TYPE, PROJECT_ACCESS_TYPE_OBSERVABLE);
+        this.projectName = intent.getStringExtra(PARAM_PROJECT_NAME);
 
 //        this.initByCases();
         super.authorizedFunctions.observe(this, authorizedFunctions -> {
@@ -119,7 +118,7 @@ public class ProjectAccessActivity extends BaseActivity {
 
         this.setFormActivityResultLauncher();
 
-        buttonBackToProjects.setOnClickListener(view -> backToProjects());
+        buttonBackToProjects.setOnClickListener(view -> onBackPressed());
 
         this.listenToAdapterOnClick();
     }
@@ -128,11 +127,13 @@ public class ProjectAccessActivity extends BaseActivity {
         if (StringUtils.isEmpty(this.projectId)) {
             this.showInfoOnNew();
         } else{
+            textViewProjectAccessTitle.setText(this.projectName);
+
             if (this.accessType == PROJECT_ACCESS_TYPE_AUTHORIZED) {
                 if (super.isAuthorized(getString(R.string.authorized_tasks_path))) {
                     projectAccessMenu.setVisibility(View.VISIBLE);
                     this.setOnclickMenuItems();
-                    projectAccessMenuInfo.performClick();
+                    projectAccessMenuInitiated.performClick();
                 } else {
                     projectAccessMenu.setVisibility(View.GONE);
                     this.showInfoOnEdit();
@@ -141,17 +142,17 @@ public class ProjectAccessActivity extends BaseActivity {
                 if (super.isAuthorized(getString(R.string.assigned_tasks_path))) {
                     projectAccessMenu.setVisibility(View.VISIBLE);
                     this.setOnclickMenuItems();
-                    projectAccessMenuInfo.performClick();
+                    projectAccessMenuInitiated.performClick();
                 } else {
                     projectAccessMenu.setVisibility(View.GONE);
                     this.showInfoOnEdit();
                 }
             } else {
 //                observable access type
-                if (super.isAuthorized(getString(R.string.tasks_path))) {
+                if (super.isAuthorized(getString(R.string.observable_tasks_path))) {
                     projectAccessMenu.setVisibility(View.VISIBLE);
                     this.setOnclickMenuItems();
-                    projectAccessMenuInfo.performClick();
+                    projectAccessMenuInitiated.performClick();
                 } else {
                     projectAccessMenu.setVisibility(View.GONE);
                     this.showInfoOnEdit();
@@ -160,11 +161,11 @@ public class ProjectAccessActivity extends BaseActivity {
         }
     }
 
-    private void prepareButtonNew(View menuItem) {
+    private void toggleButtonNewOnMenuClicked(View menuItem) {
         if (this.accessType == PROJECT_ACCESS_TYPE_AUTHORIZED && super.isAuthorized(getString(R.string.new_task_path)) && !menuItem.equals(projectAccessMenuInfo)) {
             buttonNewTask.setVisibility(View.VISIBLE);
 
-            Intent newTaskIntent = new Intent(ProjectAccessActivity.this, TaskFormActivity.class);
+            Intent newTaskIntent = new Intent(ProjectAccessActivity.this, TaskAccessActivity.class);
             newTaskIntent.putExtra(PARAM_PROJECT_ACCESS_TYPE, this.accessType);
             newTaskIntent.putExtra(PARAM_PARENT_STRING_ID, this.projectId);
             buttonNewTask.setOnClickListener(view -> formActivityResultLauncher.launch(newTaskIntent));
@@ -184,7 +185,7 @@ public class ProjectAccessActivity extends BaseActivity {
                                     view.setBackgroundColor(highlightColor);
 
                                     this.alterScreenByCase(view);
-                                    this.prepareButtonNew(view);
+                                    this.toggleButtonNewOnMenuClicked(view);
                                 }
                         )
                 );
@@ -197,14 +198,10 @@ public class ProjectAccessActivity extends BaseActivity {
             this.showTasks(TaskStatus.INITIATED.getCode());
         } else if (menuItem.equals(projectAccessMenuInProgress)) {
             this.showTasks(TaskStatus.IN_PROGRESS.getCode());
-        } else if (menuItem.equals(projectAccessMenuPending)) {
-            this.showTasks(TaskStatus.PENDING.getCode());
         } else if (menuItem.equals(projectAccessMenuCompleted)) {
             this.showTasks(TaskStatus.COMPLETED.getCode());
         } else if (menuItem.equals(projectAccessMenuOverdue)) {
             this.showTasks(TaskStatus.OVERDUE.getCode());
-        } else if (menuItem.equals(projectAccessMenuFailed)) {
-            this.showTasks(TaskStatus.FAILED.getCode());
         }
     }
 
@@ -218,6 +215,7 @@ public class ProjectAccessActivity extends BaseActivity {
 
     private void showInfoOnNew() {
         textViewProjectAccessTitle.setText(getString(R.string.project_access_title_new));
+        buttonNewTask.setVisibility(View.GONE);
         projectAccessMenu.setVisibility(View.GONE);
         fragment = ProjectInfoFragment.newInstance(this.projectId, this.position, this.accessType);
         this.replaceFragment(fragment);
@@ -233,6 +231,7 @@ public class ProjectAccessActivity extends BaseActivity {
     private void showInfoOnEdit() {
         fragment = ProjectInfoFragment.newInstance(this.projectId, this.position, this.accessType);
         this.replaceFragment(fragment);
+        buttonNewTask.setVisibility(View.GONE);
 
         if (this.accessType == PROJECT_ACCESS_TYPE_AUTHORIZED && super.isAuthorized(getString(R.string.edit_project_path))) {
             buttonSubmitProject.setVisibility(View.VISIBLE);
@@ -240,10 +239,6 @@ public class ProjectAccessActivity extends BaseActivity {
         } else {
             buttonSubmitProject.setVisibility(View.GONE);
         }
-    }
-
-    public void setTitleOnEdit(String title) {
-        textViewProjectAccessTitle.setText(title);
     }
 
     private void showTasks(int status) {
@@ -276,15 +271,6 @@ public class ProjectAccessActivity extends BaseActivity {
         this.formStatus = formStatus;
     }
 
-    private void backToProjects() {
-        Intent intent = new Intent();
-        intent.putExtra(PARAM_STRING_ID, this.projectId);
-        intent.putExtra(PARAM_POSITION, this.position);
-        intent.putExtra(PARAM_FORM_STATUS, this.formStatus);
-        setResult(RESULT_OK, intent);
-        finish();
-    }
-
     private void fetchNewTask(String id) {
         io.reactivex.disposables.Disposable disposable = RetrofitServiceManager.getTaskService(this)
                 .getTask(id)
@@ -306,6 +292,7 @@ public class ProjectAccessActivity extends BaseActivity {
                                                 this.performClickByStatus(TaskStatus.INITIATED.getCode());
                                                 ((TasksFragment) this.fragment).setOnListInitiatedListener(() -> {
                                                     CustomListComponent<TaskResponse> listTasks = ((TasksFragment) this.fragment).getListTasks();
+
                                                     listTasks.scrollTo(listTasks.getObjects().indexOf(taskResponse));
                                                     listTasks.setError(null);
                                                     System.out.println("done");
@@ -373,17 +360,17 @@ public class ProjectAccessActivity extends BaseActivity {
 
     private void performClickByStatus(int status) {
         if (status == TaskStatus.INITIATED.getCode()) {
+            projectAccessMenu.scrollTo(projectAccessMenuInitiated.getLeft(), 0);
             projectAccessMenuInitiated.performClick();
         } else if (status == TaskStatus.IN_PROGRESS.getCode()) {
+            projectAccessMenu.scrollTo(projectAccessMenuInProgress.getLeft(), 0);
             projectAccessMenuInProgress.performClick();
-        } else if (status == TaskStatus.PENDING.getCode()) {
-            projectAccessMenuPending.performClick();
         } else if (status == TaskStatus.COMPLETED.getCode()) {
+            projectAccessMenu.scrollTo(projectAccessMenuCompleted.getLeft(), 0);
             projectAccessMenuCompleted.performClick();
         } else if (status == TaskStatus.OVERDUE.getCode()) {
+            projectAccessMenu.scrollTo(projectAccessMenuOverdue.getLeft(), 0);
             projectAccessMenuOverdue.performClick();
-        } else if (status == TaskStatus.FAILED.getCode()) {
-            projectAccessMenuFailed.performClick();
         }
     }
 
@@ -394,11 +381,15 @@ public class ProjectAccessActivity extends BaseActivity {
                     public void onReceive(Context context, Intent intent) {
                         String objectId = intent.getStringExtra(PARAM_STRING_ID);
                         int objectPosition = intent.getIntExtra(PARAM_POSITION, DEFAULT_POSITION);
+                        String title = intent.getStringExtra(PARAM_TITLE);
                         if (StringUtils.isNotEmpty(objectId)) {
-                            Intent taskIntend = new Intent(ProjectAccessActivity.this, TaskFormActivity.class);
+                            Intent taskIntend = new Intent(ProjectAccessActivity.this, TaskAccessActivity.class);
                             taskIntend.putExtra(PARAM_PARENT_STRING_ID, projectId);
                             taskIntend.putExtra(PARAM_STRING_ID, objectId);
                             taskIntend.putExtra(PARAM_POSITION, objectPosition);
+
+                            taskIntend.putExtra(PARAM_PROJECT_NAME, projectName);
+                            taskIntend.putExtra(PARAM_TASK_NAME, title);
 
                             taskIntend.putExtra(PARAM_PROJECT_ACCESS_TYPE, accessType);
 
@@ -427,10 +418,18 @@ public class ProjectAccessActivity extends BaseActivity {
                 } else {
                     this.fetchEditedTask(id, position);
                 }
-            } else {
-                System.out.println("hehehehehe");
             }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent();
+        intent.putExtra(PARAM_STRING_ID, this.projectId);
+        intent.putExtra(PARAM_POSITION, this.position);
+        intent.putExtra(PARAM_FORM_STATUS, this.formStatus);
+        setResult(RESULT_OK, intent);
+        super.onBackPressed();
     }
 
     @Override

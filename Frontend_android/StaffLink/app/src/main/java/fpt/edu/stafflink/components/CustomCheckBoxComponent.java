@@ -1,24 +1,29 @@
 package fpt.edu.stafflink.components;
 
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import fpt.edu.stafflink.R;
 import fpt.edu.stafflink.adapters.CustomCheckBoxAdapter;
-import fpt.edu.stafflink.utilities.GenericUtils;
+import fpt.edu.stafflink.utilities.DimenUtils;
 
 public class CustomCheckBoxComponent<T> extends LinearLayout {
     private static final String DEFAULT_MAIN_FIELD = "id";
@@ -27,11 +32,17 @@ public class CustomCheckBoxComponent<T> extends LinearLayout {
     TextView customCheckBoxComponentError;
     CustomCheckBoxAdapter<T> adapter;
 
+    private boolean ableToChangePositions;
+    private boolean ableToRemoveItems;
     private CharSequence error;
+
+    private OnPositionChangedHandler onPositionChangedHandler;
+    private OnRemovedHandler<T> onRemovedHandler;
 
     public CustomCheckBoxComponent(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         this.initView(context);
+        this.setAttributes(attrs);
     }
 
     private void initView(Context context) {
@@ -45,6 +56,58 @@ public class CustomCheckBoxComponent<T> extends LinearLayout {
 
         adapter = new CustomCheckBoxAdapter<>(new ArrayList<>(), new LinkedList<>(), CustomCheckBoxComponent.DEFAULT_MAIN_FIELD);
         customCheckBoxComponentMainElement.setAdapter(adapter);
+    }
+
+    private void initItemTouchHelper(boolean ableToChangePositions, boolean ableToRemoveItems) {
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.START | ItemTouchHelper.END, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                changePositions(viewHolder, target);
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                removeItem(viewHolder, direction);
+            }
+
+            @Override
+            public boolean isLongPressDragEnabled() {
+                return ableToChangePositions;
+            }
+
+            @Override
+            public boolean isItemViewSwipeEnabled() {
+                return ableToRemoveItems;
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        itemTouchHelper.attachToRecyclerView(customCheckBoxComponentMainElement);
+    }
+
+    private void changePositions(RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+        int fromPosition = viewHolder.getAdapterPosition();
+        int toPosition = target.getAdapterPosition();
+
+        Collections.swap(adapter.getObjects(), fromPosition, toPosition);
+
+        adapter.notifyItemMoved(fromPosition, toPosition);
+
+        if (this.onPositionChangedHandler != null) {
+            this.onPositionChangedHandler.handle();
+        }
+    }
+
+    private void removeItem(RecyclerView.ViewHolder viewHolder, int direction) {
+        int position = viewHolder.getAdapterPosition();
+
+        if (direction == ItemTouchHelper.LEFT) {
+            if (this.onRemovedHandler != null) {
+                this.onRemovedHandler.handle(adapter.getObjects().get(position));
+            }
+            adapter.removeItem(position);
+        }
     }
 
     public void setData(List<T> objects, LinkedList<T> checkedObjects, String mainField) {
@@ -63,6 +126,24 @@ public class CustomCheckBoxComponent<T> extends LinearLayout {
 
     public List<T> getObjects() {
         return this.adapter.getObjects();
+    }
+
+    public void addNewItem(T object) {
+        this.adapter.addNewItem(object);
+    }
+
+    public void insertItem(int position, T object) {
+        this.adapter.insertItem(position, object);
+    }
+
+    public void addNewItem(T object, boolean b) {
+        this.adapter.addNewItem(object, b);
+    }
+
+    public void scrollTo(int position) {
+        if (-1 < position && position < this.getObjects().size()) {
+            this.customCheckBoxComponentMainElement.smoothScrollToPosition(position);
+        }
     }
 
     public void setCheckedObjects(LinkedList<T> checkedObjects) {
@@ -95,16 +176,82 @@ public class CustomCheckBoxComponent<T> extends LinearLayout {
         this.adapter.setObjects(rearrange(this.adapter.getObjects(), null));
     }
 
+    public void setOnCheckChangedHandler(CustomCheckBoxAdapter.OnCheckChangedHandler<T> onCheckChangedHandler) {
+        this.adapter.setOnCheckChangedHandler(onCheckChangedHandler);
+    }
+
     private List<T> rearrange(List<T> objects, T parent) {
         List<T> rearrangedList = new ArrayList<>();
         objects.forEach(object -> {
-            int parentId = GenericUtils.getObjectId(parent);
-            int objectParentId = GenericUtils.getObjectId(this.adapter.getParentObject(object));
-            if (parentId == objectParentId) {
+            if ((this.adapter.getParentObject(object) == null && parent == null) || (this.adapter.getParentObject(object) != null && this.adapter.getParentObject(object).equals(parent))) {
                 rearrangedList.add(object);
                 rearrangedList.addAll(rearrange(objects, object));
             }
         });
         return rearrangedList;
+    }
+
+    public void setButtonDrawable(Drawable buttonDrawable) {
+        this.adapter.setButtonDrawable(buttonDrawable);
+    }
+
+    public void setCustomTextSize(int textSize) {
+        this.adapter.setCustomTextSize(textSize);
+    }
+
+    public void setAbleToRemoveItems(boolean ableToRemoveItems) {
+        this.ableToRemoveItems = ableToRemoveItems;
+        this.initItemTouchHelper(this.ableToChangePositions, this.ableToRemoveItems);
+    }
+
+    public void setAbleToChangePositions(boolean ableToChangePositions) {
+        this.ableToChangePositions = ableToChangePositions;
+        this.initItemTouchHelper(this.ableToChangePositions, this.ableToRemoveItems);
+    }
+
+    public void setHasBottomLine(boolean hasBottomLine) {
+        this.adapter.setHasBottomLine(hasBottomLine);
+    }
+
+    public void setOnPositionChangedHandler(OnPositionChangedHandler onPositionChangedHandler) {
+        this.onPositionChangedHandler = onPositionChangedHandler;
+    }
+
+    public void setOnRemovedHandler(OnRemovedHandler<T> onRemovedHandler) {
+        this.onRemovedHandler = onRemovedHandler;
+    }
+
+    private void setAttributes(AttributeSet attrs) {
+        TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.CustomCheckBoxComponent, 0, 0);
+        try {
+            if (typedArray.hasValue(R.styleable.CustomCheckBoxComponent_android_textSize)) {
+                int textSizeInPx = typedArray.getDimensionPixelSize(R.styleable.CustomCheckBoxComponent_android_textSize, (int) customCheckBoxComponentError.getTextSize());
+                int textSizeInDp = DimenUtils.pxToDp(getContext(), textSizeInPx);
+                this.setCustomTextSize(textSizeInDp);
+            }
+
+            if (typedArray.hasValue(R.styleable.CustomCheckBoxComponent_buttonDrawable)) {
+                this.setButtonDrawable(typedArray.getDrawable(R.styleable.CustomCheckBoxComponent_buttonDrawable));
+            }
+
+            boolean ableToRemoveItems = typedArray.getBoolean(R.styleable.CustomCheckBoxComponent_ableToRemoveItems, false);
+            this.setAbleToRemoveItems(ableToRemoveItems);
+
+            boolean ableToChangePositions = typedArray.getBoolean(R.styleable.CustomCheckBoxComponent_ableToChangePositions, false);
+            this.setAbleToChangePositions(ableToChangePositions);
+
+            boolean hasBottomLine = typedArray.getBoolean(R.styleable.CustomCheckBoxComponent_hasBottomLine, false);
+            this.setHasBottomLine(hasBottomLine);
+        } finally {
+            typedArray.recycle();
+        }
+    }
+
+    public interface OnRemovedHandler<T> {
+        void handle(T object);
+    }
+
+    public interface OnPositionChangedHandler {
+        void handle();
     }
 }

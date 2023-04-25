@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/textViewError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/danger"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <fpt.edu.stafflink.components.CustomInputTextComponent
+            android:id="@+id/inputTextContent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="New item"
+            app:color="@color/primary"
+            android:inputType="textMultiLine"
+            android:maxLength="200"/>
+
+        <ImageButton
+            android:id="@+id/buttonSubmitCheckItem"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:src="@drawable/ic_add_light_foreground"
+            android:backgroundTint="@color/primary"
+            android:layout_marginTop="18dp"/>
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBarChecklist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:theme="@style/progressBarSuccess"/>
+
+    <fpt.edu.stafflink.components.CustomCheckBoxComponent
+        android:id="@+id/checkBoxChecklist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        app:ableToRemoveItems="true"
+        app:ableToChangePositions="true"
+        app:hasBottomLine="true"
+        android:paddingHorizontal="5dp"
+        android:paddingVertical="10dp"/>
+</LinearLayout>

@@ -4,11 +4,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.google.gson.reflect.TypeToken;
+
 import org.apache.commons.lang3.StringUtils;
+
+import java.lang.reflect.Type;
+import java.util.List;
 
 import fpt.edu.stafflink.components.CustomButtonComponent;
 import fpt.edu.stafflink.components.CustomInputTextComponent;
 import fpt.edu.stafflink.models.requestDtos.userRequestDtos.LoginRequest;
+import fpt.edu.stafflink.models.responseDtos.FunctionResponse;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import fpt.edu.stafflink.utilities.ActivityUtils;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -41,6 +47,11 @@ public class LoginActivity extends BaseActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         inputTextCredentialUsername.setText(null);
@@ -60,7 +71,7 @@ public class LoginActivity extends BaseActivity {
                 }
             });
         } else {
-            ActivityUtils.goTo(this, getString(R.string.personal_information_path));
+            this.goToInitialActivity();
         }
     }
 
@@ -114,7 +125,7 @@ public class LoginActivity extends BaseActivity {
                                     pushToast("Welcome!");
                                     String jwt = resBody.toString();
                                     super.createBearer(jwt);
-                                    ActivityUtils.goTo(this, getString(R.string.personal_information_path));
+                                    this.goToInitialActivity();
                                 },
                                 errorResBody -> textViewError.setText(errorResBody.getMessage())),
                         error -> {
@@ -124,5 +135,61 @@ public class LoginActivity extends BaseActivity {
                         });
 
         compositeDisposable.add(disposable);
+    }
+
+    private void goToInitialActivity() {
+        String bearer = super.getBearer();
+
+        System.out.println(bearer);
+
+        if (StringUtils.isNotEmpty(bearer.trim())) {
+            Disposable disposable = RetrofitServiceManager.getFunctionService(this)
+                    .getAuthorizedFunctions()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            response -> super.handleResponse(
+                                    response,
+                                    (resBody, gson) -> {
+                                        textViewError.setText(null);
+                                        Type type = new TypeToken<List<FunctionResponse>>() {}.getType();
+                                        List<FunctionResponse> authorizedFunctions = gson.fromJson(gson.toJson(resBody), type);
+                                        this.initiateActivityByCases(authorizedFunctions);
+                                    },
+                                    errorResBody -> textViewError.setText(errorResBody.getMessage())),
+                            error -> {
+                                Log.e(ERROR_TAG, "fetchAuthorizedFunctions: " + error.getMessage(), error);
+                                textViewError.setText(error.getMessage());
+                                this.pushToast(error.getMessage());
+                            });
+
+            compositeDisposable.add(disposable);
+        }
+    }
+
+    private void initiateActivityByCases(List<FunctionResponse> authorizedFunctions) {
+        if (this.isAuthorizedOnLogin(authorizedFunctions, getString(R.string.authorized_projects_path))) {
+            ActivityUtils.goTo(this, getString(R.string.authorized_projects_path));
+        } else if (this.isAuthorizedOnLogin(authorizedFunctions, getString(R.string.assigned_projects_path))) {
+            ActivityUtils.goTo(this, getString(R.string.assigned_projects_path));
+        } else if (this.isAuthorizedOnLogin(authorizedFunctions, getString(R.string.projects_path))) {
+            ActivityUtils.goTo(this, getString(R.string.projects_path));
+        } else if (this.isAuthorizedOnLogin(authorizedFunctions, getString(R.string.users_path))) {
+            ActivityUtils.goTo(this, getString(R.string.users_path));
+        } else {
+            ActivityUtils.goTo(this, getString(R.string.personal_information_path));
+        }
+    }
+
+    private boolean isAuthorizedOnLogin(List<FunctionResponse> authorizedFunctions, String functionPath) {
+        if (authorizedFunctions != null) {
+            return authorizedFunctions.stream()
+                    .anyMatch(functionResponse -> {
+                        String functionUri = functionResponse.getUri().startsWith("/") ? functionResponse.getUri() : ("/" + functionResponse.getUri());
+                        return functionPath.equals(functionUri);
+                    });
+        } else {
+            return false;
+        }
     }
 }

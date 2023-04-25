@@ -23,7 +23,7 @@ public class AttachmentController {
     @Autowired
     private AttachmentService attachmentService;
 
-    @GetMapping(value = "/{taskId}/{filename}", produces = MediaType.IMAGE_JPEG_VALUE)
+    @GetMapping(value = "/{taskId}/{filename}", produces = MediaType.ALL_VALUE)
     public ResponseEntity<ByteArrayResource> getImage(@PathVariable("taskId") String taskId, @PathVariable("filename") String filename, HttpServletRequest request) throws IOException {
 
         ByteArrayResource resource = attachmentService.downloadAttachment(taskId, filename);

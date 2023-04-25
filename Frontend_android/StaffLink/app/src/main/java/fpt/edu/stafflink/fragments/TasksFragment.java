@@ -1,9 +1,9 @@
 package fpt.edu.stafflink.fragments;
 
 import static fpt.edu.stafflink.ProjectAccessActivity.TASK_ACTION;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_STRING_ID;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_ASSIGNED;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_AUTHORIZED;
-import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_ID;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_PROJECT_ACCESS_TYPE;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_TASK_STATUS;
@@ -44,7 +44,7 @@ public class TasksFragment extends BaseFragment {
     public static TasksFragment newInstance(String id, int position, int accessType, int taskStatus) {
         TasksFragment fragment = new TasksFragment();
         Bundle args = new Bundle();
-        args.putString(PARAM_ID, id);
+        args.putString(PARAM_STRING_ID, id);
         args.putInt(PARAM_POSITION, position);
         args.putInt(PARAM_PROJECT_ACCESS_TYPE, accessType);
         args.putInt(PARAM_TASK_STATUS, taskStatus);
@@ -56,7 +56,7 @@ public class TasksFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            this.projectId = getArguments().getString(PARAM_ID);
+            this.projectId = getArguments().getString(PARAM_STRING_ID);
             this.position = getArguments().getInt(PARAM_POSITION);
             this.accessType = getArguments().getInt(PARAM_PROJECT_ACCESS_TYPE);
             this.taskStatus = getArguments().getInt(PARAM_TASK_STATUS);
@@ -108,20 +108,22 @@ public class TasksFragment extends BaseFragment {
     private void fetchAuthorizedTasks() {
         MultiValuePagination pagination = new MultiValuePagination();
 
-        Disposable disposable = WebClientServiceManager.getTaskServiceInstance()
+        Disposable disposable = WebClientServiceManager.getTaskService()
                 .getAuthorizedTasks(getContext(), this.taskStatus, pagination)
                 .subscribe(
                         taskResponse -> getBaseActivity().runOnUiThread(() -> {
                             listTasks.setError(null);
-                            listTasks.adapter.addNewItem(taskResponse);
-                            if (this.onListInitiatedListener != null) {
-                                this.onListInitiatedListener.doOnListInitiatedListener();
-                            }
+                            listTasks.addItem(taskResponse);
                         }),
                         error -> getBaseActivity().runOnUiThread(() -> {
                             Log.e(ERROR_TAG, "fetchAuthorizedTasks: " + error.getMessage(), error);
                             getBaseActivity().pushToast(error.getMessage());
                             listTasks.setError(error.getMessage());
+                        }),
+                        () -> getBaseActivity().runOnUiThread(() -> {
+                            if (this.onListInitiatedListener != null) {
+                                this.onListInitiatedListener.doOnListInitiatedListener();
+                            }
                         })
                 );
 
@@ -131,20 +133,22 @@ public class TasksFragment extends BaseFragment {
     private void fetchAuthorizedTasksByProject(String projectId) {
         MultiValuePagination pagination = new MultiValuePagination();
 
-        Disposable disposable = WebClientServiceManager.getTaskServiceInstance()
+        Disposable disposable = WebClientServiceManager.getTaskService()
                 .getAuthorizedTasksByProject(getContext(), projectId, this.taskStatus, pagination)
                 .subscribe(
                         taskResponse -> getBaseActivity().runOnUiThread(() -> {
                             listTasks.setError(null);
-                            listTasks.adapter.addNewItem(taskResponse);
-                            if (this.onListInitiatedListener != null) {
-                                this.onListInitiatedListener.doOnListInitiatedListener();
-                            }
+                            listTasks.addItem(taskResponse);
                         }),
                         error -> getBaseActivity().runOnUiThread(() -> {
                             Log.e(ERROR_TAG, "fetchAuthorizedTasksByProject: " + error.getMessage(), error);
                             getBaseActivity().pushToast(error.getMessage());
                             listTasks.setError(error.getMessage());
+                        }),
+                        () -> getBaseActivity().runOnUiThread(() -> {
+                            if (this.onListInitiatedListener != null) {
+                                this.onListInitiatedListener.doOnListInitiatedListener();
+                            }
                         })
                 );
 
@@ -154,20 +158,22 @@ public class TasksFragment extends BaseFragment {
     private void fetchAssignedTasks() {
         MultiValuePagination pagination = new MultiValuePagination();
 
-        Disposable disposable = WebClientServiceManager.getTaskServiceInstance()
+        Disposable disposable = WebClientServiceManager.getTaskService()
                 .getAssignedTasks(getContext(), this.taskStatus, pagination)
                 .subscribe(
                         taskResponse -> getBaseActivity().runOnUiThread(() -> {
                             listTasks.setError(null);
-                            listTasks.adapter.addNewItem(taskResponse);
-                            if (this.onListInitiatedListener != null) {
-                                this.onListInitiatedListener.doOnListInitiatedListener();
-                            }
+                            listTasks.addItem(taskResponse);
                         }),
                         error -> getBaseActivity().runOnUiThread(() -> {
                             Log.e(ERROR_TAG, "fetchAssignedTasks: " + error.getMessage(), error);
                             getBaseActivity().pushToast(error.getMessage());
                             listTasks.setError(error.getMessage());
+                        }),
+                        () -> getBaseActivity().runOnUiThread(() -> {
+                            if (this.onListInitiatedListener != null) {
+                                this.onListInitiatedListener.doOnListInitiatedListener();
+                            }
                         })
                 );
 
@@ -177,20 +183,22 @@ public class TasksFragment extends BaseFragment {
     private void fetchAssignedTasksByProject(String projectId) {
         MultiValuePagination pagination = new MultiValuePagination();
 
-        Disposable disposable = WebClientServiceManager.getTaskServiceInstance()
+        Disposable disposable = WebClientServiceManager.getTaskService()
                 .getAuthorizedTasksByProject(getContext(), projectId, this.taskStatus, pagination)
                 .subscribe(
                         taskResponse -> getBaseActivity().runOnUiThread(() -> {
                             listTasks.setError(null);
                             listTasks.adapter.addNewItem(taskResponse);
-                            if (this.onListInitiatedListener != null) {
-                                this.onListInitiatedListener.doOnListInitiatedListener();
-                            }
                         }),
                         error -> getBaseActivity().runOnUiThread(() -> {
                             Log.e(ERROR_TAG, "fetchAuthorizedTasksByProject: " + error.getMessage(), error);
                             getBaseActivity().pushToast(error.getMessage());
                             listTasks.setError(error.getMessage());
+                        }),
+                        () -> getBaseActivity().runOnUiThread(() -> {
+                            if (this.onListInitiatedListener != null) {
+                                this.onListInitiatedListener.doOnListInitiatedListener();
+                            }
                         })
                 );
 
@@ -200,20 +208,22 @@ public class TasksFragment extends BaseFragment {
     private void fetchTasks() {
         MultiValuePagination pagination = new MultiValuePagination();
 
-        Disposable disposable = WebClientServiceManager.getTaskServiceInstance()
+        Disposable disposable = WebClientServiceManager.getTaskService()
                 .getTasks(getContext(), this.taskStatus, pagination)
                 .subscribe(
                         taskResponse -> getBaseActivity().runOnUiThread(() -> {
                             listTasks.setError(null);
                             listTasks.adapter.addNewItem(taskResponse);
-                            if (this.onListInitiatedListener != null) {
-                                this.onListInitiatedListener.doOnListInitiatedListener();
-                            }
                         }),
                         error -> getBaseActivity().runOnUiThread(() -> {
                             Log.e(ERROR_TAG, "fetchTasks: " + error.getMessage(), error);
                             getBaseActivity().pushToast(error.getMessage());
                             listTasks.setError(error.getMessage());
+                        }),
+                        () -> getBaseActivity().runOnUiThread(() -> {
+                            if (this.onListInitiatedListener != null) {
+                                this.onListInitiatedListener.doOnListInitiatedListener();
+                            }
                         })
                 );
 
@@ -223,20 +233,22 @@ public class TasksFragment extends BaseFragment {
     private void fetchTasksByProject(String projectId) {
         MultiValuePagination pagination = new MultiValuePagination();
 
-        Disposable disposable = WebClientServiceManager.getTaskServiceInstance()
+        Disposable disposable = WebClientServiceManager.getTaskService()
                 .getTasksByProject(getContext(), projectId, this.taskStatus, pagination)
                 .subscribe(
                         taskResponse -> getBaseActivity().runOnUiThread(() -> {
                             listTasks.setError(null);
                             listTasks.adapter.addNewItem(taskResponse);
-                            if (this.onListInitiatedListener != null) {
-                                this.onListInitiatedListener.doOnListInitiatedListener();
-                            }
                         }),
                         error -> getBaseActivity().runOnUiThread(() -> {
                             Log.e(ERROR_TAG, "fetchTasksByProject: " + error.getMessage(), error);
                             getBaseActivity().pushToast(error.getMessage());
                             listTasks.setError(error.getMessage());
+                        }),
+                        () -> getBaseActivity().runOnUiThread(() -> {
+                            if (this.onListInitiatedListener != null) {
+                                this.onListInitiatedListener.doOnListInitiatedListener();
+                            }
                         })
                 );
 

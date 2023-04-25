@@ -130,7 +130,7 @@ public class ImageServiceImpl extends BaseService implements ImageService {
                 .uri(uriBuilder -> uriBuilder
                         .scheme("http")
                         .host("user-service")
-                        .path("/avatarNames")
+                        .path("/users/avatarNames")
                         .build())
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<String>>() {})

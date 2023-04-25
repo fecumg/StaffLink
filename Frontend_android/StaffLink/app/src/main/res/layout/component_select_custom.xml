@@ -6,8 +6,8 @@
 
     <Spinner
         android:id="@+id/customSelectComponentMainElement"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_width="@dimen/spinner_width"
+        android:layout_height="@dimen/spinner_height"/>
 
     <TextView
         android:id="@+id/customSelectComponentError"

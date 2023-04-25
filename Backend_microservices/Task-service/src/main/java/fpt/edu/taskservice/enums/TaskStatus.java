@@ -15,10 +15,8 @@ import java.util.Arrays;
 public enum TaskStatus {
     INITIATED(0, "initiated"),
     IN_PROGRESS(1, "in progress"),
-    PENDING(2, "pending"),
-    COMPLETED(3, "completed"),
-    OVERDUE(4, "overdue"),
-    FAILED(5, "failed");
+    COMPLETED(2, "completed"),
+    OVERDUE(3, "overdue");
 
     private final int code;
     private final String message;

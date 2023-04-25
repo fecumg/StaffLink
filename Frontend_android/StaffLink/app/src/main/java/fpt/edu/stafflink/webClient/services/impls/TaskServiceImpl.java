@@ -67,7 +67,7 @@ public class TaskServiceImpl implements TaskService {
         return WebClientManager.getWebclientInstance(context)
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(context.getString(R.string.tasks_path))
+                        .path(context.getString(R.string.observable_tasks_path))
                         .queryParam("status", taskStatusCode)
                         .queryParams(pagination)
                         .build())
@@ -80,7 +80,7 @@ public class TaskServiceImpl implements TaskService {
         return WebClientManager.getWebclientInstance(context)
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(context.getString(R.string.tasks_path) + "/" + projectId)
+                        .path(context.getString(R.string.observable_tasks_path) + "/" + projectId)
                         .queryParam("status", taskStatusCode)
                         .queryParams(pagination)
                         .build())

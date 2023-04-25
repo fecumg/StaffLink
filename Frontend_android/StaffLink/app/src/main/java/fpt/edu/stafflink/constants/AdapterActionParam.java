@@ -10,6 +10,8 @@ public class AdapterActionParam {
     public static final String PARAM_PROJECT_ACCESS_TYPE = "projectAccessType";
     public static final String PARAM_TASK_STATUS = "taskStatus";
     public static final String PARAM_FORM_STATUS = "formStatus";
+    public static final String PARAM_PROJECT_NAME = "projectName";
+    public static final String PARAM_TASK_NAME = "taskName";
 
     public static final int DEFAULT_ID = 0;
     public static final int DEFAULT_POSITION = -1;

@@ -5,6 +5,7 @@ import static fpt.edu.stafflink.constants.AdapterActionParam.FORM_STATUS_DONE;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_ID;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_PROJECT_ACCESS_TYPE;
+import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_STRING_ID;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_TITLE;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_AUTHORIZED;
 
@@ -84,7 +85,7 @@ public class ProjectInfoFragment extends BaseFragment {
     public static ProjectInfoFragment newInstance(String id, int position, int accessType) {
         ProjectInfoFragment fragment = new ProjectInfoFragment();
         Bundle args = new Bundle();
-        args.putString(PARAM_ID, id);
+        args.putString(PARAM_STRING_ID, id);
         args.putInt(PARAM_POSITION, position);
         args.putInt(PARAM_PROJECT_ACCESS_TYPE, accessType);
         fragment.setArguments(args);
@@ -95,7 +96,7 @@ public class ProjectInfoFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            this.projectId = getArguments().getString(PARAM_ID);
+            this.projectId = getArguments().getString(PARAM_STRING_ID);
             this.position = getArguments().getInt(PARAM_POSITION);
             this.accessType = getArguments().getInt(PARAM_PROJECT_ACCESS_TYPE);
         }
@@ -431,10 +432,6 @@ public class ProjectInfoFragment extends BaseFragment {
     private void bindEditedProject(ProjectResponse projectResponse) {
         inputTextName.setText(projectResponse.getName());
         inputTextDescription.setText(projectResponse.getDescription());
-
-        if (this.projectAccessActivity != null) {
-            this.projectAccessActivity.setTitleOnEdit(projectResponse.getName());
-        }
     }
     private void bindCreatedBy(UserResponse userResponse) {
         if (userResponse == null) {

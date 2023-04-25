@@ -2,17 +2,16 @@ package fpt.edu.taskservice.services.impls;
 
 import fpt.edu.taskservice.dtos.exchangeDtos.ExchangeAttachment;
 import fpt.edu.taskservice.dtos.responseDtos.AttachmentResponse;
+import fpt.edu.taskservice.dtos.responseDtos.CheckItemResponse;
+import fpt.edu.taskservice.dtos.responseDtos.CommentResponse;
 import fpt.edu.taskservice.dtos.responseDtos.TaskResponse;
-import fpt.edu.taskservice.entities.Attachment;
-import fpt.edu.taskservice.entities.Project;
-import fpt.edu.taskservice.entities.Task;
+import fpt.edu.taskservice.entities.*;
 import fpt.edu.taskservice.exceptions.UnauthorizedException;
 import fpt.edu.taskservice.pagination.Pagination;
-import fpt.edu.taskservice.repositories.AttachmentRepository;
-import fpt.edu.taskservice.repositories.ProjectRepository;
-import fpt.edu.taskservice.repositories.TaskRepository;
+import fpt.edu.taskservice.repositories.*;
 import jakarta.ws.rs.BadRequestException;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
@@ -38,12 +37,18 @@ import java.util.List;
 public class BaseService<T> {
 
     @Value("${http.request.auth.id}")
-    private String AUTH_ID;
+    protected String AUTH_ID;
 
     @Value("${folder.uploads}")
     private String UPLOADS_TMP;
     @Value("${folder.uploads.attachments}")
     private String ATTACHMENT_FOLDER;
+
+    @Value("${rabbitmq.exchange}")
+    private String EXCHANGE_NAME;
+
+    @Value("${rabbitmq.routing-key.attachment-removal}")
+    private String ATTACHMENT_REMOVAL_ROUTING_KEY;
 
     @Autowired
     private AttachmentRepository attachmentRepository;
@@ -51,10 +56,15 @@ public class BaseService<T> {
     private ProjectRepository projectRepository;
     @Autowired
     private TaskRepository taskRepository;
+    @Autowired
+    private CheckItemRepository checkItemRepository;
+    @Autowired
+    private CommentRepository commentRepository;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     protected void setCreatedBy(Object object, ServerWebExchange exchange) {
         String authUserIdString = exchange.getRequest().getHeaders().getFirst(AUTH_ID);
-        log.info("Auth_id: {}", authUserIdString);
         if (StringUtils.hasText(authUserIdString)) {
             int authUserId = Integer.parseInt(authUserIdString);
             try {
@@ -170,6 +180,12 @@ public class BaseService<T> {
         Mono<List<Attachment>> attachmentListMono = attachmentRepository.findAllByTask(task)
                 .collectList();
 
+        Mono<List<CheckItem>> checkItemListMono = checkItemRepository.findAllByTask(task)
+                .collectList();
+
+        Mono<List<Comment>> commentListMono = commentRepository.findAllByTask(task)
+                .collectList();
+
         Mono<List<Project>> projectListMono = projectRepository.findAll()
                 .flatMap(this::buildProject)
                 .collectList();
@@ -177,6 +193,14 @@ public class BaseService<T> {
         return Mono.just(task)
                 .zipWith(attachmentListMono, (preparedTask, attachments) -> {
                     preparedTask.setAttachments(attachments);
+                    return preparedTask;
+                })
+                .zipWith(checkItemListMono, (preparedTask, checkItems) -> {
+                    preparedTask.setCheckItems(checkItems);
+                    return preparedTask;
+                })
+                .zipWith(commentListMono, (preparedTask, comments) -> {
+                    preparedTask.setComments(comments);
                     return preparedTask;
                 })
                 .zipWith(projectListMono, (preparedTask, projects) -> {
@@ -195,19 +219,71 @@ public class BaseService<T> {
                 .map(AttachmentResponse::new)
                 .collectList();
 
+        Mono<List<CheckItemResponse>> checkItemResponsesMono = checkItemRepository.findAllByTask(task)
+                .map(CheckItemResponse::new)
+                .collectList();
+
+        Mono<List<CommentResponse>> comementResponsesMono = commentRepository.findAllByTask(task)
+                .map(CommentResponse::new)
+                .collectList();
+
         return Mono.just(new TaskResponse(task))
-                .zipWith(attachmentResponsesMono, ((taskResponse, attachmentResponses) -> {
+                .zipWith(attachmentResponsesMono, (taskResponse, attachmentResponses) -> {
                     taskResponse.setAttachments(attachmentResponses);
                     return taskResponse;
-                }))
+                })
+                .zipWith(checkItemResponsesMono, (taskResponse, checkItemResponses) -> {
+                    taskResponse.setCheckItems(checkItemResponses);
+                    return taskResponse;
+                })
+                .zipWith(comementResponsesMono, (taskResponse, commentResponses) -> {
+                    taskResponse.setComments(commentResponses);
+                    return taskResponse;
+                })
                 .doOnError(throwable -> log.error(throwable.getMessage()));
     }
 
     protected Mono<Task> deleteAttachmentsByTask(Task task) {
-        return attachmentRepository.deleteAll(attachmentRepository.findAllByTask(task))
+        return attachmentRepository.deleteAll(
+                        attachmentRepository.findAllByTask(task)
+                                .flatMap(this::deleteAttachmentFile)
+                )
                 .doOnError(throwable -> log.error(throwable.getMessage()))
                 .doOnSuccess(voidValue -> log.info("Attachments related to task '{}' deleted", task.getId()))
                 .thenReturn(task);
+    }
+
+    protected Mono<Task> deleteCheckItemsByTask(Task task) {
+        return checkItemRepository.deleteAll(checkItemRepository.findAllByTask(task))
+                .doOnError(throwable -> log.error(throwable.getMessage()))
+                .doOnSuccess(voidValue -> log.info("Check items related to task '{}' deleted", task.getId()))
+                .thenReturn(task);
+    }
+
+    protected Mono<Task> deleteCommentsByTask(Task task) {
+        return commentRepository.deleteAll(commentRepository.findAllByTask(task))
+                .doOnError(throwable -> log.error(throwable.getMessage()))
+                .doOnSuccess(voidValue -> log.info("Comments related to task '{}' deleted", task.getId()))
+                .thenReturn(task);
+    }
+
+    protected Mono<Attachment> deleteAttachmentFile(Attachment attachment) {
+        return taskRepository.findAll()
+                .flatMap(this::buildTask)
+                .filter(task -> task.getAttachments().stream().anyMatch(filteredAttachment -> attachment.getId().equals(filteredAttachment.getId())))
+                .next()
+                .zipWith(Mono.just(attachment), (task, currentAttachment) -> {
+                    ExchangeAttachment exchangeAttachment = new ExchangeAttachment(task.getId(), attachment.getName());
+
+//                    delete temporary file if exists
+                    this.deleteTemporaryAttachmentFile(exchangeAttachment);
+
+//                    send message to File-service to delete attachment file
+                    rabbitTemplate.convertAndSend(EXCHANGE_NAME, ATTACHMENT_REMOVAL_ROUTING_KEY, exchangeAttachment);
+                    log.info("Message has been published via routing key '{}'", ATTACHMENT_REMOVAL_ROUTING_KEY);
+
+                    return attachment;
+                });
     }
 
     protected Flux<Project> getAuthorizedProjects(ServerWebExchange exchange) {

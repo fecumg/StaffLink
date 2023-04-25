@@ -3,10 +3,7 @@ package fpt.edu.taskservice.dtos.responseDtos;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fpt.edu.taskservice.entities.Attachment;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
 
@@ -14,8 +11,7 @@ import java.util.Date;
  * @author Truong Duc Duong
  */
 
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class AttachmentResponse {

@@ -14,17 +14,31 @@ public class ProjectServiceImpl implements ProjectService {
 
 
     @Override
-    public Flux<Object> getProjects(Context context, Pagination pagination) {
-        return null;
+    public Flux<ProjectResponse> getProjects(Context context, MultiValuePagination pagination) {
+        return WebClientManager.getWebclientInstance(context)
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(context.getString(R.string.projects_path))
+                        .queryParams(pagination)
+                        .build())
+                .retrieve()
+                .bodyToFlux(ProjectResponse.class);
     }
 
     @Override
-    public Flux<Object> getAssignedProjects(Context context, Pagination pagination) {
-        return null;
+    public Flux<ProjectResponse> getAssignedProjects(Context context, MultiValuePagination pagination) {
+        return WebClientManager.getWebclientInstance(context)
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(context.getString(R.string.assigned_projects_path))
+                        .queryParams(pagination)
+                        .build())
+                .retrieve()
+                .bodyToFlux(ProjectResponse.class);
     }
 
     @Override
-    public Flux<ProjectResponse> getCreatedProjects(Context context, MultiValuePagination pagination) {
+    public Flux<ProjectResponse> getAuthorizedProjects(Context context, MultiValuePagination pagination) {
         return WebClientManager.getWebclientInstance(context)
                 .get()
                 .uri(uriBuilder -> uriBuilder

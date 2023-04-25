@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:weightSum="100"
+    android:gravity="end"
+    android:layout_marginBottom="-8dp"
+    android:id="@+id/itemCommentLayout">
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="30"/>
+
+    <TextView
+        android:id="@+id/itemCommentMainElement"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent_shadow_20"
+        android:padding="15dp"
+        android:gravity="end"/>
+
+    <fpt.edu.stafflink.components.CustomImageComponentOval
+        android:id="@+id/itemCommentAvatar"
+        android:layout_width="@dimen/tiny_circular_avatar_size"
+        android:layout_height="@dimen/tiny_circular_avatar_size"
+        android:src="@drawable/ic_person_light_foreground"
+        app:tint="@color/primary"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="5dp"/>
+</LinearLayout>

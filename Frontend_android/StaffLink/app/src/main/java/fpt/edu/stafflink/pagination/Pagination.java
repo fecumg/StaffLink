@@ -7,8 +7,8 @@ import java.util.HashMap;
  */
 
 public class Pagination extends HashMap<String, String> {
-    private static final String ASC = "ASC";
-    private static final String DESC = "DESC";
+    public static final String ASC = "ASC";
+    public static final String DESC = "DESC";
 
     private int pageNumber = 0;
     private int pageSize = 10;
@@ -57,6 +57,7 @@ public class Pagination extends HashMap<String, String> {
 
     public void setPageNumber(int pageNumber) {
         this.pageNumber = pageNumber;
+        this.generateMap();
     }
 
     public int getPageSize() {
@@ -65,6 +66,7 @@ public class Pagination extends HashMap<String, String> {
 
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
+        this.generateMap();
     }
 
     public String getSortBy() {
@@ -73,6 +75,7 @@ public class Pagination extends HashMap<String, String> {
 
     public void setSortBy(String sortBy) {
         this.sortBy = sortBy;
+        this.generateMap();
     }
 
     public String getDirection() {
@@ -81,5 +84,6 @@ public class Pagination extends HashMap<String, String> {
 
     public void setDirection(String direction) {
         this.direction = direction;
+        this.generateMap();
     }
 }

@@ -1,5 +1,6 @@
 package fpt.edu.stafflink.adapters;
 
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,11 +25,17 @@ import fpt.edu.stafflink.utilities.GenericUtils;
 
 public class CustomCheckBoxAdapter<T> extends BaseAdapter<T, CustomCheckBoxAdapter.ViewHolder> {
     private static final int PADDING_STEP_IN_DP = 20;
+
     private String mainField;
     private LinkedList<T> checkedObjects;
     private String parentField;
+    private Drawable buttonDrawable;
+    private int textSize;
+    private boolean hasBottomLine;
 
     RecyclerView mRecyclerView;
+
+    private OnCheckChangedHandler<T> onCheckChangedHandler;
 
     public CustomCheckBoxAdapter(List<T> objects, LinkedList<T> checkedObjects, String mainField) {
         super(objects);
@@ -68,6 +75,21 @@ public class CustomCheckBoxAdapter<T> extends BaseAdapter<T, CustomCheckBoxAdapt
         return this.parentField;
     }
 
+    public void setButtonDrawable(Drawable buttonDrawable) {
+        this.buttonDrawable = buttonDrawable;
+        notifyItemRangeChanged(0, getItemCount());
+    }
+
+    public void setHasBottomLine(boolean hasBottomLine) {
+        this.hasBottomLine = hasBottomLine;
+        notifyItemRangeChanged(0, getItemCount());
+    }
+
+    public void setCustomTextSize(int textSize) {
+        this.textSize = textSize;
+        notifyItemRangeChanged(0, getItemCount());
+    }
+
     private int getObjectLevel(T object, int initialLevel) {
         T parent = this.getParentObject(object);
         if (parent != null) {
@@ -102,14 +124,18 @@ public class CustomCheckBoxAdapter<T> extends BaseAdapter<T, CustomCheckBoxAdapt
     public List<T> getChildObjects(T object) {
         if (StringUtils.isNotEmpty(this.parentField)) {
             return super.getObjects().stream()
-                    .filter(child -> {
-                        int childParentId = super.getObjectId(this.getParentObject(child));
-                        return childParentId != 0 && childParentId == super.getObjectId(object);
-                    })
+                    .filter(child -> this.getParentObject(child) != null && this.getParentObject(child).equals(object))
                     .collect(Collectors.toList());
         } else {
             return new ArrayList<>();
         }
+    }
+
+    public void addNewItem(T object, boolean b) {
+        if (b) {
+            this.checkedObjects.add(object);
+        }
+        super.addNewItem(object);
     }
 
     @NonNull
@@ -129,32 +155,53 @@ public class CustomCheckBoxAdapter<T> extends BaseAdapter<T, CustomCheckBoxAdapt
         T object = getObjects().get(position);
         holder.itemCheckBoxMainElement.setText(this.getMainFieldValue(object));
 
-        int objectId = super.getObjectId(object);
+        holder.itemCheckBoxMainElement.setChecked(checkedObjects.stream().anyMatch(checkedObject -> checkedObject.equals(object)));
 
-        if (checkedObjects.stream().anyMatch(checkedObject -> super.getObjectId(checkedObject) != 0 && super.getObjectId(checkedObject) == objectId)) {
-            holder.itemCheckBoxMainElement.setChecked(true);
+        if (this.buttonDrawable != null) {
+            holder.itemCheckBoxMainElement.setButtonDrawable(this.buttonDrawable);
+        }
+
+        if (this.textSize > 0) {
+            holder.itemCheckBoxMainElement.setTextSize(textSize);
+        }
+
+        if (this.hasBottomLine) {
+            holder.itemCheckBoxBottomLine.setVisibility(View.VISIBLE);
+        } else {
+            holder.itemCheckBoxBottomLine.setVisibility(View.GONE);
         }
 
         holder.itemCheckBoxMainElement.setOnCheckedChangeListener((compoundButton, b) -> {
             if (b) {
                 this.checkedObjects.add(object);
-                System.out.println(getParentMap(object));
-                this.getParentMap(object).forEach((parentPosition, parent) -> {
-                    CheckBox parentCheckBox = mRecyclerView.getChildAt(parentPosition).findViewById(R.id.itemCheckBoxMainElement);
-                    if (!parentCheckBox.isChecked()) {
-                        parentCheckBox.setChecked(true);
-                    }
-                    this.checkedObjects.add(parent);
-                });
+                if (StringUtils.isNotEmpty(this.parentField)) {
+                    this.getParentMap(object).forEach((parentPosition, parent) -> {
+                        CheckBox parentCheckBox = mRecyclerView.getChildAt(parentPosition).findViewById(R.id.itemCheckBoxMainElement);
+                        if (!parentCheckBox.isChecked()) {
+                            parentCheckBox.setChecked(true);
+                        }
+                        if (GenericUtils.getIndexOf(parent, checkedObjects) == -1) {
+                            this.checkedObjects.add(parent);
+                        }
+                    });
+                }
             } else {
                 this.removeCheckedObject(object);
-                this.getChildMap(object).forEach((childPosition, child) -> {
-                    CheckBox childCheckBox = mRecyclerView.getChildAt(childPosition).findViewById(R.id.itemCheckBoxMainElement);
-                    if (childCheckBox.isChecked()) {
-                        childCheckBox.setChecked(false);
-                    }
-                    this.removeCheckedObject(child);
-                });
+                if (StringUtils.isNotEmpty(this.parentField)) {
+                    this.getChildMap(object).forEach((childPosition, child) -> {
+                        CheckBox childCheckBox = mRecyclerView.getChildAt(childPosition).findViewById(R.id.itemCheckBoxMainElement);
+                        if (childCheckBox.isChecked()) {
+                            childCheckBox.setChecked(false);
+                        }
+                        if (GenericUtils.getIndexOf(child, checkedObjects) > -1) {
+                            this.removeCheckedObject(child);
+                        }
+                    });
+                }
+            }
+
+            if (this.onCheckChangedHandler != null) {
+                this.onCheckChangedHandler.handle(object, b);
             }
         });
 
@@ -195,24 +242,32 @@ public class CustomCheckBoxAdapter<T> extends BaseAdapter<T, CustomCheckBoxAdapt
     }
 
     private void removeCheckedObject(T object) {
-        int objectId = super.getObjectId(object);
         for (T checkedObject: this.checkedObjects) {
-            int checkedId = super.getObjectId(checkedObject);
-            if (checkedId != 0 && checkedId == objectId) {
+            if (checkedObject.equals(object)) {
                 checkedObjects.remove(checkedObject);
                 break;
             }
         }
     }
 
+    public void setOnCheckChangedHandler(OnCheckChangedHandler<T> onCheckChangedHandler) {
+        this.onCheckChangedHandler = onCheckChangedHandler;
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         LinearLayout itemCheckBoxLayout;
         CheckBox itemCheckBoxMainElement;
+        View itemCheckBoxBottomLine;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             itemCheckBoxLayout = itemView.findViewById(R.id.itemCheckBoxLayout);
             itemCheckBoxMainElement = itemView.findViewById(R.id.itemCheckBoxMainElement);
+            itemCheckBoxBottomLine = itemView.findViewById(R.id.itemCheckBoxBottomLine);
         }
+    }
+
+    public interface OnCheckChangedHandler<T> {
+        void handle(T object, boolean b);
     }
 }

@@ -25,10 +25,6 @@ import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -54,7 +50,6 @@ import java.util.stream.Collectors;
 public class UserServiceImpl extends BaseService implements UserService {
     private static final String getAllMethodCache = "allUserResponses";
     private static final String getMethodCache = "userResponses";
-    private static final int FIXED_DELAY = 1000 * 60 * 60 * 24;
 
     @Value("${rabbitmq.exchange}")
     private String EXCHANGE;
@@ -73,8 +68,8 @@ public class UserServiceImpl extends BaseService implements UserService {
     public RabbitTemplate rabbitTemplate;
 
     @Override
-    @CacheEvict(value = getAllMethodCache, allEntries = true)
-    @CachePut(value = getMethodCache, key = "#result.getId()")
+//    @CacheEvict(value = getAllMethodCache, allEntries = true)
+//    @CachePut(value = getMethodCache, key = "#result.getId()")
     public UserResponse save(NewUserRequest newUserRequest, HttpServletRequest request) throws UniqueKeyViolationException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
 //        Validate unique properties
         if (userRepository.existsByUsername(newUserRequest.getUsername())) {
@@ -108,8 +103,8 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    @CacheEvict(value = getAllMethodCache, allEntries = true)
-    @CachePut(value = getMethodCache, key = "#id")
+//    @CacheEvict(value = getAllMethodCache, allEntries = true)
+//    @CachePut(value = getMethodCache, key = "#id")
     public UserResponse update(int id, EditUserRequest editUserRequest, HttpServletRequest request) throws UniqueKeyViolationException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
         Optional<User> optionalCurrentUser = userRepository.findById(id);
         if (optionalCurrentUser.isPresent()) {
@@ -214,7 +209,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    @Cacheable(value = getAllMethodCache, key = "(#search == null ? '' : #search).concat('-').concat(#pagination.getPageNumber())")
+//    @Cacheable(value = getAllMethodCache, key = "(#search == null ? '' : #search).concat('-').concat(#pagination.getPageNumber())")
     public List<UserResponse> getAll(String search, Pagination pagination) {
         List<User> users;
         if (StringUtils.isEmpty(search)) {
@@ -238,7 +233,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    @Cacheable(value = getMethodCache, key = "#id")
+//    @Cacheable(value = getMethodCache, key = "#id")
     public UserResponse get(int id) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {
@@ -249,10 +244,10 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = getAllMethodCache),
-            @CacheEvict(value = getMethodCache, key = "#id")
-    })
+//    @Caching(evict = {
+//            @CacheEvict(value = getAllMethodCache),
+//            @CacheEvict(value = getMethodCache, key = "#id")
+//    })
     public void delete(int id) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {

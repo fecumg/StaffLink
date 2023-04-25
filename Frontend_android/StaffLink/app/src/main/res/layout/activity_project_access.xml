@@ -36,7 +36,8 @@
             android:layout_height="@dimen/small_icon_size"
             android:src="@drawable/ic_check_light_foreground"
             android:backgroundTint="@color/primary"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
+            android:visibility="gone"/>
 
         <ImageButton
             android:id="@+id/buttonNewTask"
@@ -44,7 +45,8 @@
             android:layout_height="@dimen/small_icon_size"
             android:src="@drawable/ic_add_light_foreground"
             android:backgroundTint="@color/primary"
-            android:layout_alignParentEnd="true"/>
+            android:layout_alignParentEnd="true"
+            android:visibility="gone"/>
     </RelativeLayout>
 
     <HorizontalScrollView
@@ -83,14 +85,6 @@
                 android:gravity="center"/>
 
             <TextView
-                android:id="@+id/projectAccessMenuPending"
-                android:layout_width="@dimen/submit_button_width"
-                android:layout_height="@dimen/submit_button_height"
-                android:text="@string/project_access_menu_pending"
-                android:background="@color/project_access_menu_color"
-                android:gravity="center"/>
-
-            <TextView
                 android:id="@+id/projectAccessMenuCompleted"
                 android:layout_width="@dimen/submit_button_width"
                 android:layout_height="@dimen/submit_button_height"
@@ -103,14 +97,6 @@
                 android:layout_width="@dimen/submit_button_width"
                 android:layout_height="@dimen/submit_button_height"
                 android:text="@string/project_access_menu_overdue"
-                android:background="@color/project_access_menu_color"
-                android:gravity="center"/>
-
-            <TextView
-                android:id="@+id/projectAccessMenuFailed"
-                android:layout_width="@dimen/submit_button_width"
-                android:layout_height="@dimen/submit_button_height"
-                android:text="@string/project_access_menu_failed"
                 android:background="@color/project_access_menu_color"
                 android:gravity="center"/>
         </LinearLayout>

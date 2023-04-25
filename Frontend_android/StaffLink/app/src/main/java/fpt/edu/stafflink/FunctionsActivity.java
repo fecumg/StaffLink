@@ -5,10 +5,6 @@ import static fpt.edu.stafflink.constants.AdapterActionParam.DEFAULT_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_ID;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_POSITION;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,12 +13,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageButton;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.List;
 
-import fpt.edu.stafflink.components.CustomTableComponent;
+import fpt.edu.stafflink.components.CustomListComponent;
 import fpt.edu.stafflink.models.responseDtos.FunctionResponse;
 import fpt.edu.stafflink.pagination.Pagination;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
@@ -37,8 +37,10 @@ public class FunctionsActivity extends BaseActivity {
 
     ImageButton buttonNewFunction;
     ImageButton buttonRefreshFunctions;
-    CustomTableComponent<FunctionResponse> tableFunctions;
+    CustomListComponent<FunctionResponse> listFunctions;
     ActivityResultLauncher<Intent> formActivityResultLauncher;
+
+    Pagination defaultPagination = new Pagination(0);
 
     @Override
     protected void onSubCreate(Bundle savedInstanceState) {
@@ -46,28 +48,25 @@ public class FunctionsActivity extends BaseActivity {
 
         buttonNewFunction = findViewById(R.id.buttonNewFunction);
         buttonRefreshFunctions = findViewById(R.id.buttonRefreshFunctions);
-        tableFunctions = findViewById(R.id.tableFunctions);
+        listFunctions = findViewById(R.id.listFunctions);
 
         this.setFormActivityResultLauncher();
 
         buttonNewFunction.setOnClickListener(view -> formActivityResultLauncher.launch(new Intent(FunctionsActivity.this, FunctionFormActivity.class)));
         buttonRefreshFunctions.setOnClickListener(view -> this.refresh());
 
-        this.initTable();
+        this.initList();
         this.fetchFunctions();
 
         this.listenToAdapterOnClick();
     }
 
-    private void initTable() {
-        String[] displayedFields = new String[] {
-                "name",
-                "description"
-        };
-
-        tableFunctions.setDisplayedFields(displayedFields);
-        tableFunctions.setAction(FUNCTION_ACTION);
-        tableFunctions.setError(null);
+    private void initList() {
+        listFunctions.setParentField("parent");
+        listFunctions.setTitleField("name");
+        listFunctions.setContentField("description");
+        listFunctions.setAction(FUNCTION_ACTION);
+        listFunctions.setError(null);
     }
 
     private void fetchNewFunction(int id) {
@@ -80,18 +79,18 @@ public class FunctionsActivity extends BaseActivity {
                                 super.handleResponse(
                                         response,
                                         (responseBody, gson) -> {
-                                            tableFunctions.setError(null);
+                                            listFunctions.setError(null);
                                             FunctionResponse functionResponse = gson.fromJson(gson.toJson(responseBody), FunctionResponse.class);
-                                            tableFunctions.adapter.addNewItem(functionResponse);
+                                            listFunctions.addItem(functionResponse);
                                             super.pushToast("function with name: " + functionResponse.getName() + " added successfully");
-                                            tableFunctions.scrollTo(tableFunctions.getObjects().indexOf(functionResponse));
+                                            listFunctions.scrollTo(listFunctions.getObjects().indexOf(functionResponse));
                                         },
-                                        errorApiResponse -> tableFunctions.setError(errorApiResponse.getMessage())
+                                        errorApiResponse -> listFunctions.setError(errorApiResponse.getMessage())
                                 ),
                         error -> {
                             Log.e(ERROR_TAG, "fetchNewFunction: " + error.getMessage(), error);
                             super.pushToast(error.getMessage());
-                            tableFunctions.setError(error.getMessage());
+                            listFunctions.setError(error.getMessage());
                         }
                 );
 
@@ -100,7 +99,7 @@ public class FunctionsActivity extends BaseActivity {
 
     private void fetchEditedFunction(int id, int position) {
         Disposable disposable = RetrofitServiceManager.getFunctionService(this)
-                .getFunction(id)
+                .getFunctions(defaultPagination)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -108,29 +107,43 @@ public class FunctionsActivity extends BaseActivity {
                                 super.handleResponse(
                                         response,
                                         (responseBody, gson) -> {
-                                            tableFunctions.setError(null);
-                                            FunctionResponse functionResponse = gson.fromJson(gson.toJson(responseBody), FunctionResponse.class);
-                                            tableFunctions.adapter.modifyItem(position, functionResponse);
-                                            super.pushToast("function with name: " + functionResponse.getName() + " edited successfully");
-                                            tableFunctions.scrollTo(position);
+                                            listFunctions.setError(null);
+                                            Type type = new TypeToken<List<FunctionResponse>>() {}.getType();
+                                            List<FunctionResponse> functionResponses = gson.fromJson(gson.toJson(responseBody), type);
+
+                                            int newPosition = this.getIndexOfId(id, functionResponses);
+                                            if (position == newPosition) {
+                                                listFunctions.adapter.modifyItem(position, functionResponses.get(newPosition));
+                                            } else {
+                                                listFunctions.setObjects(functionResponses);
+                                            }
+                                            super.pushToast("function with name: " + functionResponses.get(newPosition).getName() + " edited successfully");
+                                            listFunctions.scrollTo(newPosition);
                                         },
-                                        errorApiResponse -> tableFunctions.setError(errorApiResponse.getMessage())
+                                        errorApiResponse -> listFunctions.setError(errorApiResponse.getMessage())
                                 ),
                         error -> {
                             Log.e(ERROR_TAG, "fetchEditedFunction: " + error.getMessage(), error);
                             super.pushToast(error.getMessage());
-                            tableFunctions.setError(error.getMessage());
+                            listFunctions.setError(error.getMessage());
                         }
                 );
 
         compositeDisposable.add(disposable);
     }
 
-    private void fetchFunctions() {
-        Pagination pagination = new Pagination(0);
+    private int getIndexOfId(int id, List<FunctionResponse> functionResponses) {
+        for (int i = 0; i < functionResponses.size(); i++) {
+            if (functionResponses.get(i).getId() == id) {
+                return i;
+            }
+        }
+        return  -1;
+    }
 
+    private void fetchFunctions() {
         Disposable disposable = RetrofitServiceManager.getFunctionService(this)
-                .getFunctions(pagination)
+                .getFunctions(defaultPagination)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -138,17 +151,17 @@ public class FunctionsActivity extends BaseActivity {
                                 super.handleResponse(
                                         response,
                                         (responseBody, gson) -> {
-                                            tableFunctions.setError(null);
+                                            listFunctions.setError(null);
                                             Type type = new TypeToken<List<FunctionResponse>>() {}.getType();
                                             List<FunctionResponse> functionResponses = gson.fromJson(gson.toJson(responseBody), type);
-                                            tableFunctions.setObjects(functionResponses);
+                                            listFunctions.setObjects(functionResponses);
                                         },
-                                        errorApiResponse -> tableFunctions.setError(errorApiResponse.getMessage())
+                                        errorApiResponse -> listFunctions.setError(errorApiResponse.getMessage())
                                 ),
                         error -> {
                             Log.e(ERROR_TAG, "fetchFunctions: " + error.getMessage(), error);
                             super.pushToast(error.getMessage());
-                            tableFunctions.setError(error.getMessage());
+                            listFunctions.setError(error.getMessage());
                         }
                 );
 

@@ -9,7 +9,6 @@ import fpt.edu.user_service.repositories.UserRepository;
 import fpt.edu.user_service.services.AuthService;
 import jakarta.ws.rs.BadRequestException;
 import lombok.extern.log4j.Log4j2;
-import org.modelmapper.ModelMapper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,8 +39,6 @@ public class AuthServiceImpl extends BaseService implements AuthService {
     private JwtUtilities jwtUtilities;
     @Autowired
     private RabbitTemplate rabbitTemplate;
-    @Autowired
-    private ModelMapper modelMapper;
 
     @Override
     public String login(String username, String password) {

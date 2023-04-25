@@ -39,11 +39,18 @@
     <string name="new_project_path">/projects/new</string>
     <string name="edit_project_path">/projects/edit</string>
 
-    <string name="tasks_path">/tasks</string>
     <string name="new_task_path">/tasks/new</string>
     <string name="edit_task_path">/tasks/edit</string>
     <string name="authorized_tasks_path">/tasks/authorized</string>
     <string name="assigned_tasks_path">/tasks/assigned</string>
+    <string name="observable_tasks_path">/tasks/observable</string>
+
+    <string name="attachments_by_task_path">/attachments/by</string>
+
+    <string name="checklist_by_task_path">/checklist/by</string>
+
+    <string name="comments_by_task_path">/comments/by</string>
+
 
 
     <string name="attachment_files_path">/files</string>
@@ -63,17 +70,24 @@
     <string name="authentication_title_login">Login</string>
     <string name="authentication_title_edit">Personal information</string>
 
+    <string name="authorized_projects_title">Authorized projects</string>
+    <string name="assigned_projects_title">Assigned projects</string>
+    <string name="projects_title">Projects</string>
     <string name="project_access_title_new">New project</string>
 
-    <string name="task_form_title_new">New Task</string>
+    <string name="task_access_title_new">New Task</string>
 
     <string name="project_access_menu_info">Info</string>
     <string name="project_access_menu_initiated">Initiated</string>
     <string name="project_access_menu_inProgress">In progress</string>
-    <string name="project_access_menu_pending">Pending</string>
     <string name="project_access_menu_completed">Completed</string>
     <string name="project_access_menu_overdue">Overdue</string>
-    <string name="project_access_menu_failed">Failed</string>
+
+
+    <string name="task_access_menu_info">Info</string>
+    <string name="task_access_menu_attachments">Attachments</string>
+    <string name="task_access_menu_checklist">Checklist</string>
+    <string name="task_access_menu_comments">Discussion</string>
 
 
     <string name="file_picker_menu_download">download</string>

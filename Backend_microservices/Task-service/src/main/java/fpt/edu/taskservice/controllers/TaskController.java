@@ -1,5 +1,6 @@
 package fpt.edu.taskservice.controllers;
 
+import fpt.edu.taskservice.dtos.requestDtos.EditStatusRequest;
 import fpt.edu.taskservice.dtos.requestDtos.EditTaskRequest;
 import fpt.edu.taskservice.dtos.requestDtos.NewTaskRequest;
 import fpt.edu.taskservice.dtos.responseDtos.TaskResponse;
@@ -36,9 +37,19 @@ public class TaskController extends BaseController {
         return ResponseEntity.ok(taskService.update(id, editTaskRequest, exchange));
     }
 
-    @GetMapping("")
-    public ResponseEntity<Flux<TaskResponse>> getTasks(@Nullable @ModelAttribute Pagination pagination) {
-        return ResponseEntity.ok(taskService.getAll(pagination));
+    @PutMapping(value = "/status/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Mono<TaskResponse>> editTaskStatus(@PathVariable("id") String id, @ModelAttribute EditStatusRequest editStatusRequest, ServerWebExchange exchange) {
+        return ResponseEntity.ok(taskService.updateStatus(id, editStatusRequest, exchange));
+    }
+
+    @GetMapping("/observable")
+    public ResponseEntity<Flux<TaskResponse>> getTasks(int status, @Nullable @ModelAttribute Pagination pagination) {
+        return ResponseEntity.ok(taskService.getTasks(status, pagination));
+    }
+
+    @GetMapping("/observable/{projectId}")
+    public ResponseEntity<Flux<TaskResponse>> getTasksByProject(int status, @PathVariable("projectId") String projectId, @Nullable @ModelAttribute Pagination pagination) {
+        return ResponseEntity.ok(taskService.getTasksByProject(projectId, status, pagination));
     }
 
     @GetMapping("/{id}")

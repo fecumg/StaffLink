@@ -5,7 +5,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29"
+        tools:ignore="ScopedStorage"/>
 
     <application
         android:allowBackup="true"
@@ -19,7 +21,7 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".TaskFormActivity"
+            android:name=".TaskAccessActivity"
             android:exported="true"
             android:launchMode="singleInstance" />
         <activity
@@ -27,14 +29,54 @@
             android:exported="true"
             android:launchMode="singleInstance"/>
         <activity
-            android:name=".ProjectsActivity"
+            android:name=".ObservableProjectsActivity"
             android:exported="true"
             android:launchMode="singleInstance">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="@string/default_scheme" />
+                <data android:scheme="@string/staff_link_scheme" />
+                <data
+                    android:host="@string/default_host"
+                    android:path="@string/projects_path"
+                    android:port="@string/default_port" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".AssignedProjectsActivity"
+            android:exported="true"
+            android:launchMode="singleInstance">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="@string/default_scheme" />
+                <data android:scheme="@string/staff_link_scheme" />
+                <data
+                    android:host="@string/default_host"
+                    android:path="@string/assigned_projects_path"
+                    android:port="@string/default_port" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".AuthorizedProjectsActivity"
+            android:exported="true"
+            android:launchMode="singleInstance">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
@@ -94,7 +136,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
 
-                <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 

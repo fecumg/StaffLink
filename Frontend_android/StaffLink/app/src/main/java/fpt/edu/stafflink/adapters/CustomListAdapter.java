@@ -29,15 +29,19 @@ import java.util.List;
 
 import fpt.edu.stafflink.R;
 import fpt.edu.stafflink.components.CustomImageComponentOval;
+import fpt.edu.stafflink.utilities.DimenUtils;
 import fpt.edu.stafflink.utilities.GenericUtils;
 
 public class CustomListAdapter<T> extends BaseAdapter<T, CustomListAdapter.ViewHolder>{
+    private static final int PADDING_STEP_IN_DP = 20;
+    private static final int DEFAULT_PADDING_IN_DP = 5;
 
     private static final int TYPE_EVEN = 0;
     private static final int TYPE_ODD = 1;
 
     private String titleField;
     private String contentField;
+    private String parentField;
     private int maxLines;
     private int height;
 
@@ -93,6 +97,19 @@ public class CustomListAdapter<T> extends BaseAdapter<T, CustomListAdapter.ViewH
         if (height > 0) {
             holder.itemListLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, this.height));
         }
+
+        if (StringUtils.isNotEmpty(parentField)) {
+            int paddingStepInPx = DimenUtils.dpToPx(holder.itemView.getContext(), PADDING_STEP_IN_DP);
+            int defaultPaddingInPx = DimenUtils.dpToPx(holder.itemView.getContext(), DEFAULT_PADDING_IN_DP);
+            int level = GenericUtils.getObjectLevel(object, this.parentField, 0);
+
+            holder.itemListLayout.setPadding(paddingStepInPx * level + defaultPaddingInPx, defaultPaddingInPx, defaultPaddingInPx, defaultPaddingInPx);
+
+            StringBuilder prependedStringBuilder = new StringBuilder();
+            for (int i = 0; i < level; i++) {
+                prependedStringBuilder.append("*");
+            }
+        }
     }
 
     private void onClickItem(View view, int id, String stringId, int position, String title, String content) {
@@ -137,6 +154,14 @@ public class CustomListAdapter<T> extends BaseAdapter<T, CustomListAdapter.ViewH
         this.titleField = titleField;
         this.contentField = contentField;
         notifyItemRangeChanged(0, formerItemCount > getItemCount() ? formerItemCount : getItemCount());
+    }
+
+    public void setParentField(String parentField) {
+        this.parentField = parentField;
+    }
+
+    public String getParentField() {
+        return this.parentField;
     }
 
     public void setMaxLines(int maxLines) {

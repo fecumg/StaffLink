@@ -5,15 +5,17 @@
     android:layout_height="wrap_content"
     android:id="@+id/customFilePickerComponentLayout">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/customFilePickerComponentMainElement"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
     <ImageButton
         android:id="@+id/customFilePickerComponentButton"
         android:layout_width="@dimen/submit_button_width"
         android:layout_height="@dimen/submit_button_height"
         android:src="@drawable/ic_attachment_light_foreground"
-        android:backgroundTint="@color/primary_light"/>
+        android:backgroundTint="@color/primary_light"
+        android:layout_gravity="end"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/customFilePickerComponentMainElement"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="4dp"/>
 </LinearLayout>

@@ -1,5 +1,6 @@
 package fpt.edu.stafflink.retrofit.services;
 
+import fpt.edu.stafflink.models.responseDtos.AttachmentResponse;
 import io.reactivex.Observable;
 import okhttp3.RequestBody;
 import retrofit2.Response;
@@ -10,7 +11,7 @@ import retrofit2.http.Path;
 
 public interface AttachmentService {
     @POST("/attachments/new")
-    Observable<Response<Object>> newAttachment(@Body RequestBody attachmentRequestBody);
+    Observable<Response<AttachmentResponse>> newAttachment(@Body RequestBody attachmentRequestBody);
 
     @DELETE("/attachments/delete/{id}")
     Observable<Response<Void>> deleteAttachment(@Path("id") String id);

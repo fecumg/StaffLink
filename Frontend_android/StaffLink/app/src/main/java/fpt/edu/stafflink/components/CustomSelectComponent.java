@@ -4,12 +4,14 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +33,10 @@ public class CustomSelectComponent<T> extends LinearLayout {
     private CharSequence nullValue;
     private CharSequence error;
     private boolean enabled;
+
+    ArrayAdapter<String> adapter;
+
+    private OnSelectHandler onSelectHandler;
 
     public CustomSelectComponent(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -124,6 +130,10 @@ public class CustomSelectComponent<T> extends LinearLayout {
         return this.enabled;
     }
 
+    public void setSpinnerColor(int color){
+        customSelectComponentMainElement.setBackgroundColor(color);
+    }
+
     private void initiateSpinner() {
         if (StringUtils.isEmpty(this.mainField) || this.options == null || this.options.size() == 0) {
             return;
@@ -138,12 +148,16 @@ public class CustomSelectComponent<T> extends LinearLayout {
                 })
                 .collect(Collectors.toList());
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, optionValues);
+        adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, optionValues);
         customSelectComponentMainElement.setAdapter(adapter);
+
         customSelectComponentMainElement.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 selectedOption = options.get(i);
+                if (onSelectHandler != null) {
+                    onSelectHandler.handle(view);
+                }
             }
 
             @Override
@@ -151,6 +165,10 @@ public class CustomSelectComponent<T> extends LinearLayout {
 
             }
         });
+    }
+
+    public void setOnSelectHandler(OnSelectHandler onSelectHandler) {
+        this.onSelectHandler = onSelectHandler;
     }
 
     private void setAttributes(AttributeSet attrs) {
@@ -168,5 +186,9 @@ public class CustomSelectComponent<T> extends LinearLayout {
         } finally {
             typedArray.recycle();
         }
+    }
+
+    public interface OnSelectHandler {
+        void handle(View view);
     }
 }

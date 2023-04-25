@@ -6,7 +6,9 @@ import fpt.edu.user_service.dtos.responseDtos.RoleResponse;
 import fpt.edu.user_service.entities.Function;
 import fpt.edu.user_service.entities.Role;
 import fpt.edu.user_service.pagination.Pagination;
-import fpt.edu.user_service.repositories.*;
+import fpt.edu.user_service.repositories.FunctionRepository;
+import fpt.edu.user_service.repositories.RoleRepository;
+import fpt.edu.user_service.repositories.UserRepository;
 import fpt.edu.user_service.services.RoleService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.NotFoundException;
@@ -14,10 +16,6 @@ import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,14 +46,10 @@ public class RoleServiceImpl extends BaseService implements RoleService {
     private UserRepository userRepository;
     @Autowired
     private FunctionRepository functionRepository;
-    @Autowired
-    private RoleFunctionMappingRepository roleFunctionMappingRepository;
-    @Autowired
-    private UserRoleMappingRepository userRoleMappingRepository;
 
     @Override
-    @CacheEvict(value = getAllMethodCache, allEntries = true)
-    @CachePut(value = getMethodCache, key = "#result.getId()")
+//    @CacheEvict(value = getAllMethodCache, allEntries = true)
+//    @CachePut(value = getMethodCache, key = "#result.getId()")
     public RoleResponse save(RoleRequest roleRequest, HttpServletRequest request) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         Role role = modelMapper.map(roleRequest, Role.class);
 
@@ -71,8 +65,8 @@ public class RoleServiceImpl extends BaseService implements RoleService {
     }
 
     @Override
-    @CacheEvict(value = getAllMethodCache, allEntries = true)
-    @CachePut(value = getMethodCache, key = "#id")
+//    @CacheEvict(value = getAllMethodCache, allEntries = true)
+//    @CachePut(value = getMethodCache, key = "#id")
     public RoleResponse update(int id, RoleRequest roleRequest, HttpServletRequest request) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         Optional<Role> optionalRole = roleRepository.findById(id);
         if (optionalRole.isPresent()) {
@@ -81,9 +75,7 @@ public class RoleServiceImpl extends BaseService implements RoleService {
 //            set updatedBy
             setUpdatedBy(role, request);
 
-//            delete all existing function assignments (needs experiments)
-            Role currentRole = optionalRole.get();
-
+//            set id
             role.setId(id);
 
 //            set functions
@@ -122,7 +114,7 @@ public class RoleServiceImpl extends BaseService implements RoleService {
     }
 
     @Override
-    @Cacheable(value = getAllMethodCache, key = "#pagination.getPageNumber()")
+//    @Cacheable(value = getAllMethodCache, key = "#pagination.getPageNumber()")
     public List<RoleResponse> getAll(Pagination pagination) {
         List<Role> roles = Pagination.retrieve(
                 pagination,
@@ -135,7 +127,7 @@ public class RoleServiceImpl extends BaseService implements RoleService {
     }
 
     @Override
-    @Cacheable(value = getMethodCache, key = "#id")
+//    @Cacheable(value = getMethodCache, key = "#id")
     public RoleResponse get(int id) {
         Optional<Role> optionalRole = roleRepository.findById(id);
         if (optionalRole.isPresent()) {
@@ -146,11 +138,11 @@ public class RoleServiceImpl extends BaseService implements RoleService {
     }
 
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = getAllMethodCache),
-            @CacheEvict(value = getMethodCache, key = "#id")
-            }
-    )
+//    @Caching(evict = {
+//            @CacheEvict(value = getAllMethodCache),
+//            @CacheEvict(value = getMethodCache, key = "#id")
+//            }
+//    )
     public void delete(int id) {
         Optional<Role> optionalRole = roleRepository.findById(id);
         if (optionalRole.isPresent()) {

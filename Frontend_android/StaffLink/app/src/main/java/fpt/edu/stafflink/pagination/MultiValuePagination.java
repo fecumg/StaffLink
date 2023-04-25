@@ -7,8 +7,8 @@ import org.springframework.util.LinkedMultiValueMap;
  */
 
 public class MultiValuePagination extends LinkedMultiValueMap<String, String> {
-    private static final String ASC = "ASC";
-    private static final String DESC = "DESC";
+    public static final String ASC = "ASC";
+    public static final String DESC = "DESC";
 
     private int pageNumber = 0;
     private int pageSize = 10;
@@ -27,6 +27,12 @@ public class MultiValuePagination extends LinkedMultiValueMap<String, String> {
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
         this.sortBy = sortBy;
+        this.generateMap();
+    }
+
+    public MultiValuePagination(String sortBy, String direction) {
+        this.sortBy = sortBy;
+        this.direction = direction;
         this.generateMap();
     }
 
@@ -57,6 +63,7 @@ public class MultiValuePagination extends LinkedMultiValueMap<String, String> {
 
     public void setPageNumber(int pageNumber) {
         this.pageNumber = pageNumber;
+        this.generateMap();
     }
 
     public int getPageSize() {
@@ -65,6 +72,7 @@ public class MultiValuePagination extends LinkedMultiValueMap<String, String> {
 
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
+        this.generateMap();
     }
 
     public String getSortBy() {
@@ -73,6 +81,7 @@ public class MultiValuePagination extends LinkedMultiValueMap<String, String> {
 
     public void setSortBy(String sortBy) {
         this.sortBy = sortBy;
+        this.generateMap();
     }
 
     public String getDirection() {
@@ -81,5 +90,6 @@ public class MultiValuePagination extends LinkedMultiValueMap<String, String> {
 
     public void setDirection(String direction) {
         this.direction = direction;
+        this.generateMap();
     }
 }

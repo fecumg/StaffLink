@@ -5,6 +5,7 @@ import fpt.edu.taskservice.dtos.requestDtos.AttachmentRequest;
 import fpt.edu.taskservice.dtos.responseDtos.AttachmentResponse;
 import fpt.edu.taskservice.entities.Attachment;
 import fpt.edu.taskservice.entities.Task;
+import fpt.edu.taskservice.pagination.Pagination;
 import fpt.edu.taskservice.repositories.AttachmentRepository;
 import fpt.edu.taskservice.repositories.TaskRepository;
 import fpt.edu.taskservice.services.AttachmentService;
@@ -20,6 +21,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,12 +29,14 @@ import reactor.core.publisher.Mono;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 
 /**
  * @author Truong Duc Duong
  */
 
 @Service
+@Transactional(rollbackFor = Exception.class)
 @Log4j2
 public class AttachmentServiceImpl extends BaseService<Attachment> implements AttachmentService {
 
@@ -46,9 +50,6 @@ public class AttachmentServiceImpl extends BaseService<Attachment> implements At
 
     @Value("${rabbitmq.routing-key.attachment-processing}")
     private String ATTACHMENT_PROCESSING_ROUTING_KEY;
-
-    @Value("${rabbitmq.routing-key.attachment-removal}")
-    private String ATTACHMENT_REMOVAL_ROUTING_KEY;
 
     @Autowired
     private AttachmentRepository attachmentRepository;
@@ -90,6 +91,15 @@ public class AttachmentServiceImpl extends BaseService<Attachment> implements At
     }
 
     @Override
+    public Flux<AttachmentResponse> getAllByTaskId(String taskId, Pagination pagination) {
+        Flux<Attachment> attachmentFlux =  taskRepository.findById(taskId)
+                .switchIfEmpty(Mono.error(new NotFoundException( "Task not found")))
+                .flatMapMany(task -> attachmentRepository.findAllByTask(task));
+
+        return this.buildAttachmentResponseFlux(attachmentFlux, pagination);
+    }
+
+    @Override
     public Mono<AttachmentResponse> get(String id) {
         return attachmentRepository.findById(id)
                 .switchIfEmpty(Mono.error(new NotFoundException( "Attachment not found")))
@@ -99,25 +109,9 @@ public class AttachmentServiceImpl extends BaseService<Attachment> implements At
 
     @Override
     public Mono<Void> delete(String id) {
-        Mono<Attachment> attachmentMono = attachmentRepository.findById(id)
-                .switchIfEmpty(Mono.error(new NotFoundException( "Attachment not found")));
-
-        return taskRepository.findAll()
-                .flatMap(super::buildTask)
-                .filter(task -> task.getAttachments().stream().anyMatch(attachment -> id.equals(attachment.getId())))
-                .next()
-                .zipWith(attachmentMono, (task, attachment) -> {
-                    ExchangeAttachment exchangeAttachment = new ExchangeAttachment(task.getId(), attachment.getName());
-
-//                    delete temporary file if exists
-                    super.deleteTemporaryAttachmentFile(exchangeAttachment);
-
-//                    send message to File-service to delete attachment file
-                    rabbitTemplate.convertAndSend(EXCHANGE_NAME, ATTACHMENT_REMOVAL_ROUTING_KEY, exchangeAttachment);
-                    log.info("Message has been published via routing key '{}'", ATTACHMENT_REMOVAL_ROUTING_KEY);
-
-                    return attachment;
-                })
+        return attachmentRepository.findById(id)
+                .switchIfEmpty(Mono.error(new NotFoundException( "Attachment not found")))
+                .flatMap(super::deleteAttachmentFile)
                 .flatMap(attachment -> attachmentRepository.delete(attachment))
                 .doOnSuccess(voidValue -> log.info("Attachment with id {} has been deleted successfully", id))
                 .doOnError(throwable -> log.error(throwable.getMessage()));
@@ -151,6 +145,13 @@ public class AttachmentServiceImpl extends BaseService<Attachment> implements At
 
                     return filePart;
                 });
+    }
+
+    private Flux<AttachmentResponse> buildAttachmentResponseFlux(Flux<Attachment> attachmentFlux, Pagination pagination) {
+        return super.paginate(attachmentFlux, pagination)
+                .map(AttachmentResponse::new)
+                .delayElements(Duration.ofMillis(100))
+                .doOnError(throwable -> log.error(throwable.getMessage()));
     }
 
     @RabbitListener(queues = {"${rabbitmq.queue.attachment-processing-done}"})

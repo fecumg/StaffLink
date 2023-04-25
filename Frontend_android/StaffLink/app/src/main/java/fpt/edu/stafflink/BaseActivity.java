@@ -37,6 +37,7 @@ import fpt.edu.stafflink.models.responseDtos.FunctionResponse;
 import fpt.edu.stafflink.models.responseDtos.UserResponse;
 import fpt.edu.stafflink.response.ErrorApiResponse;
 import fpt.edu.stafflink.response.RetrofitResponse.ErrorResponseHandler;
+import fpt.edu.stafflink.response.RetrofitResponse.GenericResponseHandler;
 import fpt.edu.stafflink.response.RetrofitResponse.MergedResponse;
 import fpt.edu.stafflink.response.RetrofitResponse.MergedResponseHandler;
 import fpt.edu.stafflink.response.RetrofitResponse.ResponseHandler;
@@ -155,7 +156,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
-    public <T> void handleGenericResponse(Response<T> response, ResponseHandlerSecond<T> handler, ErrorResponseHandler errorHandler) {
+    public <T> void handleGenericResponse(Response<T> response, GenericResponseHandler<T> handler, ErrorResponseHandler errorHandler) {
         Gson gson = new GsonBuilder().create();
         if (response.isSuccessful()) {
             T resBody = response.body();
@@ -175,10 +176,6 @@ public abstract class BaseActivity extends AppCompatActivity {
                 Log.e(ERROR_TAG, "handleGenericResponse: " + e.getMessage(), e);
             }
         }
-    }
-
-    public interface ResponseHandlerSecond<T> {
-        void handle(T responseBody);
     }
 
     public void handleMergedResponse(MergedResponse mergedResponse, MergedResponseHandler handler, ErrorResponseHandler errorHandler) {
@@ -246,7 +243,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
-    private void fetchAuthUser(Context context) {
+    protected void fetchAuthUser(Context context) {
         String bearer = this.getBearer();
         if (StringUtils.isNotEmpty(bearer.trim())) {
             Disposable disposable = RetrofitServiceManager.getUserService(this)
@@ -336,7 +333,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         sharedPreferences.edit().remove(getString(R.string.authorization_sharedPreference)).apply();
     }
 
-    protected String getBearer() {
+    public String getBearer() {
         return sharedPreferences.getString(getString(R.string.authorization_sharedPreference), "");
     }
 

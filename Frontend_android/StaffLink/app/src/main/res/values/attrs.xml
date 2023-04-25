@@ -60,4 +60,12 @@
         <attr name="downloadable" format="boolean"/>
         <attr name="ableToPickFile" format="boolean"/>
     </declare-styleable>
+
+    <declare-styleable name="CustomCheckBoxComponent">
+        <attr name="buttonDrawable" format="reference"/>
+        <attr name="android:textSize"/>
+        <attr name="ableToRemoveItems" format="boolean"/>
+        <attr name="ableToChangePositions" format="boolean"/>
+        <attr name="hasBottomLine" format="boolean"/>
+    </declare-styleable>
 </resources>

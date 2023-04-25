@@ -33,6 +33,8 @@ public class TaskResponse extends BaseResponse {
     private String status;
     private int statusCode;
     private List<AttachmentResponse> attachments;
+    private List<CheckItemResponse> checkItems;
+    private List<CommentResponse> comments;
 
     public TaskResponse(Task task) {
         this.id = task.getId();

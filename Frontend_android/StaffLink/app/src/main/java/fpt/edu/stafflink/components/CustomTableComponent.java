@@ -185,12 +185,14 @@ public class CustomTableComponent<T> extends LinearLayout {
     }
 
     public void scrollTo(int position) {
-        customTableComponentMainElement.scrollToPosition(position);
+        if (-1 < position && position < this.getObjects().size()) {
+            customTableComponentMainElement.smoothScrollToPosition(position);
+        }
     }
 
     public void scrollToBottom() {
         if (adapter.getItemCount() > 0) {
-            customTableComponentMainElement.scrollToPosition(adapter.getItemCount() - 1);
+            customTableComponentMainElement.smoothScrollToPosition(adapter.getItemCount() - 1);
         }
     }
 

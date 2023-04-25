@@ -28,6 +28,9 @@
     <color name="warning">#FFE5B000</color>
     <color name="warning_light">#E6C454</color>
 
+    <color name="success">#6BB345</color>
+    <color name="success_light">#82B568</color>
+
     <color name="danger">#FFC33951</color>
     <color name="danger_light">#C66878</color>
 

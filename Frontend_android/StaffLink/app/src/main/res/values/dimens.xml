@@ -8,7 +8,7 @@
     <dimen name="small_icon_size">50dp</dimen>
     <dimen name="medium_icon_size">80dp</dimen>
 
-    <dimen name="header_text_size">25sp</dimen>
+    <dimen name="header_text_size">20sp</dimen>
 
     <dimen name="submit_button_width">120dp</dimen>
     <dimen name="submit_button_height">60dp</dimen>
@@ -27,6 +27,7 @@
 
     <dimen name="normal_circular_avatar_size">200dp</dimen>
     <dimen name="small_circular_avatar_size">120dp</dimen>
+    <dimen name="tiny_circular_avatar_size">50dp</dimen>
 
     <dimen name="title_width">200dp</dimen>
     <dimen name="title_width_without_refresh">280dp</dimen>
@@ -35,4 +36,9 @@
     <dimen name="file_picker_item_width">250dp</dimen>
 
     <dimen name="search_result_padding">400dp</dimen>
+
+    <dimen name="spinner_height">40dp</dimen>
+    <dimen name="spinner_width">250dp</dimen>
+
+    <dimen name="button_checkbox_size">25dp</dimen>
 </resources>

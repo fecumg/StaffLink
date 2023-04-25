@@ -26,14 +26,16 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.tbruyelle.rxpermissions3.RxPermissions;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -75,6 +77,7 @@ public class CustomFilePickerComponent extends LinearLayout {
         super(context, attrs);
         this.initView(context);
         this.setAttributes(attrs);
+        this.initRxPermission();
     }
 
     private void initView(Context context) {
@@ -83,6 +86,7 @@ public class CustomFilePickerComponent extends LinearLayout {
         customFilePickerComponentButton = view.findViewById(R.id.customFilePickerComponentButton);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+//        RecyclerView.LayoutManager layoutManager = new FlexboxLayoutManager(getContext(), FlexDirection.ROW, FlexWrap.WRAP);
         customFilePickerComponentMainElement.setLayoutManager(layoutManager);
 
         adapter = new CustomFilePickerAdapter(new ArrayList<>(), DEFAULT_MAIN_FIELD) {
@@ -95,6 +99,14 @@ public class CustomFilePickerComponent extends LinearLayout {
         customFilePickerComponentMainElement.setAdapter(adapter);
     }
 
+    private void initRxPermission() {
+        AppCompatActivity activity = ActivityUtils.getActivity(getContext());
+        if (activity == null) {
+            return;
+        }
+        rxPermissions = new RxPermissions(activity);
+    }
+
     public void showMenuOnLongClickItem(View view, int position, SelectedAttachment selectedAttachment) {
         PopupMenu popupMenu = new PopupMenu(getContext(), view);
         popupMenu.getMenuInflater().inflate(R.menu.menu_file_picker, popupMenu.getMenu());
@@ -105,7 +117,7 @@ public class CustomFilePickerComponent extends LinearLayout {
 
         popupMenu.setOnMenuItemClickListener(menuItem -> {
             if (menuItem.getItemId() == R.id.menuFilePickerDownload) {
-                this.downloadAttachment(position, selectedAttachment);
+                this.downloadUnderPermission(position, selectedAttachment);
             } else if (menuItem.getItemId() == R.id.menuFilePickerRemove) {
                 this.onClickRemove(position, selectedAttachment);
             }
@@ -130,6 +142,22 @@ public class CustomFilePickerComponent extends LinearLayout {
         if (this.removeHandler != null) {
             this.removeHandler.handle(position, selectedAttachment);
         }
+    }
+
+    private void downloadUnderPermission(int position, SelectedAttachment selectedAttachment) {
+        AppCompatActivity activity = ActivityUtils.getActivity(getContext());
+        if (activity == null) {
+            return;
+        }
+
+        permissionDisposal = rxPermissions.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .subscribe(granted -> {
+                    if (granted) {
+                        this.downloadAttachment(position, selectedAttachment);
+                    } else {
+                        Toast.makeText(activity, "Storage access denied", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     public void downloadAttachment(int position, SelectedAttachment selectedAttachment) {
@@ -162,7 +190,18 @@ public class CustomFilePickerComponent extends LinearLayout {
         executor.execute(() -> {
             try {
                 this.writeFile(downloadLink, downloadFolderPath, selectedAttachment.getName(), progressBar, handler);
-            } catch (IOException e) {
+            } catch (FileNotFoundException e) {
+                if (getContext() instanceof BaseActivity) {
+                    BaseActivity baseActivity = (BaseActivity) getContext();
+                    baseActivity.runOnUiThread(() -> baseActivity.pushToast("file not found"));
+                }
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }catch (IOException e) {
+                if (getContext() instanceof BaseActivity) {
+                    BaseActivity baseActivity = (BaseActivity) getContext();
+                    baseActivity.runOnUiThread(() -> baseActivity.pushToast(e.getMessage()));
+                }
                 e.printStackTrace();
                 throw new RuntimeException(e);
             }
@@ -174,8 +213,14 @@ public class CustomFilePickerComponent extends LinearLayout {
         URLConnection connection = url.openConnection();
         connection.connect();
 
+        if (StringUtils.isEmpty(FilenameUtils.getExtension(filename))) {
+            filename += ".txt";
+        }
+
         try (InputStream input = connection.getInputStream();
              OutputStream output = Files.newOutputStream(Paths.get(downloadFolderPath + File.separator + filename), CREATE_NEW)) {
+
+            System.out.println("length2 " + connection.getContentLength());
 
             byte[] bytes = new byte[1024];
 
@@ -184,9 +229,7 @@ public class CustomFilePickerComponent extends LinearLayout {
             while ((count = input.read(bytes)) != -1) {
                 total += count;
 
-                System.out.println(total);
-
-//                    publish the progress
+//                publish the progress
                 this.publishProgress(progressBar, (int) ((total * 100) / connection.getContentLength()));
 
                 output.write(bytes, 0, count);
@@ -200,6 +243,10 @@ public class CustomFilePickerComponent extends LinearLayout {
             String newFilename = this.generateParallelFilename(filename);
             this.writeFile(downloadLink, downloadFolderPath, newFilename, progressBar, handler);
         }
+    }
+
+    private void publishProgress(ProgressBar progressBar, Integer... progress) {
+        progressBar.setProgress(progress[0]);
     }
 
     private String generateParallelFilename(String filename) {
@@ -231,7 +278,6 @@ public class CustomFilePickerComponent extends LinearLayout {
         if (activity == null) {
             return;
         }
-        rxPermissions = new RxPermissions(activity);
 
         customFilePickerComponentButton.setOnClickListener((view) ->
                 permissionDisposal = rxPermissions.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -258,6 +304,17 @@ public class CustomFilePickerComponent extends LinearLayout {
         );
     }
 
+    public void registerPickFileActivityResultLauncherOnFragment(Fragment fragment) {
+        pickFileActivityResultLauncher = fragment.registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                this::pickFile
+        );
+    }
+
+    public void flushPickFileActivityResultLauncher() {
+        pickFileActivityResultLauncher = null;
+    }
+
     private void pickFile(ActivityResult result) {
         if (result.getResultCode() == RESULT_OK && result.getData() != null) {
             Uri uri = result.getData().getData();
@@ -268,10 +325,6 @@ public class CustomFilePickerComponent extends LinearLayout {
 
             permissionDisposal.dispose();
         }
-    }
-
-    private void publishProgress(ProgressBar progressBar, Integer... progress) {
-        progressBar.setProgress(progress[0]);
     }
 
     public void setData(List<SelectedAttachment> objects, String mainField) {
@@ -320,6 +373,12 @@ public class CustomFilePickerComponent extends LinearLayout {
 
     public boolean getDownloadable() {
         return this.adapter.isDownloadable();
+    }
+
+    public void scrollTo(int position) {
+        if (-1 < position && position < this.getObjects().size()) {
+            customFilePickerComponentMainElement.smoothScrollToPosition(position);
+        }
     }
 
     public void setUploadHandler(UploadHandler uploadHandler) {

@@ -24,4 +24,20 @@
         <!-- inactive track color -->
         <item name="android:colorForeground">#42221f1f</item>
     </style>
+
+    <style name="progressBarSuccess" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/success</item>
+    </style>
+    <style name="progressBarWarning" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/warning</item>
+    </style>
+    <style name="progressBarDanger" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/danger</item>
+    </style>
+    <style name="progressBarPrimary" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/primary</item>
+    </style>
+    <style name="progressBarDark" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/dark</item>
+    </style>
 </resources>

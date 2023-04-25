@@ -3,7 +3,9 @@ package fpt.edu.taskservice.controllers;
 import fpt.edu.taskservice.dtos.exchangeDtos.ExchangeAttachment;
 import fpt.edu.taskservice.dtos.requestDtos.AttachmentRequest;
 import fpt.edu.taskservice.dtos.responseDtos.AttachmentResponse;
+import fpt.edu.taskservice.pagination.Pagination;
 import fpt.edu.taskservice.services.AttachmentService;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
@@ -34,6 +36,11 @@ public class AttachmentController extends BaseController {
     @PostMapping(value = "/new", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Mono<AttachmentResponse>> newAttachment(@ModelAttribute AttachmentRequest attachmentRequest, ServerWebExchange exchange) {
         return ResponseEntity.ok(attachmentService.save(attachmentRequest, exchange));
+    }
+
+    @GetMapping("/by/{taskId}")
+    public ResponseEntity<Flux<AttachmentResponse>> getAttachmentsByTaskId(@PathVariable("taskId") String taskId, @Nullable @ModelAttribute Pagination pagination) {
+        return ResponseEntity.ok(attachmentService.getAllByTaskId(taskId, pagination));
     }
 
     @GetMapping("/{id}")

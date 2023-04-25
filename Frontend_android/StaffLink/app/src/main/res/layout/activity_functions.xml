@@ -39,8 +39,13 @@
             android:layout_toLeftOf="@+id/buttonNewFunction"/>
     </RelativeLayout>
 
-    <fpt.edu.stafflink.components.CustomTableComponent
-        android:id="@+id/tableFunctions"
+<!--    <fpt.edu.stafflink.components.CustomTableComponent-->
+<!--        android:id="@+id/tableFunctions"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"/>-->
+
+    <fpt.edu.stafflink.components.CustomListComponent
+        android:id="@+id/listFunctions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 </LinearLayout>

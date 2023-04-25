@@ -5,16 +5,16 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProjectsActivity">
+    tools:context=".AuthorizedProjectsActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <TextView
+            android:id="@+id/ProjectsActivityTitle"
             android:layout_width="@dimen/title_width"
             android:layout_height="wrap_content"
-            android:text="Projects"
             android:textSize="@dimen/header_text_size"
             android:textStyle="bold"
             android:gravity="center"

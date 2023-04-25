@@ -11,11 +11,18 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
 import fpt.edu.stafflink.R;
 import fpt.edu.stafflink.adapters.CustomListAdapter;
+import fpt.edu.stafflink.pagination.Pagination;
+import fpt.edu.stafflink.utilities.GenericUtils;
 
 public class CustomListComponent<T> extends LinearLayout {
     private static final String ERROR_TAG = "CustomListComponent";
@@ -57,15 +64,34 @@ public class CustomListComponent<T> extends LinearLayout {
     }
 
     public void setData(List<T> objects, String titleField, String contentField) {
+        if (StringUtils.isNotEmpty(this.adapter.getParentField())) {
+            objects = GenericUtils.rearrange(objects, null, this.adapter.getParentField());
+        }
         this.adapter.setData(objects, titleField, contentField);
     }
 
     public void setObjects(List<T> objects) {
+        if (StringUtils.isNotEmpty(this.adapter.getParentField())) {
+            objects = GenericUtils.rearrange(objects, null, this.adapter.getParentField());
+        }
         this.adapter.setObjects(objects);
     }
 
     public void addItem(T object) {
-        this.adapter.addNewItem(object);
+        if (StringUtils.isNotEmpty(this.adapter.getParentField())) {
+            List<T> clonedObjects = new ArrayList<>(this.getObjects());
+            clonedObjects.add(object);
+            clonedObjects = GenericUtils.rearrange(clonedObjects, null, this.adapter.getParentField());
+
+            int position = GenericUtils.getIndexOf(object, clonedObjects);
+            if (position != -1) {
+                this.adapter.insertItem(position, object);
+            } else {
+                this.adapter.addNewItem(object);
+            }
+        } else {
+            this.adapter.addNewItem(object);
+        }
     }
 
     public List<T> getObjects() {
@@ -80,6 +106,11 @@ public class CustomListComponent<T> extends LinearLayout {
         return this.adapter.getAction();
     }
 
+    public void setParentField(String parentField) {
+        this.adapter.setParentField(parentField);
+        this.adapter.setObjects(GenericUtils.rearrange(this.adapter.getObjects(), null, this.adapter.getParentField()));
+    }
+
     public void setError(CharSequence error) {
         this.error = error;
         customListComponentError.setText(error);
@@ -90,7 +121,9 @@ public class CustomListComponent<T> extends LinearLayout {
     }
 
     public void scrollTo(int position) {
-        customListComponentMainElement.scrollToPosition(position);
+        if (-1 < position && position < this.getObjects().size()) {
+            customListComponentMainElement.smoothScrollToPosition(position);
+        }
     }
 
     public void setItemMaxLines(int maxLines) {

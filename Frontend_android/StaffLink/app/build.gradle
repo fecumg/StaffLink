@@ -87,5 +87,10 @@ dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux:2.7.6'
+    implementation group: 'io.netty', name: 'netty-resolver-dns-native-macos', version: '4.1.90.Final', classifier: 'osx-aarch_64'
+
+    implementation 'commons-io:commons-io:2.11.0'
+
+    implementation 'dev.gustavoavila:java-android-websocket-client:2.0.2'
 
 }

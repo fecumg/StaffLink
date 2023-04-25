@@ -56,6 +56,12 @@ public abstract class BaseAdapter<T, TViewHolder extends RecyclerView.ViewHolder
         notifyItemInserted(this.objects.size());
     }
 
+    public void insertItem(int position, T object) {
+        this.objects.add(position, object);
+        notifyItemInserted(position);
+        notifyItemRangeChanged(0, getItemCount());
+    }
+
     public void addNewItems(List<T> objects) {
         int positionStart = this.objects.size();
         this.objects.addAll(objects);

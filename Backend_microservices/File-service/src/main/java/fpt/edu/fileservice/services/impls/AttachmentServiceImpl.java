@@ -121,7 +121,7 @@ public class AttachmentServiceImpl extends BaseService implements AttachmentServ
         }
     }
 
-    private ByteArrayResource retrieveAttachment(ExchangeAttachment exchangeAttachment) {
+    private ByteArrayResource retrieveAttachment(ExchangeAttachment exchangeAttachment) throws IOException {
         String attachmentFolderDirectory = System.getProperty("user.dir") + File.separator + UPLOADS + File.separator + ATTACHMENTS;
 
         String taskId = exchangeAttachment.getTaskId();
@@ -159,8 +159,6 @@ public class AttachmentServiceImpl extends BaseService implements AttachmentServ
 
             Path path = Paths.get(fileDirectory);
             return new ByteArrayResource(Files.readAllBytes(path));
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -183,6 +181,9 @@ public class AttachmentServiceImpl extends BaseService implements AttachmentServ
         String fileDirectory = attachmentFolderDirectory + File.separator + taskId + File.separator + filename;
         File file = new File(fileDirectory);
         Path path = Paths.get(fileDirectory);
+
+        System.out.println(file.exists());
+
         if (file.exists()) {
             return new ByteArrayResource(Files.readAllBytes(path));
         } else {

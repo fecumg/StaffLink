@@ -161,6 +161,8 @@ public class RoleFormActivity extends BaseActivity {
                                                 "name");
                                         bindEditedRole(roleResponse);
                                         checkBoxFunctions.setError(null);
+
+                                        roleResponse.getFunctions().forEach(checkedFunction -> System.out.println(checkedFunction.getName()));
                                     },
                                     errorApiResponse -> checkBoxFunctions.setError(errorApiResponse.getMessage())
                                 ),
