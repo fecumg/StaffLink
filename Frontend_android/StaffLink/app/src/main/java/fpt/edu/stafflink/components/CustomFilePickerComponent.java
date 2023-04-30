@@ -29,6 +29,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexWrap;
+import com.google.android.flexbox.FlexboxLayoutManager;
 import com.tbruyelle.rxpermissions3.RxPermissions;
 
 import org.apache.commons.io.FilenameUtils;
@@ -85,8 +89,8 @@ public class CustomFilePickerComponent extends LinearLayout {
         customFilePickerComponentMainElement = view.findViewById(R.id.customFilePickerComponentMainElement);
         customFilePickerComponentButton = view.findViewById(R.id.customFilePickerComponentButton);
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
-//        RecyclerView.LayoutManager layoutManager = new FlexboxLayoutManager(getContext(), FlexDirection.ROW, FlexWrap.WRAP);
+//        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        RecyclerView.LayoutManager layoutManager = new FlexboxLayoutManager(getContext(), FlexDirection.ROW, FlexWrap.WRAP);
         customFilePickerComponentMainElement.setLayoutManager(layoutManager);
 
         adapter = new CustomFilePickerAdapter(new ArrayList<>(), DEFAULT_MAIN_FIELD) {
@@ -110,10 +114,9 @@ public class CustomFilePickerComponent extends LinearLayout {
     public void showMenuOnLongClickItem(View view, int position, SelectedAttachment selectedAttachment) {
         PopupMenu popupMenu = new PopupMenu(getContext(), view);
         popupMenu.getMenuInflater().inflate(R.menu.menu_file_picker, popupMenu.getMenu());
+        popupMenu.getMenu().findItem(R.id.menuFilePickerDownload).setVisible(this.adapter.isDownloadable());
+        popupMenu.getMenu().findItem(R.id.menuFilePickerRemove).setVisible(this.adapter.isRemovable());
         popupMenu.show();
-
-        popupMenu.getMenu().findItem(R.id.menuFilePickerDownload).setEnabled(this.adapter.isDownloadable());
-        popupMenu.getMenu().findItem(R.id.menuFilePickerRemove).setEnabled(this.adapter.isDownloadable());
 
         popupMenu.setOnMenuItemClickListener(menuItem -> {
             if (menuItem.getItemId() == R.id.menuFilePickerDownload) {

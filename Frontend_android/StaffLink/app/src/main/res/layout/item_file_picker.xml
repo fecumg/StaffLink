@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+    android:layout_width="@dimen/file_picker_item_width"
     android:layout_height="@dimen/file_picker_item_height"
     android:id="@+id/itemFilePickerLayout"
     android:background="@color/transparent_shadow_40"
     android:padding="5dp"
-    android:layout_marginBottom="5dp">
+    android:layout_marginBottom="10dp"
+    android:layout_marginEnd="10dp">
 
     <TextView
         android:id="@+id/itemFilePickerMainElement"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
+        android:layout_marginBottom="3dp"
         android:ellipsize="end"/>
 
     <ProgressBar

@@ -93,4 +93,5 @@ dependencies {
 
     implementation 'dev.gustavoavila:java-android-websocket-client:2.0.2'
 
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }

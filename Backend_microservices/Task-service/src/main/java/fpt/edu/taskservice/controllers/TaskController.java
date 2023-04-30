@@ -4,6 +4,7 @@ import fpt.edu.taskservice.dtos.requestDtos.EditStatusRequest;
 import fpt.edu.taskservice.dtos.requestDtos.EditTaskRequest;
 import fpt.edu.taskservice.dtos.requestDtos.NewTaskRequest;
 import fpt.edu.taskservice.dtos.responseDtos.TaskResponse;
+import fpt.edu.taskservice.dtos.responseDtos.TaskStatisticResponse;
 import fpt.edu.taskservice.pagination.Pagination;
 import fpt.edu.taskservice.services.TaskService;
 import jakarta.annotation.Nullable;
@@ -80,5 +81,10 @@ public class TaskController extends BaseController {
     @GetMapping("/assigned/{projectId}")
     public ResponseEntity<Flux<TaskResponse>> getAssignedTasksByProject(@PathVariable("projectId") String projectId, int status, @Nullable @ModelAttribute Pagination pagination, ServerWebExchange exchange) {
         return ResponseEntity.ok(taskService.getAssignedTasksByProject(projectId, status, pagination, exchange));
+    }
+
+    @GetMapping("/statistic")
+    public ResponseEntity<Mono<TaskStatisticResponse>> getTaskStatistic() {
+        return ResponseEntity.ok(taskService.getTaskStatistic());
     }
 }

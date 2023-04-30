@@ -5,6 +5,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:weightSum="100"
     tools:context=".LoginActivity">
 
     <RelativeLayout
@@ -12,24 +13,22 @@
         android:layout_height="wrap_content">
 
         <TextView
+            android:id="@+id/textViewTitle"
             android:layout_width="@dimen/title_width"
             android:layout_height="wrap_content"
-            android:text="Login"
+            android:text="Welcome"
             android:textSize="@dimen/header_text_size"
             android:textStyle="bold"
             android:gravity="center"
             android:textColor="@color/primary"
-            android:layout_centerVertical="true"
-            android:layout_centerInParent="true"/>
+            android:layout_centerHorizontal="true"/>
 
-        <ImageButton
-            android:id="@+id/buttonSubmitEdit"
-            android:layout_width="@dimen/small_icon_size"
-            android:layout_height="@dimen/small_icon_size"
-            android:src="@drawable/ic_check_light_foreground"
-            android:backgroundTint="@color/primary"
-            android:layout_alignParentEnd="true"
-            android:visibility="gone"/>
+        <ImageView
+            android:layout_width="@dimen/logo_width"
+            android:layout_height="@dimen/logo_height"
+            android:src="@drawable/staff_link_3d_brick"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/textViewTitle" />
     </RelativeLayout>
 
     <TextView

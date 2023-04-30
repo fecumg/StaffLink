@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 import fpt.edu.stafflink.components.CustomImageComponentOval;
@@ -81,6 +82,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             throwable.printStackTrace();
+
             Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
 
             if (throwable instanceof UnauthorizedException) {
@@ -233,13 +235,20 @@ public abstract class BaseActivity extends AppCompatActivity {
                                                     authorizedFunctions.setValue(gson.fromJson(gson.toJson(resBody), type));
                                                     this.setNavigationFunctions(this.authorizedFunctions.getValue());
                                                 },
-                                                errorResBody -> baseNavigationComponent.setError(errorResBody.getMessage())),
+                                                errorResBody -> {
+                                                    baseNavigationComponent.setError(errorResBody.getMessage());
+                                                    this.setNavigationFunctions(new ArrayList<>());
+                                                }
+                            ),
                             error -> {
                                 Log.e(ERROR_TAG, "fetchAuthorizedFunctions: " + error.getMessage(), error);
                                 this.pushToast(error.getMessage());
+                                this.setNavigationFunctions(new ArrayList<>());
                             });
 
             compositeDisposable.add(disposable);
+        } else {
+            this.setNavigationFunctions(new ArrayList<>());
         }
     }
 
@@ -304,6 +313,8 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         baseNavigationButtonLogout.setOnClickListener(view -> {
             this.removeBearer();
+            this.authUser.setValue(null);
+            this.authorizedFunctions.setValue(null);
             ActivityUtils.goTo(this, getString(R.string.login_path));
         });
     }

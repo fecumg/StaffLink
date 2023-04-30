@@ -88,6 +88,7 @@ public class AttachmentsFragment extends BaseFragment{
     private void initFilePickerAttachments() {
         filePickerAttachments.setDownloadable(true);
         filePickerAttachments.setMainField("name");
+
         if (this.accessType == PROJECT_ACCESS_TYPE_OBSERVABLE) {
             filePickerAttachments.setCancellable(false);
             filePickerAttachments.setAbleToPickFile(false);

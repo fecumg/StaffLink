@@ -42,8 +42,6 @@ public class LoginActivity extends BaseActivity {
         inputTextCredentialUsername = findViewById(R.id.inputTextCredentialUsername);
         inputTextCredentialPassword = findViewById(R.id.inputTextCredentialPassword);
         buttonLogin = findViewById(R.id.buttonLogin);
-
-        this.initiate();
     }
 
     @Override
@@ -54,6 +52,9 @@ public class LoginActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        this.initiate();
+
         inputTextCredentialUsername.setText(null);
         inputTextCredentialUsername.clearFocus();
 
@@ -62,7 +63,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     private void initiate() {
-        if (StringUtils.isEmpty(super.getBearer().trim())) {
+        if (StringUtils.isEmpty(super.getBearer())) {
             buttonLogin.setOnClick(view -> {
                 LoginRequest loginRequest = this.validateLoginRequest();
                 if (loginRequest != null) {
@@ -140,8 +141,6 @@ public class LoginActivity extends BaseActivity {
     private void goToInitialActivity() {
         String bearer = super.getBearer();
 
-        System.out.println(bearer);
-
         if (StringUtils.isNotEmpty(bearer.trim())) {
             Disposable disposable = RetrofitServiceManager.getFunctionService(this)
                     .getAuthorizedFunctions()
@@ -172,6 +171,8 @@ public class LoginActivity extends BaseActivity {
             ActivityUtils.goTo(this, getString(R.string.authorized_projects_path));
         } else if (this.isAuthorizedOnLogin(authorizedFunctions, getString(R.string.assigned_projects_path))) {
             ActivityUtils.goTo(this, getString(R.string.assigned_projects_path));
+        } else if (this.isAuthorizedOnLogin(authorizedFunctions, getString(R.string.task_statistic_path))) {
+            ActivityUtils.goTo(this, getString(R.string.task_statistic_path));
         } else if (this.isAuthorizedOnLogin(authorizedFunctions, getString(R.string.projects_path))) {
             ActivityUtils.goTo(this, getString(R.string.projects_path));
         } else if (this.isAuthorizedOnLogin(authorizedFunctions, getString(R.string.users_path))) {

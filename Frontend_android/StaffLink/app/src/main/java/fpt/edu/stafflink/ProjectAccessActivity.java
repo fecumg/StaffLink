@@ -243,7 +243,7 @@ public class ProjectAccessActivity extends BaseActivity {
 
     private void showTasks(int status) {
         buttonSubmitProject.setVisibility(View.GONE);
-        fragment = TasksFragment.newInstance(this.projectId, this.position, this.accessType, status);
+        fragment = TasksFragment.newInstance(this.projectId, this.accessType, status);
         this.replaceFragment(fragment);
     }
 

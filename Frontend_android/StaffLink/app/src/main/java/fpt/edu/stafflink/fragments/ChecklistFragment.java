@@ -225,6 +225,7 @@ public class ChecklistFragment extends BaseFragment{
     }
 
     public void submitNewCheckItem(RequestBody newCheckItemRequestBody) {
+        inputTextContent.setText(null);
         Disposable disposable = RetrofitServiceManager.getCheckItemService(super.retrieveContext())
                 .newCheckItem(newCheckItemRequestBody)
                 .subscribeOn(Schedulers.io())
@@ -241,7 +242,6 @@ public class ChecklistFragment extends BaseFragment{
                                                 checkBoxChecklist.addNewItem(checkItemResponse);
                                             }
                                             checkBoxChecklist.scrollTo(0);
-                                            inputTextContent.setText(null);
                                             super.getBaseActivity().pushToast("Check item added successfully");
                                         },
                                         errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())

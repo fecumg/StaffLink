@@ -24,6 +24,8 @@ public class TaskResponse extends BaseResponse {
     private String id;
     private String name;
     private String description;
+    private String projectName;
+    private String tree;
 
     @JsonSerialize(as = Date.class)
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="GMT")
@@ -40,6 +42,10 @@ public class TaskResponse extends BaseResponse {
         this.id = task.getId();
         this.name = task.getName();
         this.description = task.getDescription();
+        if (task.getProject() != null) {
+            this.projectName = task.getProject().getName();
+            this.tree = task.getProject().getName() + "/" + task.getName();
+        }
         this.dueAt = task.getDueAt();
         this.userIds = task.getUserIds();
 

@@ -177,9 +177,6 @@ public class TaskInfoFragment extends BaseFragment{
     }
 
     private void prepareTaskForm() {
-
-        System.out.println(this.accessType + " *** " + getBaseActivity().isAuthorized(getString(R.string.edit_task_path)));
-
         if (
                 (this.accessType == PROJECT_ACCESS_TYPE_AUTHORIZED && getBaseActivity().isAuthorized(getString(R.string.edit_task_path))) ||
                         StringUtils.isEmpty(this.id)
@@ -237,8 +234,8 @@ public class TaskInfoFragment extends BaseFragment{
 
             selectStatus.setOnSelectHandler((view) -> {
                 if (selectStatus.getSelectedOption().getCode() == TaskStatus.INITIATED.getCode()) {
-                    selectStatus.setSpinnerColor(ContextCompat.getColor(super.retrieveContext(), R.color.secondary_light));
-                    ((TextView) view).setTextColor(ContextCompat.getColor(super.retrieveContext(), R.color.dark));
+                    selectStatus.setSpinnerColor(ContextCompat.getColor(super.retrieveContext(), R.color.primary_light));
+                    ((TextView) view).setTextColor(ContextCompat.getColor(super.retrieveContext(), R.color.light));
                 } else if (selectStatus.getSelectedOption().getCode() == TaskStatus.IN_PROGRESS.getCode()) {
                     selectStatus.setSpinnerColor(ContextCompat.getColor(super.retrieveContext(), R.color.warning_light));
                     ((TextView) view).setTextColor(ContextCompat.getColor(super.retrieveContext(), R.color.dark));

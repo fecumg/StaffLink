@@ -17,6 +17,8 @@ public class TaskResponse extends BaseResponse {
     private String id;
     private String name;
     private String description;
+    private String projectName;
+    private String tree;
     private Date dueAt;
     private List<Integer> userIds;
     private String status;
@@ -45,6 +47,22 @@ public class TaskResponse extends BaseResponse {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    public String getTree() {
+        return tree;
+    }
+
+    public void setTree(String tree) {
+        this.tree = tree;
     }
 
     public Date getDueAt() {

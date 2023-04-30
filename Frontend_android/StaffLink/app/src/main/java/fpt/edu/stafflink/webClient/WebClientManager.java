@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import fpt.edu.stafflink.R;
 import fpt.edu.stafflink.exceptions.UnauthorizedException;
 import fpt.edu.stafflink.response.ErrorApiResponse;
+import fpt.edu.stafflink.utilities.ActivityUtils;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
@@ -25,7 +26,7 @@ public class WebClientManager {
                 .baseUrl(domain)
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.newConnection().compress(true)))
                 .defaultHeader(context.getString(R.string.authorization_sharedPreference), bearer)
-                .filter(errorHandlingFilter())
+                .filter(errorHandlingFilter(context))
                 .build();
     }
 
@@ -36,10 +37,11 @@ public class WebClientManager {
         return webclientInstance;
     }
 
-    public static ExchangeFilterFunction errorHandlingFilter() {
+    public static ExchangeFilterFunction errorHandlingFilter(Context context) {
         return ExchangeFilterFunction.ofResponseProcessor(
                 clientResponse -> {
                     if(HttpStatus.UNAUTHORIZED.equals(clientResponse.statusCode())) {
+                        ActivityUtils.goTo(context, context.getString(R.string.unauthorized_path));
                         return clientResponse.bodyToMono(ErrorApiResponse.class)
                                 .flatMap(errorApiResponse -> Mono.error(new UnauthorizedException(errorApiResponse.getMessage())));
                     } else if (clientResponse.statusCode().isError()) {

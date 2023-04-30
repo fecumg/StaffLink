@@ -11,9 +11,19 @@ import fpt.edu.stafflink.pagination.MultiValuePagination;
 import fpt.edu.stafflink.webClient.WebClientServiceManager;
 
 public class AssignedProjectsActivity extends AuthorizedProjectsActivity {
+    private static final String ASSIGNED_PROJECT_ACTION = "AssignedProjectAction";
+
     @Override
     protected void initTitle() {
         ProjectsActivityTitle.setText(getString(R.string.assigned_projects_title));
+    }
+
+    @Override
+    protected void initTable() {
+        listProjects.setTitleField("name");
+        listProjects.setContentField("description");
+        listProjects.setAction(ASSIGNED_PROJECT_ACTION);
+        listProjects.setError(null);
     }
 
     @Override
@@ -40,6 +50,11 @@ public class AssignedProjectsActivity extends AuthorizedProjectsActivity {
                 );
 
         reactorCompositeDisposable.add(disposable);
+    }
+
+    @Override
+    protected void startToListenToAdapterOnClick() {
+        super.listenToAdapterOnClick(ASSIGNED_PROJECT_ACTION);
     }
 
     @Override

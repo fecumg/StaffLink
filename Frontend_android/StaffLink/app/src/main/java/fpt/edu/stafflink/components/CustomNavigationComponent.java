@@ -47,6 +47,10 @@ public class CustomNavigationComponent extends LinearLayout {
         this.adapter.setObjects(this.rearrangeFunctions(functions, null));
     }
 
+    public List<FunctionResponse> getFunctions() {
+        return this.adapter.getObjects();
+    }
+
     public void setFunctions(List<FunctionResponse> functions, String uri) {
         this.adapter.setUri(uri);
         this.adapter.setObjects(this.rearrangeFunctions(functions, null));

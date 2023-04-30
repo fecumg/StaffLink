@@ -36,7 +36,7 @@
             android:layout_height="@dimen/small_icon_size"
             android:src="@drawable/ic_refresh_light_foreground"
             android:backgroundTint="@color/secondary"
-            android:layout_toStartOf="@+id/buttonNewProject"/>
+            android:layout_alignParentStart="true"/>
     </RelativeLayout>
 
     <fpt.edu.stafflink.components.CustomInputTextComponent

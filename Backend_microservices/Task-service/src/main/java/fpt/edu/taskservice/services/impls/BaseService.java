@@ -227,6 +227,10 @@ public class BaseService<T> {
                 .map(CommentResponse::new)
                 .collectList();
 
+        Mono<List<Project>> projectListMono = projectRepository.findAll()
+                .flatMap(this::buildProject)
+                .collectList();
+
         return Mono.just(new TaskResponse(task))
                 .zipWith(attachmentResponsesMono, (taskResponse, attachmentResponses) -> {
                     taskResponse.setAttachments(attachmentResponses);
@@ -238,6 +242,17 @@ public class BaseService<T> {
                 })
                 .zipWith(comementResponsesMono, (taskResponse, commentResponses) -> {
                     taskResponse.setComments(commentResponses);
+                    return taskResponse;
+                })
+                .zipWith(projectListMono, (taskResponse, projects) -> {
+                    Project parentProject = projects.stream()
+                            .filter(project -> project.getTasks().stream().anyMatch(childTask -> taskResponse.getId().equals(childTask.getId())))
+                            .findFirst()
+                            .orElse(null);
+                    if (parentProject != null) {
+                        taskResponse.setProjectName(parentProject.getName());
+                        taskResponse.setTree(parentProject.getName() + "/" + taskResponse.getName());
+                    }
                     return taskResponse;
                 })
                 .doOnError(throwable -> log.error(throwable.getMessage()));

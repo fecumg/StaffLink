@@ -114,7 +114,12 @@ public class TaskAccessActivity extends BaseActivity {
         if (StringUtils.isEmpty(this.id)) {
             this.showInfoOnNew();
         } else{
-            String title = this.projectName + "/" + this.taskName;
+            String title;
+            if (StringUtils.isNotEmpty(this.projectName)) {
+                title = this.projectName + "/" + this.taskName;
+            } else {
+                title = this.taskName;
+            }
             textViewTaskAccessTitle.setText(title);
 
             taskAccessMenu.setVisibility(View.VISIBLE);

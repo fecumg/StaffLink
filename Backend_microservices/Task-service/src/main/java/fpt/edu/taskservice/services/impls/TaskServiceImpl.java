@@ -4,6 +4,7 @@ import fpt.edu.taskservice.dtos.requestDtos.EditStatusRequest;
 import fpt.edu.taskservice.dtos.requestDtos.EditTaskRequest;
 import fpt.edu.taskservice.dtos.requestDtos.NewTaskRequest;
 import fpt.edu.taskservice.dtos.responseDtos.TaskResponse;
+import fpt.edu.taskservice.dtos.responseDtos.TaskStatisticResponse;
 import fpt.edu.taskservice.entities.Task;
 import fpt.edu.taskservice.enums.TaskStatus;
 import fpt.edu.taskservice.pagination.Pagination;
@@ -222,6 +223,16 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
                 .filter(task -> task.getStatus() == status);
 
         return this.buildTaskResponseFlux(authorizedTaskFlux, pagination);
+    }
+
+    @Override
+    public Mono<TaskStatisticResponse> getTaskStatistic() {
+        Mono<Long> initiatedMono = taskRepository.countTasksByStatus(TaskStatus.INITIATED.getCode());
+        Mono<Long> inProgressMono = taskRepository.countTasksByStatus(TaskStatus.IN_PROGRESS.getCode());
+        Mono<Long> overdueMono = taskRepository.countTasksByStatus(TaskStatus.OVERDUE.getCode());
+
+        return Mono.zip(initiatedMono, inProgressMono, overdueMono)
+                .map(objects -> new TaskStatisticResponse(objects.getT1(), objects.getT2(), objects.getT3()));
     }
 
     private Mono<Task> setDueAt(Task task, Object taskRequest){

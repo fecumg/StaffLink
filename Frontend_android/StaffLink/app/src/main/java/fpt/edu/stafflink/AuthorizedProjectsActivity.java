@@ -41,7 +41,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class AuthorizedProjectsActivity extends BaseActivity {
     protected static final String ERROR_TAG = "AuthorizedProjectsActivity";
-    private static final String PROJECT_ACTION = "ProjectAction";
+    private static final String AUTHORIZED_PROJECT_ACTION = "AuthorizedProjectAction";
 
     private int pageNumber = 1;
     private static final int PAGE_SIZE = 20;
@@ -72,17 +72,17 @@ public class AuthorizedProjectsActivity extends BaseActivity {
         this.initTable();
 
         this.fetchProjects();
-        this.listenToAdapterOnClick();
+        this.startToListenToAdapterOnClick();
     }
 
     protected void initTitle() {
         ProjectsActivityTitle.setText(getString(R.string.authorized_projects_title));
     }
 
-    private void initTable() {
+    protected void initTable() {
         listProjects.setTitleField("name");
         listProjects.setContentField("description");
-        listProjects.setAction(PROJECT_ACTION);
+        listProjects.setAction(AUTHORIZED_PROJECT_ACTION);
         listProjects.setError(null);
     }
 
@@ -178,7 +178,11 @@ public class AuthorizedProjectsActivity extends BaseActivity {
         this.fetchProjects();
     }
 
-    private void listenToAdapterOnClick() {
+    protected void startToListenToAdapterOnClick() {
+        this.listenToAdapterOnClick(AUTHORIZED_PROJECT_ACTION);
+    }
+
+    protected void listenToAdapterOnClick(String action) {
         LocalBroadcastManager.getInstance(this)
                 .registerReceiver(new BroadcastReceiver() {
                     @Override
@@ -197,7 +201,7 @@ public class AuthorizedProjectsActivity extends BaseActivity {
                             formActivityResultLauncher.launch(accessProjectIntent);
                         }
                     }
-                }, new IntentFilter(PROJECT_ACTION));
+                }, new IntentFilter(action));
     }
 
     private void setFormActivityResultLauncher() {

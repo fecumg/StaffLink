@@ -4,6 +4,7 @@ import fpt.edu.taskservice.dtos.requestDtos.EditStatusRequest;
 import fpt.edu.taskservice.dtos.requestDtos.EditTaskRequest;
 import fpt.edu.taskservice.dtos.requestDtos.NewTaskRequest;
 import fpt.edu.taskservice.dtos.responseDtos.TaskResponse;
+import fpt.edu.taskservice.dtos.responseDtos.TaskStatisticResponse;
 import fpt.edu.taskservice.pagination.Pagination;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerWebExchange;
@@ -29,4 +30,6 @@ public interface TaskService {
     Flux<TaskResponse> getAssignedTasksByProject(String projectId, int status, Pagination pagination, ServerWebExchange exchange);
     Flux<TaskResponse> getAuthorizedTasks(int status, Pagination pagination, ServerWebExchange exchange);
     Flux<TaskResponse> getAuthorizedTasksByProjectId(String projectId, int status, Pagination pagination, ServerWebExchange exchange);
+
+    Mono<TaskStatisticResponse> getTaskStatistic();
 }

@@ -31,7 +31,6 @@ public class TasksFragment extends BaseFragment {
     CustomListComponent<TaskResponse> listTasks;
 
     private String projectId;
-    private int position;
     private int accessType;
     private int taskStatus;
 
@@ -41,11 +40,10 @@ public class TasksFragment extends BaseFragment {
         // Required empty public constructor
     }
 
-    public static TasksFragment newInstance(String id, int position, int accessType, int taskStatus) {
+    public static TasksFragment newInstance(String id, int accessType, int taskStatus) {
         TasksFragment fragment = new TasksFragment();
         Bundle args = new Bundle();
         args.putString(PARAM_STRING_ID, id);
-        args.putInt(PARAM_POSITION, position);
         args.putInt(PARAM_PROJECT_ACCESS_TYPE, accessType);
         args.putInt(PARAM_TASK_STATUS, taskStatus);
         fragment.setArguments(args);
@@ -57,7 +55,6 @@ public class TasksFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             this.projectId = getArguments().getString(PARAM_STRING_ID);
-            this.position = getArguments().getInt(PARAM_POSITION);
             this.accessType = getArguments().getInt(PARAM_PROJECT_ACCESS_TYPE);
             this.taskStatus = getArguments().getInt(PARAM_TASK_STATUS);
         }
@@ -98,7 +95,7 @@ public class TasksFragment extends BaseFragment {
         return view;
     }
 
-    private void initList() {
+    protected void initList() {
         listTasks.setTitleField("name");
         listTasks.setContentField("description");
         listTasks.setAction(TASK_ACTION);

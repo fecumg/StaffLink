@@ -11,6 +11,7 @@ import fpt.edu.taskservice.repositories.TaskRepository;
 import fpt.edu.taskservice.services.AttachmentService;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.List;
 
 /**
  * @author Truong Duc Duong
@@ -75,11 +77,21 @@ public class AttachmentServiceImpl extends BaseService<Attachment> implements At
 
     @Override
     public Mono<AttachmentResponse> save(AttachmentRequest attachmentRequest, ServerWebExchange exchange) {
-        return taskRepository.findById(attachmentRequest.getTaskId())
-                .switchIfEmpty(Mono.error(new NotFoundException( "Task not found")))
-                .flatMap(task -> this.processAttachmentFile(attachmentRequest.getAttachment(), task)
-                        .thenReturn(task))
-                .map(task -> new Attachment(attachmentRequest.getAttachment().filename(), task))
+        Mono<Task> taskMono = taskRepository.findById(attachmentRequest.getTaskId())
+                .switchIfEmpty(Mono.error(new NotFoundException( "Task not found")));
+
+        String requestFilename = attachmentRequest.getAttachment().filename();
+        Mono<String> filenameMono = taskMono
+                .flatMapMany(task -> attachmentRepository.findAllByTask(task))
+                .collectList()
+                .map(attachments -> this.processFilename(requestFilename, attachments));
+
+        return taskMono
+                .zipWith(filenameMono, (task, filename) ->
+                        this.processAttachmentFile(attachmentRequest.getAttachment(), filename, task)
+                                .thenReturn(new Attachment(filename, task))
+                )
+                .flatMap(mono -> mono)
                 .map(attachment -> {
                     super.setCreatedBy(attachment, exchange);
                     return attachment;
@@ -117,7 +129,7 @@ public class AttachmentServiceImpl extends BaseService<Attachment> implements At
                 .doOnError(throwable -> log.error(throwable.getMessage()));
     }
 
-    private Mono<FilePart> processAttachmentFile(FilePart filePart, Task task) {
+    private Mono<FilePart> processAttachmentFile(FilePart filePart, String filename, Task task) {
         String attachmentFolderDirectory = System.getProperty("user.dir") + File.separator + UPLOADS_TMP + File.separator + ATTACHMENT_FOLDER;
 
 //        create folder in case of non-existing
@@ -133,11 +145,11 @@ public class AttachmentServiceImpl extends BaseService<Attachment> implements At
             }
         }
 
-        return filePart.transferTo(folderPath.resolve(filePart.filename()))
+        return filePart.transferTo(folderPath.resolve(filename))
                 .thenReturn(filePart)
-                .doOnSuccess(fp -> log.info("File {} has been stored in folder {}", filePart.filename(), folderDirectory))
+                .doOnSuccess(fp -> log.info("File {} has been stored in folder {}", filename, folderDirectory))
                 .map(fp ->  {
-                    ExchangeAttachment exchangeAttachment = new ExchangeAttachment(task.getId(), filePart.filename());
+                    ExchangeAttachment exchangeAttachment = new ExchangeAttachment(task.getId(), filename);
 
 //                    send message to ask File-service to retrieve uploaded attachments
                     rabbitTemplate.convertAndSend(EXCHANGE_NAME, ATTACHMENT_PROCESSING_ROUTING_KEY, exchangeAttachment);
@@ -157,5 +169,38 @@ public class AttachmentServiceImpl extends BaseService<Attachment> implements At
     @RabbitListener(queues = {"${rabbitmq.queue.attachment-processing-done}"})
     private void listenToAttachmentProcessingDone(ExchangeAttachment exchangeAttachment) {
         super.deleteTemporaryAttachmentFile(exchangeAttachment);
+    }
+
+    private String processFilename(String filename, List<Attachment> attachments) {
+        for (Attachment attachment: attachments) {
+            if (filename.equals(attachment.getName())) {
+                return processFilename(generateParallelFilename(filename), attachments);
+            }
+        }
+        return filename;
+    }
+
+    private String generateParallelFilename(String filename) {
+        String extension = filename.substring(filename.lastIndexOf("."));
+        String filenameWithoutExtension = filename.substring(0, filename.lastIndexOf("."));
+        int lastIndexOfLodash = filenameWithoutExtension.lastIndexOf("_");
+        String defaultResult = filenameWithoutExtension + "_" + 1 + extension;
+        if (lastIndexOfLodash < 0) {
+            return defaultResult;
+        } else {
+            if (lastIndexOfLodash == filename.length() - 1) {
+                return filenameWithoutExtension + 1 + extension;
+            }
+            String suffix = filenameWithoutExtension.substring(lastIndexOfLodash + 1);
+            if (StringUtils.isEmpty(suffix)) {
+                return defaultResult;
+            }
+            try {
+                int suffixInt = Integer.parseInt(suffix);
+                return filenameWithoutExtension.substring(0, lastIndexOfLodash + 1) + (++suffixInt) + extension;
+            } catch (NumberFormatException e) {
+                return defaultResult;
+            }
+        }
     }
 }

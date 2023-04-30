@@ -51,9 +51,9 @@
 
     <string name="comments_by_task_path">/comments/by</string>
 
-
-
     <string name="attachment_files_path">/files</string>
+
+    <string name="task_statistic_path">/tasks/statistic</string>
 
 
     <string name="navigation_greeting">Hello, </string>
@@ -92,4 +92,14 @@
 
     <string name="file_picker_menu_download">download</string>
     <string name="file_picker_menu_remove">remove</string>
+
+
+    <string name="comment_channel_name">task comments</string>
+    <string name="comment_channel_description">channel to receive and notify incoming comments</string>
+
+
+    <string name="task_statistic_sub_title">Task statistic</string>
+    <string name="task_statistic_initiated_title">Initiated tasks</string>
+    <string name="task_statistic_in_progress_title">In progress tasks</string>
+    <string name="task_statistic_overdue_title">Overdue tasks</string>
 </resources>
