@@ -44,6 +44,8 @@ dependencies {
     implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.1.5'
 
     implementation group: 'io.netty', name: 'netty-resolver-dns-native-macos', version: '4.1.89.Final', classifier: 'osx-aarch_64'
+
+    implementation 'org.imgscalr:imgscalr-lib:4.2'
 }
 
 dependencyManagement {

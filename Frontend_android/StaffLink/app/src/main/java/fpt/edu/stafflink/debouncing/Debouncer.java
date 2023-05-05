@@ -62,9 +62,10 @@ public class Debouncer {
                 } else { // Mark as terminated and invoke callback
                     dueTime = -1;
                     try {
-                        callback.call();
-                    } finally {
                         delayedMap.remove(key);
+                        callback.call();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }

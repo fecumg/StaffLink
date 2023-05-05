@@ -53,13 +53,13 @@ public class FunctionController extends BaseController {
         }
     }
 
-    @GetMapping(value = "")
+    @GetMapping(value = "/all")
     public ResponseEntity<Object> getFunctions(@Nullable Pagination pagination) {
         List<FunctionResponse> functionResponses = functionService.getAll(pagination);
         return createSuccessResponse(functionResponses);
     }
 
-    @GetMapping(value = "/{id}")
+    @GetMapping(value = "/get/{id}")
     public ResponseEntity<Object> getFunction(@PathVariable("id") int id) {
         FunctionResponse functionResponse = functionService.get(id);
         return createSuccessResponse(functionResponse);
@@ -69,12 +69,6 @@ public class FunctionController extends BaseController {
     public ResponseEntity<?> deleteFunction(@PathVariable("id") int id) {
         functionService.delete(id);
         return createSuccessResponse();
-    }
-
-    @GetMapping(value = "/authorized")
-    public ResponseEntity<Object> getAuthorizedFunctions(HttpServletRequest request) {
-        List<FunctionResponse> authorizedFunctions = functionService.getAuthorizedFunctions(request);
-        return createSuccessResponse(authorizedFunctions);
     }
 
     @GetMapping(value = "/potentialParents/{id}")

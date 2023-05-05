@@ -38,6 +38,8 @@ public class CustomTableAdapter<T> extends BaseAdapter<T, CustomTableAdapter.Vie
     private static final int TYPE_ODD = 1;
     public static final int MAX_FIELD_NUMBER = 5;
 
+    public static final float IMAGE_WRAPPER_WEIGHT = 0.7f;
+
     private String[] displayedFields;
     private String[] imageFields;
     private int imageShape;
@@ -112,6 +114,8 @@ public class CustomTableAdapter<T> extends BaseAdapter<T, CustomTableAdapter.Vie
                     imageElement = (CustomImageComponent) itemTableElementWrapper.getChildAt(RECTANGULAR_IMAGE_INDEX);
                 }
 
+                holder.itemTableElementWrappers[i].setLayoutParams(imageLayoutParams());
+
                 imageElement.setVisibility(VISIBLE);
 
                 if (defaultImage != null) {
@@ -122,7 +126,7 @@ public class CustomTableAdapter<T> extends BaseAdapter<T, CustomTableAdapter.Vie
                     imageElement.setImageTint(defaultImageTint);
                 }
 
-                imageElement.setUrl(RetrofitManager.getImageUrl(imageElement.getContext(), GenericUtils.getFieldValue(object, fieldName)));
+                imageElement.setUrl(RetrofitManager.getThumbnailUrl(imageElement.getContext(), GenericUtils.getFieldValue(object, fieldName)));
             } else {
                 TextView textElement = (TextView) itemTableElementWrapper.getChildAt(TEXT_INDEX);
                 textElement.setVisibility(VISIBLE);
@@ -134,6 +138,14 @@ public class CustomTableAdapter<T> extends BaseAdapter<T, CustomTableAdapter.Vie
             }
         }
         holder.itemTableLayout.setOnClickListener(view -> super.onClickItem(view, super.getObjectId(object), position));
+    }
+
+    public LinearLayout.LayoutParams imageLayoutParams() {
+        return new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                IMAGE_WRAPPER_WEIGHT
+        );
     }
 
     public void setDisplayedFields(String[] displayedFields) {

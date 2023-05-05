@@ -181,7 +181,7 @@ public class TasksFragment extends BaseFragment {
         MultiValuePagination pagination = new MultiValuePagination();
 
         Disposable disposable = WebClientServiceManager.getTaskService()
-                .getAuthorizedTasksByProject(getContext(), projectId, this.taskStatus, pagination)
+                .getAssignedTasksByProject(getContext(), projectId, this.taskStatus, pagination)
                 .subscribe(
                         taskResponse -> getBaseActivity().runOnUiThread(() -> {
                             listTasks.setError(null);

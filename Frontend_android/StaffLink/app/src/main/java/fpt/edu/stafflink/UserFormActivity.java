@@ -178,15 +178,12 @@ public class UserFormActivity extends BaseActivity {
                                 super.handleMergedResponse(
                                     mergedResponse,
                                     (firstResBody, secondResBody, gson) -> {
+                                        checkBoxRoles.setError(null);
                                         Type type = new TypeToken<List<RoleResponse>>() {}.getType();
                                         List<RoleResponse> roleResponses = gson.fromJson(gson.toJson(firstResBody), type);
                                         UserResponse userResponse = gson.fromJson(gson.toJson(secondResBody), UserResponse.class);
-                                        checkBoxRoles.setData(
-                                                roleResponses,
-                                                new LinkedList<>(userResponse.getRoles()),
-                                                "name");
+                                        checkBoxRoles.setData(roleResponses, new LinkedList<>(userResponse.getRoles()), "name");
                                         bindEditedUser(context, userResponse);
-                                        checkBoxRoles.setError(null);
                                     },
                                     errorApiResponse -> checkBoxRoles.setError(errorApiResponse.getMessage())
                                 ),

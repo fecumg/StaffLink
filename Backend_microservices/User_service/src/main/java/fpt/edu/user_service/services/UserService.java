@@ -21,10 +21,9 @@ public interface UserService {
     UserResponse save(NewUserRequest newUserRequest, HttpServletRequest request) throws UniqueKeyViolationException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException;
     UserResponse update(int id, EditUserRequest editUserRequest, HttpServletRequest request) throws UniqueKeyViolationException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException;
     List<UserResponse> getAll(String search, Pagination pagination);
+    List<UserResponse> search(String search, Pagination pagination);
     UserResponse get(int id);
     void delete(int id);
 
     List<String> getAllAvatarNames();
-    UserResponse getAuthenticatedUser(HttpServletRequest request);
-    UserResponse editPersonalInfo(EditUserRequest editUserRequest, HttpServletRequest request) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException, UniqueKeyViolationException;
 }

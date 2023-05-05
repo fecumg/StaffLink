@@ -6,6 +6,7 @@ import fpt.edu.user_service.entities.Function;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,6 +47,7 @@ public class ExchangeUser {
         return user.getRoles().stream()
                 .flatMap(role -> role.getFunctions().stream())
                 .map(Function::getUri)
+                .filter(StringUtils::isNotEmpty)
                 .distinct()
                 .toList();
     }

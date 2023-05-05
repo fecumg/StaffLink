@@ -14,10 +14,10 @@ import retrofit2.http.QueryMap;
 
 public interface ProjectService {
 
-    @GET("/projects")
+    @GET("/projects/observable")
     Observable<Response<Object>> getProjects(@QueryMap Pagination pagination);
 
-    @GET("/projects/{id}")
+    @GET("/projects/get/{id}")
     Observable<Response<Object>> getProject(@Path("id") String id);
 
     @POST("/projects/new")

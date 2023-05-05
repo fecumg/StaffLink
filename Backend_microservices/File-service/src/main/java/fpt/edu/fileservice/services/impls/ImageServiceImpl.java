@@ -33,7 +33,8 @@ import java.util.Objects;
 @Log4j2
 public class ImageServiceImpl extends BaseService implements ImageService {
 
-    private final String IMAGE_FOLDER = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "images";
+    private static final String IMAGE_FOLDER = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "images";
+    private static final String THUMBNAIL_FOLDER = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "thumbnails";
 
     @Autowired
     private Environment env;
@@ -42,7 +43,20 @@ public class ImageServiceImpl extends BaseService implements ImageService {
 
     @Override
     public ByteArrayResource getImage(String filename) throws IOException {
-        String imagePath = IMAGE_FOLDER + File.separator + filename;
+        return getImageByteArrayResource(filename, IMAGE_FOLDER);
+    }
+
+    @Override
+    public ByteArrayResource getThumbnail(String filename) throws IOException {
+        try {
+            return getImageByteArrayResource(filename, THUMBNAIL_FOLDER);
+        } catch (NoSuchFileException e) {
+            return getImageByteArrayResource(filename, IMAGE_FOLDER);
+        }
+    }
+
+    private ByteArrayResource getImageByteArrayResource(String filename, String folderPath) throws IOException {
+        String imagePath = folderPath + File.separator + filename;
         File file = new File(imagePath);
         if (file.exists()) {
             return new ByteArrayResource(Files.readAllBytes(Paths.get(imagePath)));
@@ -91,30 +105,50 @@ public class ImageServiceImpl extends BaseService implements ImageService {
         }
 
 //        create containing folder in case of non-existing
-        this.createFolder(IMAGE_FOLDER);
+        createFolder(IMAGE_FOLDER);
+        createFolder(THUMBNAIL_FOLDER);
 
         String filePath = IMAGE_FOLDER + File.separator + filename;
         File file = new File(filePath);
 
+        String thumbnailPath = THUMBNAIL_FOLDER + File.separator + filename;
+        File thumbnail = new File(thumbnailPath);
+
 //        write file
-        try (BufferingOutputStream stream = new BufferingOutputStream(new FileOutputStream(file))) {
-            stream.write(bytes);
-            log.info("New image has been added to {}", filePath);
+        try (
+                BufferingOutputStream fileOutputStream = new BufferingOutputStream(new FileOutputStream(file));
+                BufferingOutputStream thumbnailOutputStream = new BufferingOutputStream(new FileOutputStream(thumbnail))
+                ) {
+            fileOutputStream.write(bytes);
+            thumbnailOutputStream.write(bytes);
+
+            log.info("New image and thumbnail has been added to {} and {}", filePath, thumbnailPath);
         } catch (IOException e) {
             log.error(e.getMessage());
+            return;
         }
 
 //        convert image to .jpg
         if (!extension.equalsIgnoreCase("jpg")) {
-            String convertedFilePath = IMAGE_FOLDER + File.separator + name + ".jpg";
-            boolean conversionResult = this.convertImageFormat(filePath, convertedFilePath, "JPG");
-            if (conversionResult) {
-//                delete old file
+            String convertedImageFilePath = IMAGE_FOLDER + File.separator + name + ".jpg";
+            String convertedThumbnailFilePath = THUMBNAIL_FOLDER + File.separator + name + ".jpg";
+
+            boolean imageConversionResult = convertImageFormat(filePath, convertedImageFilePath, "JPG");
+            boolean thumbnailConversionResult = convertImageFormat(thumbnailPath, convertedThumbnailFilePath, "JPG");
+            if (imageConversionResult) {
                 file.deleteOnExit();
-                log.info("Image {} has been converted to {}", filePath, convertedFilePath);
-            } else {
-                log.error("Failed to convert image {}", filePath);
             }
+            if (thumbnailConversionResult) {
+                thumbnail.deleteOnExit();
+            }
+        }
+
+//        resize
+        try {
+            resizeNormal(file);
+            resizeThumbnail(thumbnail);
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
     }
 

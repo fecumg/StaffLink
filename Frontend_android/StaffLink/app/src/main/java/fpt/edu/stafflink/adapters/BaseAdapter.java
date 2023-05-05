@@ -46,9 +46,11 @@ public abstract class BaseAdapter<T, TViewHolder extends RecyclerView.ViewHolder
     }
 
     public void setObjects(List<T> objects) {
-        int formerItemCount = getItemCount();
+        if (getItemCount() > 0) {
+            removeAll();
+        }
         this.objects = objects;
-        notifyItemRangeChanged(0, formerItemCount > getItemCount() ? formerItemCount : getItemCount());
+        notifyItemRangeChanged(0, getItemCount());
     }
 
     public void addNewItem(T object) {

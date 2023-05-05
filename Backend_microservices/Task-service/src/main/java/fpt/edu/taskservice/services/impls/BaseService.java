@@ -45,7 +45,7 @@ public class BaseService<T> {
     private String ATTACHMENT_FOLDER;
 
     @Value("${rabbitmq.exchange}")
-    private String EXCHANGE_NAME;
+    protected String EXCHANGE_NAME;
 
     @Value("${rabbitmq.routing-key.attachment-removal}")
     private String ATTACHMENT_REMOVAL_ROUTING_KEY;
@@ -61,7 +61,7 @@ public class BaseService<T> {
     @Autowired
     private CommentRepository commentRepository;
     @Autowired
-    private RabbitTemplate rabbitTemplate;
+    protected RabbitTemplate rabbitTemplate;
 
     protected void setCreatedBy(Object object, ServerWebExchange exchange) {
         String authUserIdString = exchange.getRequest().getHeaders().getFirst(AUTH_ID);

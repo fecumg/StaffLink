@@ -80,7 +80,7 @@
                 android:id="@+id/inputTextUri"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Uri"
+                android:hint="Uri pattern"
                 app:startIconDrawable="@drawable/ic_link_light_foreground"
                 app:color="@color/primary"
                 android:inputType="text"

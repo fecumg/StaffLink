@@ -174,7 +174,10 @@ public class RolesActivity extends BaseActivity {
                             Intent editRoleIntent = new Intent(RolesActivity.this, RoleFormActivity.class);
                             editRoleIntent.putExtra(PARAM_ID, objectId);
                             editRoleIntent.putExtra(PARAM_POSITION, objectPosition);
-                            formActivityResultLauncher.launch(editRoleIntent);
+
+                            if (formActivityResultLauncher != null) {
+                                formActivityResultLauncher.launch(editRoleIntent);
+                            }
                         }
                     }
                 }, new IntentFilter(ROLE_ACTION));
@@ -196,5 +199,11 @@ public class RolesActivity extends BaseActivity {
                         }
                     }
                 });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        formActivityResultLauncher = null;
     }
 }

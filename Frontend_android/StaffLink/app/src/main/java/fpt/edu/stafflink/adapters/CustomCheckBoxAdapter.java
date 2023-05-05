@@ -153,6 +153,7 @@ public class CustomCheckBoxAdapter<T> extends BaseAdapter<T, CustomCheckBoxAdapt
         }
 
         T object = getObjects().get(position);
+
         holder.itemCheckBoxMainElement.setText(this.getMainFieldValue(object));
 
         holder.itemCheckBoxMainElement.setChecked(checkedObjects.stream().anyMatch(checkedObject -> checkedObject.equals(object)));

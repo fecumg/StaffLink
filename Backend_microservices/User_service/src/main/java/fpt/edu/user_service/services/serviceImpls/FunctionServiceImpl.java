@@ -1,11 +1,10 @@
 package fpt.edu.user_service.services.serviceImpls;
 
+import fpt.edu.user_service.dtos.ExchangeGuardedPath;
 import fpt.edu.user_service.dtos.authenticationDtos.ExchangeUser;
 import fpt.edu.user_service.dtos.requestDtos.FunctionRequest;
 import fpt.edu.user_service.dtos.responseDtos.FunctionResponse;
 import fpt.edu.user_service.entities.Function;
-import fpt.edu.user_service.entities.User;
-import fpt.edu.user_service.exceptions.UnauthorizedException;
 import fpt.edu.user_service.exceptions.UniqueKeyViolationException;
 import fpt.edu.user_service.pagination.Pagination;
 import fpt.edu.user_service.repositories.FunctionRepository;
@@ -21,6 +20,10 @@ import org.modelmapper.TypeToken;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,14 +63,16 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
     public RabbitTemplate rabbitTemplate;
 
     @Override
-//    @CacheEvict(value = getAllMethodCache, allEntries = true)
-//    @CachePut(value = getMethodCache, key = "#result.getId()")
+    @CacheEvict(value = getAllMethodCache, allEntries = true)
+    @CachePut(value = getMethodCache, key = "#result.getId()")
     public FunctionResponse save(FunctionRequest functionRequest, HttpServletRequest request) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, UniqueKeyViolationException {
 
 //        check unique uri
         if (StringUtils.isNotEmpty(functionRequest.getUri()) && functionRepository.existsByUri(functionRequest.getUri())) {
             throw new UniqueKeyViolationException("Uri already exists");
         }
+
+        functionRequest.setUri(formatUri(functionRequest.getUri()));
 
         Function function = modelMapper.map(functionRequest, Function.class);
 
@@ -80,14 +85,16 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
         Function newFunction = functionRepository.save(function);
 
 //        send message to demand auth-gateway to update guardedPaths redis cache
-        rabbitTemplate.convertAndSend(EXCHANGE, PATH_UPDATE_ROUTING_KEY, newFunction.getUri());
+        if (StringUtils.isNotEmpty(newFunction.getUri())) {
+            sendMessageToUpdatePathCache(new ExchangeGuardedPath(newFunction.getId(), newFunction.getUri()));
+        }
 
         return modelMapper.map(newFunction, FunctionResponse.class);
     }
 
     @Override
-//    @CacheEvict(value = getAllMethodCache, allEntries = true)
-//    @CachePut(value = getMethodCache, key = "#id")
+    @CacheEvict(value = getAllMethodCache, allEntries = true)
+    @CachePut(value = getMethodCache, key = "#id")
     public FunctionResponse update(int id, FunctionRequest functionRequest, HttpServletRequest request) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, UniqueKeyViolationException {
         Optional<Function> optionalFunction = functionRepository.findById(id);
         if (optionalFunction.isPresent()) {
@@ -100,6 +107,8 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
                 throw new UniqueKeyViolationException("Uri already exists");
             }
 
+            functionRequest.setUri(formatUri(functionRequest.getUri()));
+
             Function function = modelMapper.map(functionRequest, Function.class);
 
 //            set updatedBy
@@ -109,12 +118,14 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
             setEditParent(functionRequest, function, currentFunction);
 
             function.setId(id);
+
             Function editedFunction = functionRepository.save(function);
 
 //            send message to demand auth-gateway to update guardedPaths redis cache
-            this.sendMessageToUpdatePathCache(currentFunction.getUri());
-            if (!functionRequest.getUri().equals(currentFunction.getUri())) {
-                this.sendMessageToDeletePathCache(currentFunction.getUri());
+            if (StringUtils.isNotEmpty(editedFunction.getUri())) {
+                this.sendMessageToUpdatePathCache(new ExchangeGuardedPath(editedFunction.getId(), editedFunction.getUri()));
+            } else {
+                sendMessageToDeletePathCache(editedFunction.getId());
             }
 
 //            send message to demand auth-gateway to update authenticatedUser redis cache
@@ -176,18 +187,18 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
                 .collect(Collectors.toList());
     }
 
-    private void sendMessageToUpdatePathCache(String uri) {
-        rabbitTemplate.convertAndSend(EXCHANGE, PATH_UPDATE_ROUTING_KEY, uri);
+    private void sendMessageToUpdatePathCache(ExchangeGuardedPath exchangeGuardedPath) {
+        rabbitTemplate.convertAndSend(EXCHANGE, PATH_UPDATE_ROUTING_KEY, exchangeGuardedPath);
         log.info("Message has been published to routing key '{}'", PATH_UPDATE_ROUTING_KEY);
     }
 
-    private void sendMessageToDeletePathCache(String uri) {
-        rabbitTemplate.convertAndSend(EXCHANGE, PATH_DELETE_ROUTING_KEY, uri);
+    private void sendMessageToDeletePathCache(int id) {
+        rabbitTemplate.convertAndSend(EXCHANGE, PATH_DELETE_ROUTING_KEY, id);
         log.info("Message has been published to routing key '{}'", PATH_DELETE_ROUTING_KEY);
     }
 
     @Override
-//    @Cacheable(value = getAllMethodCache, key = "#pagination.getPageNumber()")
+    @Cacheable(value = getAllMethodCache, key = "#pagination.getPageNumber()")
     public List<FunctionResponse> getAll(Pagination pagination) {
         List<Function> functions = Pagination.retrieve(
                 pagination,
@@ -196,12 +207,12 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
                 sort -> functionRepository.findAll(sort),
                 Function.class
         );
-        List<Function> rearrangedFunctions = this.rearrange(functions, null);
+        List<Function> rearrangedFunctions = rearrange(functions, null);
         return modelMapper.map(rearrangedFunctions, new TypeToken<List<FunctionResponse>>() {}.getType());
     }
 
     @Override
-//    @Cacheable(value = getMethodCache, key = "#id")
+    @Cacheable(value = getMethodCache, key = "#id")
     public FunctionResponse get(int id) {
         Function function = functionRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Function not found"));
@@ -209,11 +220,11 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
     }
 
     @Override
-//    @Caching(evict = {
-//            @CacheEvict(value = getAllMethodCache),
-//            @CacheEvict(value = getMethodCache, key = "#id")
-//        }
-//    )
+    @Caching(evict = {
+            @CacheEvict(value = getAllMethodCache),
+            @CacheEvict(value = getMethodCache, key = "#id")
+        }
+    )
     public void delete(int id) {
         Optional<Function> optionalFunction = functionRepository.findById(id);
         if (optionalFunction.isPresent()) {
@@ -221,7 +232,7 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
             List<ExchangeUser> exchangeUsers = this.getAffectedExchangeUser(function);
 
 //            send message to demand auth-gateway to update guardedPaths redis cache
-            this.sendMessageToDeletePathCache(function.getUri());
+            this.sendMessageToDeletePathCache(function.getId());
 
             functionRepository.delete(function);
 
@@ -230,26 +241,6 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
         } else {
             throw new NotFoundException("Function not found");
         }
-    }
-
-    @Override
-    public List<FunctionResponse> getAuthorizedFunctions(HttpServletRequest request) {
-        String authUserIdString = request.getHeader(super.AUTH_ID);
-        if (StringUtils.isEmpty(authUserIdString)) {
-            throw new UnauthorizedException("Unauthorized");
-        }
-        int authUserId = Integer.parseInt(authUserIdString);
-        User authUser = userRepository.findById(authUserId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
-        List<Function> authorizedFunctions = authUser.getRoles().stream()
-                .flatMap(role -> role.getFunctions().stream())
-                .distinct()
-                .toList();
-
-        List<Function> rearrangedAuthorizedFunctions = this.rearrange(authorizedFunctions, null);
-
-        return modelMapper.map(rearrangedAuthorizedFunctions, new TypeToken<List<FunctionResponse>>() {}.getType());
     }
 
     @Override
@@ -267,21 +258,9 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
                 )
                 .toList();
 
-        List<Function> rearrangedPotentialParents = this.rearrange(potentialParents, null);
+        List<Function> rearrangedPotentialParents = rearrange(potentialParents, null);
 
         return modelMapper.map(rearrangedPotentialParents, new TypeToken<List<FunctionResponse>>() {}.getType());
-    }
-
-    private List<Function> rearrange(List<Function> functions, Function initialParent) {
-        List<Function> rearrangedList = new ArrayList<>();
-        functions.forEach(function -> {
-            if ((initialParent == null && function.getParent() == null) ||
-                    (initialParent != null && function.getParent() != null && initialParent.getId() == function.getParent().getId())) {
-                rearrangedList.add(function);
-                rearrangedList.addAll(rearrange(functions, function));
-            }
-        });
-        return rearrangedList;
     }
 
     @Scheduled(cron = "0 0 2 * * ?", zone = "Asia/Ho_Chi_Minh")

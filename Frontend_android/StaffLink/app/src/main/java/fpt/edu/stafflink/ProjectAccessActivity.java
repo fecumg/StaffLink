@@ -19,6 +19,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -168,6 +169,7 @@ public class ProjectAccessActivity extends BaseActivity {
             Intent newTaskIntent = new Intent(ProjectAccessActivity.this, TaskAccessActivity.class);
             newTaskIntent.putExtra(PARAM_PROJECT_ACCESS_TYPE, this.accessType);
             newTaskIntent.putExtra(PARAM_PARENT_STRING_ID, this.projectId);
+            newTaskIntent.putExtra(PARAM_PROJECT_NAME, this.projectName);
             buttonNewTask.setOnClickListener(view -> formActivityResultLauncher.launch(newTaskIntent));
         } else {
             buttonNewTask.setVisibility(View.GONE);
@@ -269,6 +271,16 @@ public class ProjectAccessActivity extends BaseActivity {
 
     public void setFormStatus(int formStatus) {
         this.formStatus = formStatus;
+    }
+
+    public void enableSubmitNew() {
+        buttonSubmitProject.setClickable(true);
+        buttonSubmitProject.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary)));
+    }
+
+    public void disableSubmitNew() {
+        buttonSubmitProject.setClickable(false);
+        buttonSubmitProject.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.secondary)));
     }
 
     private void fetchNewTask(String id) {

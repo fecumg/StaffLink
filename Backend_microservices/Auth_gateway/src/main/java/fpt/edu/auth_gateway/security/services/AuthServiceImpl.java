@@ -1,5 +1,6 @@
 package fpt.edu.auth_gateway.security.services;
 
+import fpt.edu.auth_gateway.dtos.ExchangeGuardedPath;
 import fpt.edu.auth_gateway.dtos.ExchangeUser;
 import fpt.edu.auth_gateway.reactiveRedis.ReactiveRedisRepository;
 import fpt.edu.auth_gateway.security.authObjects.AuthenticatedUser;
@@ -9,12 +10,14 @@ import org.modelmapper.ModelMapper;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
@@ -87,43 +90,59 @@ public class AuthServiceImpl implements AuthService {
     private Flux<String> getAllGuardedPaths() {
         return reactiveRedisRepository.getAll(PATHS_KEY)
                 .map(object -> modelMapper.map(object, String.class))
-                .switchIfEmpty(this.getGuardedPathsFromUserService()
-                        .flatMap(path -> reactiveRedisRepository.set(PATHS_KEY, path, path)
-                                .thenReturn(path))
-                        .doOnNext(path ->
-                                log.info("'{}' has been added to guarded path cache", path))
-                        .onErrorResume(throwable -> {
-                                log.error(throwable.getMessage());
-                                return this.getGuardedPathsFromUserService();
-                        }))
+                .switchIfEmpty(
+                        this.getGuardedPathsFromUserService()
+                                .filter(exchangeGuardedPath -> StringUtils.hasText(exchangeGuardedPath.getUri()))
+                                .flatMap(exchangeGuardedPath -> reactiveRedisRepository.set(PATHS_KEY, exchangeGuardedPath.getId(), exchangeGuardedPath.getUri())
+                                        .thenReturn(exchangeGuardedPath))
+                                .doOnNext(exchangeGuardedPath ->
+                                        log.info("'{}' has been added to guarded path cache", exchangeGuardedPath.getUri()))
+                                .onErrorResume(throwable -> {
+                                        log.error(throwable.getMessage());
+                                        return this.getGuardedPathsFromUserService();
+                                })
+                                .map(ExchangeGuardedPath::getUri)
+                )
                 .onErrorResume(throwable -> {
                         log.error(throwable.getMessage());
-                        return this.getGuardedPathsFromUserService();
+                        return this.getGuardedPathsFromUserService()
+                                .map(ExchangeGuardedPath::getUri);
                 });
     }
 
-    private Flux<String> getGuardedPathsFromUserService() {
+    private Flux<ExchangeGuardedPath> getGuardedPathsFromUserService() {
         return webClientBuilder.build()
                 .get()
                 .uri("http://user-service/allGuardedPaths")
                 .retrieve()
-                .bodyToFlux(String.class)
+                .bodyToMono(new ParameterizedTypeReference<List<ExchangeGuardedPath>>() {})
+                .flatMapMany(Flux::fromIterable)
+                .filter(exchangeGuardedPath -> StringUtils.hasText(exchangeGuardedPath.getUri()))
                 .doOnError(throwable -> log.error(throwable.getMessage()));
     }
 
     @Override
     public Mono<Boolean> isGuardedPath(ServerWebExchange exchange) {
+//        get requested core uri
+        String requestedCoreUri = exchange.getRequest().getURI().getPath();
+        AntPathMatcher antPathMatcher = new AntPathMatcher();
+
         return this.getAllGuardedPaths()
-                .any(guardedPath -> guardedPath.equals(exchange.getRequest().getURI().getPath()));
+                .filter(StringUtils::hasText)
+                .map(this::formatUri)
+                .any(guardedPath -> antPathMatcher.match(guardedPath, requestedCoreUri));
     }
 
     @Override
     public boolean isAuthorized(ServerWebExchange exchange, AuthenticatedUser authenticatedUser) {
 //        get requested core uri
         String requestedCoreUri = exchange.getRequest().getURI().getPath();
+        AntPathMatcher antPathMatcher = new AntPathMatcher();
 
         return authenticatedUser.getAuthorizedUris().stream()
-                .anyMatch(authorizedUri -> new AntPathMatcher().match(authorizedUri + "/**", requestedCoreUri));
+                .filter(StringUtils::hasText)
+                .map(this::formatUri)
+                .anyMatch(authorizedUri -> antPathMatcher.match(authorizedUri, requestedCoreUri));
     }
 
     @RabbitListener(queues = {"${rabbitmq.queue.new-auth-cache}"})
@@ -166,19 +185,24 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @RabbitListener(queues = {"${rabbitmq.queue.guarded-path-update}"})
-    private Mono<Void> updateGuardedPathCache(String guardedPath) {
+    private Mono<Void> updateGuardedPathCache(ExchangeGuardedPath exchangeGuardedPath) {
         log.info("listen to message from queue '{}'", env.getProperty("rabbitmq.queue.guarded-path-update"));
-        return reactiveRedisRepository.set(PATHS_KEY, guardedPath, guardedPath)
+        return reactiveRedisRepository.set(PATHS_KEY, exchangeGuardedPath.getId(), exchangeGuardedPath.getUri())
                 .doOnError(throwable -> log.error(throwable.getMessage()))
                 .then();
     }
 
     @RabbitListener(queues = {"${rabbitmq.queue.guarded-path-delete}"})
-    private Mono<Void> deleteGuardedPathCache(String guardedPath) {
+    private Mono<Void> deleteGuardedPathCache(int guardedPathId) {
         log.info("listen to message from queue '{}'", env.getProperty("rabbitmq.queue.guarded-path-delete"));
-        return reactiveRedisRepository.hasKey(PATHS_KEY, guardedPath)
+        return reactiveRedisRepository.hasKey(PATHS_KEY, guardedPathId)
                 .filter(bool -> bool)
-                .map(bool -> reactiveRedisRepository.remove(PATHS_KEY, guardedPath))
+                .flatMap(bool -> {
+
+                    System.out.println(PATHS_KEY + " *** " + guardedPathId);
+
+                    return reactiveRedisRepository.remove(PATHS_KEY, guardedPathId);
+                })
                 .doOnError(throwable -> log.error(throwable.getMessage()))
                 .then();
     }
@@ -208,5 +232,33 @@ public class AuthServiceImpl implements AuthService {
                         () -> this.getAllGuardedPaths()
                                 .subscribe(data -> log.info("Guarded path cache synced"))
                 );
+    }
+
+    private String formatUri(String uri) {
+        uri = formatUriPrefix(uri);
+        uri = formatUriSuffix(uri);
+        return uri;
+    }
+
+    private String formatUriPrefix(String uri) {
+        if (!StringUtils.hasText(uri)) {
+            return uri;
+        }
+        if (!uri.startsWith("/")) {
+            return  "/" + uri;
+        } else {
+            return formatUriPrefix(uri.substring(1));
+        }
+    }
+
+    private String formatUriSuffix(String uri) {
+        if (!StringUtils.hasText(uri)) {
+            return uri;
+        }
+        if (!uri.endsWith("/")) {
+            return uri;
+        } else {
+            return formatUriSuffix(uri.substring(0, uri.length() - 1));
+        }
     }
 }

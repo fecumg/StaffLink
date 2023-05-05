@@ -1,6 +1,5 @@
 package fpt.edu.stafflink;
 
-import static fpt.edu.stafflink.ProjectAccessActivity.TASK_ACTION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.DEFAULT_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_POSITION;
 import static fpt.edu.stafflink.constants.AdapterActionParam.PARAM_PROJECT_ACCESS_TYPE;
@@ -37,7 +36,6 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.DefaultValueFormatter;
-import com.github.mikephil.charting.highlight.ChartHighlighter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
@@ -159,9 +157,15 @@ public class TaskChartActivity extends BaseActivity {
         textViewOverdueAmount.setText(String.valueOf(taskStatisticResponse.getOverdueTaskAmount()));
 
         List<PieEntry> PieEntries = new ArrayList<>();
-        PieEntries.add(new PieEntry(taskStatisticResponse.getInitiatedTaskAmount(), "initiated"));
-        PieEntries.add(new PieEntry(taskStatisticResponse.getInProgressTaskAmount(), "in progress"));
-        PieEntries.add(new PieEntry(taskStatisticResponse.getOverdueTaskAmount(), "overdue"));
+        if (taskStatisticResponse.getInitiatedTaskAmount() > 0) {
+            PieEntries.add(new PieEntry(taskStatisticResponse.getInitiatedTaskAmount(), "initiated"));
+        }
+        if (taskStatisticResponse.getInProgressTaskAmount() > 0) {
+            PieEntries.add(new PieEntry(taskStatisticResponse.getInProgressTaskAmount(), "in progress"));
+        }
+        if (taskStatisticResponse.getOverdueTaskAmount() > 0) {
+            PieEntries.add(new PieEntry(taskStatisticResponse.getOverdueTaskAmount(), "overdue"));
+        }
 
         ArrayList<Integer> colors = new ArrayList<>();
         colors.add(ContextCompat.getColor(this, R.color.primary));
@@ -253,5 +257,11 @@ public class TaskChartActivity extends BaseActivity {
 
     private void doOnBackFromForm(ActivityResult result) {
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        formActivityResultLauncher = null;
     }
 }

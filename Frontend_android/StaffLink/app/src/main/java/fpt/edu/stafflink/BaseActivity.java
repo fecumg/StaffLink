@@ -1,10 +1,13 @@
 package fpt.edu.stafflink;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -18,6 +21,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.MutableLiveData;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
@@ -45,6 +49,7 @@ import fpt.edu.stafflink.response.RetrofitResponse.ResponseHandler;
 import fpt.edu.stafflink.retrofit.RetrofitManager;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
 import fpt.edu.stafflink.utilities.ActivityUtils;
+import fpt.edu.stafflink.webClient.WebClientManager;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -55,6 +60,7 @@ import retrofit2.Response;
 
 public abstract class BaseActivity extends AppCompatActivity {
     private static final String ERROR_TAG = "BaseActivity";
+    private static final String LOGOUT_ACTION = "logoutAction";
 
     DrawerLayout baseDrawerLayout;
     FrameLayout baseFrameLayout;
@@ -72,10 +78,12 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     SharedPreferences sharedPreferences;
 
-    protected MutableLiveData<List<FunctionResponse>> authorizedFunctions;
-    protected MutableLiveData<UserResponse> authUser;
+    public MutableLiveData<List<FunctionResponse>> authorizedFunctions;
+    public MutableLiveData<UserResponse> authUser;
 
     Toast toast;
+
+    Handler handler = new Handler();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -122,8 +130,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         baseNavigationImageAvatar.registerPickImageActivityResultLauncher();
 
-//        this.fetchAuthorizedFunctions();
-//        this.fetchAuthUser(this);
+        listenToLogoutEvent();
     }
 
     @Override
@@ -222,7 +229,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void fetchAuthorizedFunctions() {
         String bearer = this.getBearer();
         if (StringUtils.isNotEmpty(bearer.trim())) {
-            Disposable disposable = RetrofitServiceManager.getFunctionService(this)
+            Disposable disposable = RetrofitServiceManager.getAuthenticationService(this)
                     .getAuthorizedFunctions()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -255,7 +262,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void fetchAuthUser(Context context) {
         String bearer = this.getBearer();
         if (StringUtils.isNotEmpty(bearer.trim())) {
-            Disposable disposable = RetrofitServiceManager.getUserService(this)
+            Disposable disposable = RetrofitServiceManager.getAuthenticationService(this)
                     .getAuthUser()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -301,7 +308,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         baseNavigationLoginButtonLayout.setVisibility(View.GONE);
         baseNavigationAuthLayout.setVisibility(View.VISIBLE);
-        baseNavigationImageAvatar.setUrl(RetrofitManager.getImageUrl(context, userResponse.getAvatar()));
+        baseNavigationImageAvatar.setUrl(RetrofitManager.getThumbnailUrl(context, userResponse.getAvatar()));
 
         baseNavigationTextViewGreeting.setText(R.string.navigation_greeting);
         baseNavigationTextViewGreeting.append(userResponse.getName());
@@ -311,12 +318,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             ActivityUtils.goTo(this, getString(R.string.personal_information_path));
         });
 
-        baseNavigationButtonLogout.setOnClickListener(view -> {
-            this.removeBearer();
-            this.authUser.setValue(null);
-            this.authorizedFunctions.setValue(null);
-            ActivityUtils.goTo(this, getString(R.string.login_path));
-        });
+        baseNavigationButtonLogout.setOnClickListener(view -> logout());
     }
 
     protected void setNavigationFunctions(List<FunctionResponse> functionResponses) {
@@ -364,15 +366,34 @@ public abstract class BaseActivity extends AppCompatActivity {
         return this.authUser.getValue();
     }
 
-    protected boolean isOnScreen(View view) {
-        Rect rect = new Rect();
-        view.getGlobalVisibleRect(rect);
+    private void logout() {
+        this.removeBearer();
+        this.authUser.setValue(null);
+        this.authorizedFunctions.setValue(null);
 
-        int visibleHeight = rect.bottom - rect.top;
+        RetrofitManager.dispose();
+        WebClientManager.dispose();
 
-        int actualHeight = view.getHeight();
+        Intent logoutIntent = new Intent(LOGOUT_ACTION);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(logoutIntent);
 
-        return actualHeight == visibleHeight;
+        ActivityUtils.goTo(this, getString(R.string.login_path));
+    }
+
+    private void listenToLogoutEvent() {
+        if (this instanceof LoginActivity) {
+            return;
+        }
+
+        System.out.println(this);
+
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        finish();
+                    }
+                }, new IntentFilter(LOGOUT_ACTION));
     }
 
     @Override

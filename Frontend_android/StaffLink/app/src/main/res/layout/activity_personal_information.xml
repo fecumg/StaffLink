@@ -56,7 +56,8 @@
                 app:tint="@color/primary"
                 app:ableToPickImage="true"
                 android:layout_marginBottom="10dp"
-                app:cancellable="true"/>
+                app:cancellable="true"
+                app:cameraAccessible="true"/>
 
             <fpt.edu.stafflink.components.CustomInputTextComponent
                 android:id="@+id/inputTextName"

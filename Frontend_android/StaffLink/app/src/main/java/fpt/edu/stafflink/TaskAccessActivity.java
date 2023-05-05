@@ -13,6 +13,7 @@ import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE
 import static fpt.edu.stafflink.constants.AdapterActionParam.PROJECT_ACCESS_TYPE_OBSERVABLE;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -116,7 +117,7 @@ public class TaskAccessActivity extends BaseActivity {
         } else{
             String title;
             if (StringUtils.isNotEmpty(this.projectName)) {
-                title = this.projectName + "/" + this.taskName;
+                title = this.projectName + "/\n" + this.taskName;
             } else {
                 title = this.taskName;
             }
@@ -172,7 +173,8 @@ public class TaskAccessActivity extends BaseActivity {
     }
 
     private void showInfoOnNew() {
-        textViewTaskAccessTitle.setText(getString(R.string.task_access_title_new));
+        String title = this.projectName + "/\n" + getString(R.string.task_access_title_new);
+        textViewTaskAccessTitle.setText(title);
         taskAccessMenu.setVisibility(View.GONE);
         fragment = TaskInfoFragment.newInstance(this.projectId, this.id, this.position, this.accessType);
         this.replaceFragment(fragment);
@@ -247,6 +249,16 @@ public class TaskAccessActivity extends BaseActivity {
 
     public void setFormStatus(int formStatus) {
         this.formStatus = formStatus;
+    }
+
+    public void enableSubmitNew() {
+        buttonSubmitTask.setClickable(true);
+        buttonSubmitTask.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary)));
+    }
+
+    public void disableSubmitNew() {
+        buttonSubmitTask.setClickable(false);
+        buttonSubmitTask.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.secondary)));
     }
 
     @Override

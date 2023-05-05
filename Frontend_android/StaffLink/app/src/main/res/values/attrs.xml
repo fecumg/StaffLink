@@ -29,6 +29,7 @@
         <attr name="tint" />
         <attr name="cancellable" format="boolean"/>
         <attr name="index" format="integer"/>
+        <attr name="cameraAccessible" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="CustomTableComponent">

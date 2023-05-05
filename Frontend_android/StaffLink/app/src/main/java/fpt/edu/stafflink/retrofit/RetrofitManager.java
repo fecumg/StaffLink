@@ -16,7 +16,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitManager {
 
-    private static Retrofit roleRetrofitInstance;
+    private static Retrofit retrofitInstance;
 
     private static Retrofit generateRetrofitInstance(Context context, String domain) {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
@@ -45,15 +45,21 @@ public class RetrofitManager {
     }
 
     public static Retrofit getRetrofitInstance(Context context) {
-        if (roleRetrofitInstance == null) {
-            roleRetrofitInstance = generateRetrofitInstance(context, context.getString(R.string.default_domain));
+        if (retrofitInstance == null) {
+            retrofitInstance = generateRetrofitInstance(context, context.getString(R.string.default_domain));
         }
-        return roleRetrofitInstance;
+        return retrofitInstance;
     }
 
     public static String getImageUrl(Context context, String filename) {
         String domain = context.getString(R.string.default_domain);
         String imagePathPrefix = context.getString(R.string.image_path_prefix);
+        return formatDomain(domain) + "/" + formatPath(imagePathPrefix) + "/" + filename;
+    }
+
+    public static String getThumbnailUrl(Context context, String filename) {
+        String domain = context.getString(R.string.default_domain);
+        String imagePathPrefix = context.getString(R.string.thumbnail_path_prefix);
         return formatDomain(domain) + "/" + formatPath(imagePathPrefix) + "/" + filename;
     }
 
@@ -75,7 +81,7 @@ public class RetrofitManager {
         if (path.startsWith("/")) {
             String stringStartedPath = path.substring(1);
             if (stringStartedPath.endsWith("/")) {
-                return stringStartedPath.substring(0, stringStartedPath.length() -1);
+                return stringStartedPath.substring(0, stringStartedPath.length() - 1);
             } else
                 return stringStartedPath;
         } else {
@@ -84,6 +90,12 @@ public class RetrofitManager {
             } else {
                 return path;
             }
+        }
+    }
+
+    public static void dispose() {
+        if (retrofitInstance != null) {
+            retrofitInstance = null;
         }
     }
 }

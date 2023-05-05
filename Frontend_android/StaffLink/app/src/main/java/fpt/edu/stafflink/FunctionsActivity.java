@@ -183,7 +183,10 @@ public class FunctionsActivity extends BaseActivity {
                             Intent editFunctionIntent = new Intent(FunctionsActivity.this, FunctionFormActivity.class);
                             editFunctionIntent.putExtra(PARAM_ID, objectId);
                             editFunctionIntent.putExtra(PARAM_POSITION, objectPosition);
-                            formActivityResultLauncher.launch(editFunctionIntent);
+
+                            if (formActivityResultLauncher != null) {
+                                formActivityResultLauncher.launch(editFunctionIntent);
+                            }
                         }
                     }
                 }, new IntentFilter(FUNCTION_ACTION));
@@ -205,5 +208,11 @@ public class FunctionsActivity extends BaseActivity {
                         }
                     }
                 });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        formActivityResultLauncher = null;
     }
 }

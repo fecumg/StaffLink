@@ -1,5 +1,8 @@
 package fpt.edu.stafflink.retrofit.services;
 
+import java.util.List;
+
+import fpt.edu.stafflink.models.responseDtos.UserResponse;
 import fpt.edu.stafflink.pagination.Pagination;
 import io.reactivex.Observable;
 import okhttp3.RequestBody;
@@ -15,10 +18,13 @@ import retrofit2.http.QueryMap;
 
 public interface UserService {
 
-    @GET("/users")
+    @GET("/users/all")
     Observable<Response<Object>> getUsers(@Query("search") String search, @QueryMap Pagination pagination);
 
-    @GET("users/{id}")
+    @GET("/users/search")
+    Observable<Response<List<UserResponse>>> searchUsers(@Query("search") String search, @QueryMap Pagination pagination);
+
+    @GET("users/get/{id}")
     Observable<Response<Object>> getUser(@Path("id") int id);
 
     @POST("/users/new")
@@ -29,10 +35,4 @@ public interface UserService {
 
     @DELETE("/users/delete/{id}")
     Observable<Response<Object>> deleteUser(@Path("id") int id);
-
-    @GET("/users/auth")
-    Observable<Response<Object>> getAuthUser();
-
-    @PUT("/users/editPersonalInfo")
-    Observable<Response<Object>> editPersonalInfo(@Body RequestBody editUserRequestBody);
 }

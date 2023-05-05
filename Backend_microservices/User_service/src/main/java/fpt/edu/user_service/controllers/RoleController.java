@@ -52,13 +52,13 @@ public class RoleController extends BaseController {
         }
     }
 
-    @GetMapping(value = "")
+    @GetMapping(value = "/all")
     public ResponseEntity<Object> getRoles(@Nullable Pagination pagination) {
         List<RoleResponse> roleResponses = roleService.getAll(pagination);
         return createSuccessResponse(roleResponses);
     }
 
-    @GetMapping(value = "/{id}")
+    @GetMapping(value = "/get/{id}")
     public ResponseEntity<Object> getRole(@PathVariable("id") int id) {
         RoleResponse roleResponse = roleService.get(id);
         return createSuccessResponse(roleResponse);

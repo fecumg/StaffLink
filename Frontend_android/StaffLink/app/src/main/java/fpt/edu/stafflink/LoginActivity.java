@@ -142,7 +142,7 @@ public class LoginActivity extends BaseActivity {
         String bearer = super.getBearer();
 
         if (StringUtils.isNotEmpty(bearer.trim())) {
-            Disposable disposable = RetrofitServiceManager.getFunctionService(this)
+            Disposable disposable = RetrofitServiceManager.getAuthenticationService(this)
                     .getAuthorizedFunctions()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

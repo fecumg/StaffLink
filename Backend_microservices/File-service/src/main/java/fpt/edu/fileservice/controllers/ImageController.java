@@ -16,16 +16,26 @@ import java.io.IOException;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/images")
 public class ImageController {
 
     @Autowired
     private ImageService imageService;
 
-    @GetMapping(value = "/{filename}", produces = MediaType.IMAGE_JPEG_VALUE)
+    @GetMapping(value = "/images/{filename}", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<ByteArrayResource> getImage(@PathVariable("filename") String filename) throws IOException {
 
         ByteArrayResource resource = imageService.getImage(filename);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentLength(resource.contentLength())
+                .body(resource);
+    }
+
+    @GetMapping(value = "/thumbnails/{filename}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<ByteArrayResource> getThumbnail(@PathVariable("filename") String filename) throws IOException {
+
+        ByteArrayResource resource = imageService.getThumbnail(filename);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

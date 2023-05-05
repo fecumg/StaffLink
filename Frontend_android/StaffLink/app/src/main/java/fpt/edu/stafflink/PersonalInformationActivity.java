@@ -54,6 +54,7 @@ public class PersonalInformationActivity extends BaseActivity {
         imageAvatar = findViewById(R.id.imageAvatar);
 
         imageAvatar.registerPickImageActivityResultLauncher();
+        imageAvatar.registerCameraActivityResultLauncher();
 
         this.initiate();
     }
@@ -73,7 +74,7 @@ public class PersonalInformationActivity extends BaseActivity {
     private void fetchAuthUserPersonalInfo(Context context) {
         String bearer = super.getBearer();
         if (StringUtils.isNotEmpty(bearer.trim())) {
-            Disposable disposable = RetrofitServiceManager.getUserService(this)
+            Disposable disposable = RetrofitServiceManager.getAuthenticationService(this)
                     .getAuthUser()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -189,18 +190,21 @@ public class PersonalInformationActivity extends BaseActivity {
     }
 
     private void submitEdit(RequestBody editUserRequestBody) {
-        Disposable disposable = RetrofitServiceManager.getUserService(this)
+        Disposable disposable = RetrofitServiceManager.getAuthenticationService(this)
                 .editPersonalInfo(editUserRequestBody)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         response ->
-                                super.handleResponse(
+                                super.handleGenericResponse(
                                         response,
-                                        (responseBody, gson) -> {
+                                        userResponse -> {
                                             textViewError.setText(null);
                                             pushToast("personal information updated successfully");
-                                            super.baseNavigationAuthLayout.postDelayed(() -> super.fetchAuthUser(this), 2000);
+                                            super.baseNavigationAuthLayout.postDelayed(() -> {
+                                                super.fetchAuthUser(this);
+                                                bindAuthInformation(this, userResponse);
+                                            }, 2000);
                                         },
                                         errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
                                 ),

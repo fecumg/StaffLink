@@ -198,7 +198,9 @@ public class AuthorizedProjectsActivity extends BaseActivity {
 
                             setIntentProjectAccessType(accessProjectIntent);
 
-                            formActivityResultLauncher.launch(accessProjectIntent);
+                            if (formActivityResultLauncher != null) {
+                                formActivityResultLauncher.launch(accessProjectIntent);
+                            }
                         }
                     }
                 }, new IntentFilter(action));
@@ -227,5 +229,11 @@ public class AuthorizedProjectsActivity extends BaseActivity {
                 }
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        formActivityResultLauncher = null;
     }
 }

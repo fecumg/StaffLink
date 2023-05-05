@@ -43,9 +43,11 @@ import fpt.edu.stafflink.components.CustomInputTextComponent;
 import fpt.edu.stafflink.components.CustomListComponent;
 import fpt.edu.stafflink.components.CustomSelectedListComponent;
 import fpt.edu.stafflink.debouncing.Debouncer;
+import fpt.edu.stafflink.models.others.SearchedUser;
 import fpt.edu.stafflink.models.others.SelectedUser;
 import fpt.edu.stafflink.models.requestDtos.ProjectRequest;
 import fpt.edu.stafflink.models.responseDtos.ProjectResponse;
+import fpt.edu.stafflink.models.responseDtos.RoleResponse;
 import fpt.edu.stafflink.models.responseDtos.UserResponse;
 import fpt.edu.stafflink.pagination.Pagination;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
@@ -68,7 +70,7 @@ public class ProjectInfoFragment extends BaseFragment {
     CustomInputTextComponent inputTextCreateBy;
     CustomSelectedListComponent<SelectedUser> selectedListUsers;
     CustomInputTextComponent inputTextSearchUsers;
-    CustomListComponent<UserResponse> listUsers;
+    CustomListComponent<SearchedUser> listUsers;
 
     private String projectId;
     private int position;
@@ -140,7 +142,7 @@ public class ProjectInfoFragment extends BaseFragment {
 
     private void initSearchList() {
         listUsers.setTitleField("name");
-        listUsers.setContentField("username");
+        listUsers.setContentField("roles");
         listUsers.setAction(SELECT_AUTHORIZED_USER_ACTION);
         listUsers.setError(null);
     }
@@ -278,22 +280,25 @@ public class ProjectInfoFragment extends BaseFragment {
         Pagination pagination = new Pagination();
 
         Disposable disposable = RetrofitServiceManager.getUserService(getContext())
-                .getUsers(search, pagination)
+                .searchUsers(search, pagination)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         response ->
-                                getBaseActivity().handleResponse(
+                                getBaseActivity().handleGenericResponse(
                                         response,
-                                        (responseBody, gson) -> {
+                                        userResponses -> {
                                             listUsers.setError(null);
-                                            Type type = new TypeToken<List<UserResponse>>() {}.getType();
-                                            List<UserResponse> userResponses = gson.fromJson(gson.toJson(responseBody), type);
+
                                             List<UserResponse> userResponsesExceptCreatedBy = userResponses.stream()
                                                             .filter(userResponse -> this.createdBy == null || userResponse.getId() != this.createdBy.getId())
                                                             .collect(Collectors.toList());
 
-                                            listUsers.setObjects(userResponsesExceptCreatedBy);
+                                            List<SearchedUser> searchedUsers = userResponsesExceptCreatedBy.stream()
+                                                            .map(SearchedUser::new)
+                                                            .collect(Collectors.toList());
+
+                                            listUsers.setObjects(searchedUsers);
 
                                             int[] matrix = new int[2];
                                             listUsers.getLocationOnScreen(matrix);
@@ -321,6 +326,8 @@ public class ProjectInfoFragment extends BaseFragment {
     }
 
     public void submitNewProject(RequestBody projectRequestBody) {
+        this.projectAccessActivity.disableSubmitNew();
+
         Disposable disposable = RetrofitServiceManager.getProjectService(getContext())
                 .newProject(projectRequestBody)
                 .subscribeOn(Schedulers.io())
@@ -338,12 +345,16 @@ public class ProjectInfoFragment extends BaseFragment {
                                                 this.projectAccessActivity.setProjectId(projectResponse.getId());
                                             }
                                         },
-                                        errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
+                                        errorApiResponse -> {
+                                            textViewError.setText(errorApiResponse.getMessage());
+                                            this.projectAccessActivity.enableSubmitNew();
+                                        }
                                 ),
                         error -> {
                             Log.e(ERROR_TAG, "submitNewProject: " + error.getMessage(), error);
                             getBaseActivity().pushToast(error.getMessage());
                             textViewError.setText(error.getMessage());
+                            this.projectAccessActivity.enableSubmitNew();
                         });
 
         getBaseActivity().compositeDisposable.add(disposable);

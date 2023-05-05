@@ -16,6 +16,8 @@ import jakarta.ws.rs.NotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -59,6 +61,8 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
     private HandlerMapping handlerMapping;
     @Autowired
     private WebSocketHandler webSocketHandler;
+    @Autowired
+    private ApplicationContext context;
 
     @Override
     public Mono<TaskResponse> save(NewTaskRequest newTaskRequest, ServerWebExchange exchange) {
@@ -75,12 +79,22 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
                 .flatMap(preparedTask -> setDueAt(preparedTask, newTaskRequest))
                 .flatMap(preparedTask -> taskRepository.save(preparedTask))
                 .flatMap(super::buildTaskResponse)
-                .doOnSuccess(taskResponse -> {
+                .doOnNext(taskResponse -> {
                     log.info("Task with id '{}' saved successfully", taskResponse.getId());
 
+                    DefaultSingletonBeanRegistry registry = (DefaultSingletonBeanRegistry) context.getAutowireCapableBeanFactory();
+
                     @SuppressWarnings("unchecked")
-                    Map<String, WebSocketHandler> urlMapping = (Map<String, WebSocketHandler>) ((SimpleUrlHandlerMapping) handlerMapping).getUrlMap();
-                    urlMapping.put("/comments/" + taskResponse.getId(), webSocketHandler);
+                    Map<String, WebSocketHandler> urlMap = (Map<String, WebSocketHandler>) ((SimpleUrlHandlerMapping) handlerMapping).getUrlMap();
+                    urlMap.put("/comments/" + taskResponse.getId(), webSocketHandler);
+
+                    registry.destroySingleton("handlerAdapter");
+
+                    for (String key: urlMap.keySet()) {
+                        System.out.println(key);
+                    }
+
+                    registry.registerSingleton("handlerAdapter", new SimpleUrlHandlerMapping(urlMap));
                 })
                 .doOnError(throwable -> log.error(throwable.getMessage()));
     }

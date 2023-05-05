@@ -28,14 +28,12 @@ import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
+import androidx.lifecycle.Observer;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
-import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -52,6 +50,7 @@ import fpt.edu.stafflink.components.CustomSelectComponent;
 import fpt.edu.stafflink.components.CustomSelectedListComponent;
 import fpt.edu.stafflink.debouncing.Debouncer;
 import fpt.edu.stafflink.enums.TaskStatus;
+import fpt.edu.stafflink.models.others.SearchedUser;
 import fpt.edu.stafflink.models.others.SelectedUser;
 import fpt.edu.stafflink.models.others.TaskStatusDto;
 import fpt.edu.stafflink.models.requestDtos.taskRequestDtos.EditStatusRequest;
@@ -85,7 +84,7 @@ public class TaskInfoFragment extends BaseFragment{
     CustomInputTextComponent inputTextCreateBy;
     CustomSelectedListComponent<SelectedUser> selectedListUsers;
     CustomInputTextComponent inputTextSearchUsers;
-    CustomListComponent<UserResponse> listUsers;
+    CustomListComponent<SearchedUser> listUsers;
 
     private String projectId;
     private String id;
@@ -148,10 +147,12 @@ public class TaskInfoFragment extends BaseFragment{
         if (StringUtils.isNotEmpty(this.id)) {
             this.fetchDataOnEdit(this.id);
         } else {
-            UserResponse authUser = super.getBaseActivity().getAuthUser();
-            if (authUser != null) {
-                this.bindCreatedBy(authUser);
-            }
+            getBaseActivity().authUser.observe(getBaseActivity(), authorizedFunctions -> {
+                if (getBaseActivity().getAuthUser() != null) {
+                    bindCreatedBy(getBaseActivity().getAuthUser());
+                }
+                getBaseActivity().authUser.removeObservers(getBaseActivity());
+            });
         }
 
         this.prepareTaskForm();
@@ -167,7 +168,7 @@ public class TaskInfoFragment extends BaseFragment{
 
     private void initSearchList() {
         listUsers.setTitleField("name");
-        listUsers.setContentField("username");
+        listUsers.setContentField("roles");
         listUsers.setAction(SELECT_ASSIGNED_USER_ACTION);
         listUsers.setError(null);
     }
@@ -382,22 +383,25 @@ public class TaskInfoFragment extends BaseFragment{
         Pagination pagination = new Pagination();
 
         Disposable disposable = RetrofitServiceManager.getUserService(getContext())
-                .getUsers(search, pagination)
+                .searchUsers(search, pagination)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         response ->
-                                getBaseActivity().handleResponse(
+                                getBaseActivity().handleGenericResponse(
                                         response,
-                                        (responseBody, gson) -> {
+                                        userResponses -> {
                                             listUsers.setError(null);
-                                            Type type = new TypeToken<List<UserResponse>>() {}.getType();
-                                            List<UserResponse> userResponses = gson.fromJson(gson.toJson(responseBody), type);
+
                                             List<UserResponse> userResponsesExceptCreatedBy = userResponses.stream()
                                                     .filter(userResponse -> this.createdBy == null || userResponse.getId() != this.createdBy.getId())
                                                     .collect(Collectors.toList());
 
-                                            listUsers.setObjects(userResponsesExceptCreatedBy);
+                                            List<SearchedUser> searchedUsers = userResponsesExceptCreatedBy.stream()
+                                                    .map(SearchedUser::new)
+                                                    .collect(Collectors.toList());
+
+                                            listUsers.setObjects(searchedUsers);
 
                                             int[] matrix = new int[2];
                                             listUsers.getLocationOnScreen(matrix);
@@ -425,6 +429,8 @@ public class TaskInfoFragment extends BaseFragment{
     }
 
     public void submitNewTask(RequestBody newTaskRequestBody) {
+        this.taskAccessActivity.disableSubmitNew();
+
         Disposable disposable = RetrofitServiceManager.getTaskService(getContext())
                 .newTask(newTaskRequestBody)
                 .subscribeOn(Schedulers.io())
@@ -442,12 +448,16 @@ public class TaskInfoFragment extends BaseFragment{
                                                 this.taskAccessActivity.setId(taskResponse.getId());
                                             }
                                         },
-                                        errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
+                                        errorApiResponse -> {
+                                            textViewError.setText(errorApiResponse.getMessage());
+                                            this.taskAccessActivity.enableSubmitNew();
+                                        }
                                 ),
                         error -> {
                             Log.e(ERROR_TAG, "submitNewTask: " + error.getMessage(), error);
                             getBaseActivity().pushToast(error.getMessage());
                             textViewError.setText(error.getMessage());
+                            this.taskAccessActivity.enableSubmitNew();
                         });
 
         getBaseActivity().compositeDisposable.add(disposable);

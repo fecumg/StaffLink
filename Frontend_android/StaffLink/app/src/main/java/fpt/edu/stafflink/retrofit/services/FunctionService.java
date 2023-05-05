@@ -17,10 +17,10 @@ import retrofit2.http.Path;
 import retrofit2.http.QueryMap;
 
 public interface FunctionService {
-    @GET("/functions")
+    @GET("/functions/all")
     Observable<Response<Object>> getFunctions(@QueryMap Pagination pagination);
 
-    @GET("/functions/{id}")
+    @GET("/functions/get/{id}")
     Observable<Response<Object>> getFunction(@Path("id") int id);
 
     @POST("/functions/new")
@@ -31,9 +31,6 @@ public interface FunctionService {
 
     @DELETE("/functions/delete/{id}")
     Observable<Response<Object>> deleteFunction(@Path("id") int id);
-
-    @GET("/functions/authorized")
-    Observable<Response<Object>> getAuthorizedFunctions();
 
     @GET("/functions/potentialParents/{id}")
     Observable<Response<Object>> getPotentialParents(@Path("id") int id);

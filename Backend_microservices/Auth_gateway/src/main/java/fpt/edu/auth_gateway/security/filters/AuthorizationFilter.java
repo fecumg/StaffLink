@@ -58,23 +58,24 @@ public class AuthorizationFilter extends AbstractGatewayFilterFactory<Authorizat
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             String requestPath = exchange.getRequest().getURI().getPath();
+
             if (config.isGuardByDefault()) {
                 return this.isFreePath(config, exchange)
                         .filter(bool -> bool)
                         .doOnNext(bool ->
                                 log.info("Free access to '{}', declared in application.properties", requestPath))
                         .flatMap(bool -> chain.filter(exchange))
-                        .switchIfEmpty(this.authorize(exchange, chain));
+                        .switchIfEmpty(this.checkAuthorization(exchange, chain));
             } else {
                 return authService.isGuardedPath(exchange)
                         .filter(bool -> bool)
-                        .flatMap(bool -> this.authorize(exchange, chain))
+                        .flatMap(bool -> this.checkAuthorization(exchange, chain))
                         .switchIfEmpty(chain.filter(exchange));
             }
         };
     }
 
-    private Mono<Void> authorize(ServerWebExchange exchange, GatewayFilterChain chain) {
+    private Mono<Void> checkAuthorization(ServerWebExchange exchange, GatewayFilterChain chain) {
         return ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
                 .filter(Authentication::isAuthenticated)

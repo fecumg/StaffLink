@@ -53,7 +53,7 @@ public class TaskController extends BaseController {
         return ResponseEntity.ok(taskService.getTasksByProject(projectId, status, pagination));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<Mono<TaskResponse>> getTask(@PathVariable("id") String id) {
         return ResponseEntity.ok(taskService.get(id));
     }

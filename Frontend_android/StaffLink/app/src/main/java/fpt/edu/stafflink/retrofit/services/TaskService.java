@@ -14,10 +14,10 @@ import retrofit2.http.Path;
 import retrofit2.http.QueryMap;
 
 public interface TaskService {
-    @GET("/tasks")
+    @GET("/tasks/observable")
     Observable<Response<Object>> getTasks(@QueryMap Pagination pagination);
 
-    @GET("/tasks/{id}")
+    @GET("/tasks/get/{id}")
     Observable<Response<Object>> getTask(@Path("id") String id);
 
     @POST("/tasks/new")

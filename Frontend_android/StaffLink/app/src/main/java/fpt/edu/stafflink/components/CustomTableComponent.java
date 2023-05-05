@@ -10,12 +10,14 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import fpt.edu.stafflink.R;
@@ -41,12 +43,16 @@ public class CustomTableComponent<T> extends LinearLayout {
 
     private CharSequence error;
 
+    private OnScrolledToBottomHandler onScrolledToBottomHandler;
+
     public CustomTableComponent(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
         this.initView(context);
 
         this.setAttributes(attrs);
+
+        doOnScrolledToBottom();
     }
 
     private void initView(Context context) {
@@ -76,7 +82,8 @@ public class CustomTableComponent<T> extends LinearLayout {
         customTableComponentMainElement.setAdapter(adapter);
     }
 
-    private void generateHeaders(String[] displayedFields) {
+    private void generateHeaders() {
+        String[] displayedFields = this.adapter.getDisplayedFields();
         int fieldNumber = displayedFields.length;
         if (fieldNumber == 0) {
             return;
@@ -94,6 +101,10 @@ public class CustomTableComponent<T> extends LinearLayout {
                 textView.setVisibility(VISIBLE);
                 textView.setText(displayedFields[i]);
 
+                if (this.adapter.getImageFields() != null && Arrays.asList(this.adapter.getImageFields()).contains(displayedFields[i])) {
+                    customTableComponentHeaderWrappers[i].setLayoutParams(this.adapter.imageLayoutParams());
+                }
+
                 if (1 < fieldNumber) {
                     customTableComponentHeaderWrappers[i].getChildAt(BORDER_INDEX).setVisibility(VISIBLE);
                 }
@@ -104,18 +115,18 @@ public class CustomTableComponent<T> extends LinearLayout {
     }
 
     public void setData(List<T> objects, String[] displayedFields) {
-        this.generateHeaders(displayedFields);
         this.adapter.setData(objects, displayedFields);
+        this.generateHeaders();
     }
 
     public void setData(List<T> objects, String[] displayedFields, String[] imageFields) {
-        this.generateHeaders(displayedFields);
         this.adapter.setData(objects, displayedFields, imageFields);
+        this.generateHeaders();
     }
 
     public void setData(List<T> objects, String[] displayedFields, String[] imageFields, int imageShape) {
-        this.generateHeaders(displayedFields);
         this.adapter.setData(objects, displayedFields, imageFields, imageShape);
+        this.generateHeaders();
     }
 
     public void setObjects(List<T> objects) {
@@ -127,8 +138,8 @@ public class CustomTableComponent<T> extends LinearLayout {
     }
 
     public void setDisplayedFields(String[] displayedFields) {
-        this.generateHeaders(displayedFields);
         this.adapter.setDisplayedFields(displayedFields);
+        this.generateHeaders();
     }
 
     public String[] getDisplayedFields() {
@@ -146,6 +157,7 @@ public class CustomTableComponent<T> extends LinearLayout {
 
     public void setImageFields(String[] imageFields) {
         this.adapter.setImageFields(imageFields);
+        this.generateHeaders();
     }
 
     public String[] getImageFields() {
@@ -196,6 +208,27 @@ public class CustomTableComponent<T> extends LinearLayout {
         }
     }
 
+    public void doOnScrolledToBottom() {
+        customTableComponentMainElement.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                int maxScroll = recyclerView.computeVerticalScrollRange();
+                int currentScroll = recyclerView.computeVerticalScrollOffset() + recyclerView.computeVerticalScrollExtent();
+                if (currentScroll == maxScroll) {
+                    if (onScrolledToBottomHandler != null) {
+                        onScrolledToBottomHandler.handle();
+                    }
+                }
+            }
+        });
+    }
+
+    public void setOnScrolledToBottomHandler(OnScrolledToBottomHandler onScrolledToBottomHandler) {
+        this.onScrolledToBottomHandler = onScrolledToBottomHandler;
+    }
+
     private void setAttributes(AttributeSet attrs) {
         TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.CustomTableComponent, 0, 0);
         try {
@@ -211,5 +244,9 @@ public class CustomTableComponent<T> extends LinearLayout {
         } finally {
             typedArray.recycle();
         }
+    }
+
+    public interface OnScrolledToBottomHandler {
+        void handle();
     }
 }

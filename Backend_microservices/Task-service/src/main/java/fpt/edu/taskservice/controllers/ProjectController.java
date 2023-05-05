@@ -34,12 +34,12 @@ public class ProjectController extends BaseController {
         return ResponseEntity.ok(projectService.update(id, projectRequest, exchange));
     }
 
-    @GetMapping("")
+    @GetMapping("/observable")
     public ResponseEntity<Flux<ProjectResponse>> getProjects(@Nullable @ModelAttribute Pagination pagination) {
         return ResponseEntity.ok(projectService.getAll(pagination));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<Mono<ProjectResponse>> getProject(@PathVariable("id") String id) {
         return ResponseEntity.ok(projectService.get(id));
     }

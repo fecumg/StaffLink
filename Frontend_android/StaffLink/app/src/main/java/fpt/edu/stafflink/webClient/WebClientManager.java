@@ -22,6 +22,8 @@ public class WebClientManager {
         SharedPreferences sharedPreferences = context.getSharedPreferences(context.getString(R.string.app_name), Context.MODE_PRIVATE);
         String bearer = sharedPreferences.getString(context.getString(R.string.authorization_sharedPreference), "");
 
+        System.out.println(bearer);
+
         return WebClient.builder()
                 .baseUrl(domain)
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.newConnection().compress(true)))
@@ -52,5 +54,11 @@ public class WebClientManager {
                     }
                 }
         );
+    }
+
+    public static void dispose() {
+        if (webclientInstance != null) {
+            webclientInstance = null;
+        }
     }
 }

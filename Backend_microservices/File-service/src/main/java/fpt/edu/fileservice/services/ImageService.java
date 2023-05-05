@@ -12,4 +12,6 @@ import java.io.IOException;
 @Service
 public interface ImageService {
     ByteArrayResource getImage(String filename) throws IOException;
+
+    ByteArrayResource getThumbnail(String filename) throws IOException;
 }

@@ -4,16 +4,19 @@ import static android.app.Activity.RESULT_OK;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -44,6 +47,9 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.tbruyelle.rxpermissions3.RxPermissions;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Date;
 
 import fpt.edu.stafflink.R;
 import fpt.edu.stafflink.utilities.ActivityUtils;
@@ -74,11 +80,14 @@ public class CustomImageComponent extends RelativeLayout {
     private int tint;
     private boolean cancellable;
     private int index;
+    private boolean cameraAccessible;
 
     private ActivityResultLauncher<Intent> pickImageActivityResultLauncher;
+    private ActivityResultLauncher<Intent> cameraActivityResultLauncher;
 
     private RxPermissions rxPermissions;
-    private Disposable permissionDisposal;
+    private Disposable galleryPermissionDisposal;
+    private Disposable cameraPermissionDisposal;
 
     public CustomImageComponent(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -117,20 +126,59 @@ public class CustomImageComponent extends RelativeLayout {
 
                 customImageComponentMainElement.performClick();
 
-                postDelayed(() -> permissionDisposal = rxPermissions.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        .subscribe(granted -> {
-                            if (granted) {
-                                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                                pickImageActivityResultLauncher.launch(intent);
-                            } else {
-                                Toast.makeText(activity, "Gallery access denied", Toast.LENGTH_SHORT).show();
-                            }
-                        }), ZOOM_ANIMATION_DURATION);
+                postDelayed(() -> {
+                    if (cameraAccessible) {
+                        onCameraAccessible(activity);
+                    } else {
+                        launchGallery(activity);
+                    }
+                }, ZOOM_ANIMATION_DURATION);
 
                 return true;
             }
             return false;
         });
+    }
+
+    private void onCameraAccessible(AppCompatActivity activity) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(
+                getContext());
+        alert.setTitle("Image source");
+        alert.setMessage("Choose your image source");
+        alert.setPositiveButton("Camera", (dialogInterface, i) -> {
+            launchCamera(activity);
+            dialogInterface.dismiss();
+        });
+        alert.setNegativeButton("Gallery", (dialogInterface, i) -> {
+            launchGallery(activity);
+            dialogInterface.dismiss();
+        });
+        alert.setNeutralButton("Cancel", (dialogInterface, i) -> dialogInterface.dismiss());
+        alert.show();
+    }
+
+    private void launchGallery(AppCompatActivity activity) {
+        galleryPermissionDisposal = rxPermissions.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .subscribe(granted -> {
+                    if (granted) {
+                        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        pickImageActivityResultLauncher.launch(intent);
+                    } else {
+                        Toast.makeText(activity, "Gallery access denied", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void launchCamera(AppCompatActivity activity) {
+        cameraPermissionDisposal = rxPermissions.request(Manifest.permission.CAMERA)
+                .subscribe(granted -> {
+                    if (granted) {
+                        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                        cameraActivityResultLauncher.launch(intent);
+                    } else {
+                        Toast.makeText(activity, "Camera access denied", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     public void registerPickImageActivityResultLauncher() {
@@ -141,6 +189,17 @@ public class CustomImageComponent extends RelativeLayout {
         pickImageActivityResultLauncher = activity.registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> pickImage(result, activity)
+        );
+    }
+
+    public void registerCameraActivityResultLauncher() {
+        AppCompatActivity activity = ActivityUtils.getActivity(getContext());
+        if (activity == null || !this.ableToPickImage || !this.cameraAccessible) {
+            return;
+        }
+        cameraActivityResultLauncher = activity.registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                this::captureImage
         );
     }
 
@@ -190,8 +249,43 @@ public class CustomImageComponent extends RelativeLayout {
             customImageComponentMainElement.setImageBitmap(BitmapFactory.decodeFile(imagePath));
             customImageComponentMainElement.setImageTintList(null);
 
-            permissionDisposal.dispose();
+            galleryPermissionDisposal.dispose();
         }
+    }
+
+    private void captureImage(ActivityResult result) {
+        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+            Bitmap bitmap = (Bitmap) result.getData().getExtras().get("data");
+            customImageComponentMainElement.setImageBitmap(bitmap);
+
+            File imageFile = getOutputMediaFile();
+            if (imageFile == null) {
+                return;
+            }
+            try (FileOutputStream fos = new FileOutputStream(imageFile)) {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
+                this.file = imageFile;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            cameraPermissionDisposal.dispose();
+        }
+    }
+
+    private File getOutputMediaFile(){
+        File mediaStorageDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + getContext().getString(R.string.picture_folder));
+
+        if (! mediaStorageDir.exists()){
+            if (! mediaStorageDir.mkdirs()){
+                return null;
+            }
+        }
+        String time = new Date().toString();
+        File mediaFile;
+        String imageName = time +".jpg";
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator + imageName);
+        return mediaFile;
     }
 
     public void initView() {
@@ -363,6 +457,14 @@ public class CustomImageComponent extends RelativeLayout {
         return this.index;
     }
 
+    public void setCameraAccessible(boolean cameraAccessible) {
+        this.cameraAccessible = cameraAccessible;
+    }
+
+    public boolean isCameraAccessible() {
+        return this.cameraAccessible;
+    }
+
     private void setAttributes(AttributeSet attrs) {
         TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.CustomImageComponent, 0, 0);
         try {
@@ -391,6 +493,9 @@ public class CustomImageComponent extends RelativeLayout {
             if (typedArray.hasValue(R.styleable.CustomImageComponent_index)) {
                 this.setIndex(typedArray.getIndex(R.styleable.CustomImageComponent_index));
             }
+
+            boolean cameraAccessible = typedArray.getBoolean(R.styleable.CustomImageComponent_cameraAccessible, false);
+            this.setCameraAccessible(cameraAccessible);
         } finally {
             typedArray.recycle();
         }

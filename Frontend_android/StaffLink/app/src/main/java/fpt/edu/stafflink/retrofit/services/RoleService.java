@@ -16,10 +16,10 @@ import retrofit2.http.Path;
 import retrofit2.http.QueryMap;
 
 public interface RoleService {
-    @GET("/roles")
+    @GET("/roles/all")
     Observable<Response<Object>> getRoles(@QueryMap Pagination pagination);
 
-    @GET("/roles/{id}")
+    @GET("/roles/get/{id}")
     Observable<Response<Object>> getRole(@Path("id") int id);
 
     @POST("/roles/new")

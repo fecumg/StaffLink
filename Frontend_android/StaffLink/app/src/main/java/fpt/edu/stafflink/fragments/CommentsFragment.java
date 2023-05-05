@@ -199,7 +199,7 @@ public class CommentsFragment extends BaseFragment {
                         }),
                         () -> getBaseActivity().runOnUiThread(() -> {
                             progressBarInfiniteLoading.setVisibility(View.GONE);
-                            if (comments.getObjects().size() - previousSize == 20) {
+                            if (comments.getObjects().size() - previousSize == DEFAULT_PAGE_SIZE) {
                                 this.currentPage++;
                                 this.ableToLoad = true;
                             } else {
