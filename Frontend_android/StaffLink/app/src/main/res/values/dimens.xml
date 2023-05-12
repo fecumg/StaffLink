@@ -27,7 +27,7 @@
 
     <dimen name="normal_circular_avatar_size">200dp</dimen>
     <dimen name="small_circular_avatar_size">120dp</dimen>
-    <dimen name="tiny_circular_avatar_size">50dp</dimen>
+    <dimen name="tiny_circular_avatar_size">40dp</dimen>
 
     <dimen name="title_width">260dp</dimen>
     <dimen name="logo_width">260dp</dimen>
@@ -44,4 +44,7 @@
     <dimen name="button_checkbox_size">25dp</dimen>
 
     <dimen name="pie_chart_size">300dp</dimen>
+
+    <dimen name="comment_item_margin_bottom">2dp</dimen>
+    <dimen name="comment_item_margin_top">10dp</dimen>
 </resources>

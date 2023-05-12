@@ -124,7 +124,7 @@ public class TasksFragment extends BaseFragment {
                         })
                 );
 
-        getBaseActivity().reactorCompositeDisposable.add(disposable);
+        reactorCompositeDisposable.add(disposable);
     }
 
     private void fetchAuthorizedTasksByProject(String projectId) {
@@ -149,7 +149,7 @@ public class TasksFragment extends BaseFragment {
                         })
                 );
 
-        getBaseActivity().reactorCompositeDisposable.add(disposable);
+        reactorCompositeDisposable.add(disposable);
     }
 
     private void fetchAssignedTasks() {
@@ -174,7 +174,7 @@ public class TasksFragment extends BaseFragment {
                         })
                 );
 
-        getBaseActivity().reactorCompositeDisposable.add(disposable);
+        reactorCompositeDisposable.add(disposable);
     }
 
     private void fetchAssignedTasksByProject(String projectId) {
@@ -199,7 +199,7 @@ public class TasksFragment extends BaseFragment {
                         })
                 );
 
-        getBaseActivity().reactorCompositeDisposable.add(disposable);
+        reactorCompositeDisposable.add(disposable);
     }
 
     private void fetchTasks() {
@@ -224,7 +224,7 @@ public class TasksFragment extends BaseFragment {
                         })
                 );
 
-        getBaseActivity().reactorCompositeDisposable.add(disposable);
+        reactorCompositeDisposable.add(disposable);
     }
 
     private void fetchTasksByProject(String projectId) {
@@ -249,7 +249,7 @@ public class TasksFragment extends BaseFragment {
                         })
                 );
 
-        getBaseActivity().reactorCompositeDisposable.add(disposable);
+        reactorCompositeDisposable.add(disposable);
     }
 
     public int getTaskStatus() {

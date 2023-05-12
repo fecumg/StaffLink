@@ -64,10 +64,10 @@ public class BaseService {
     }
 
     protected void resizeThumbnail(File file) throws IOException {
-        resizeImage(file, 500);
+        resizeImage(file, 200);
     }
 
     protected void resizeNormal(File file) throws IOException {
-        resizeImage(file, 1200);
+        resizeImage(file, 800);
     }
 }

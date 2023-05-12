@@ -1,5 +1,6 @@
 package fpt.edu.stafflink.debouncing;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -7,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Debouncer {
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1);
-    private final ConcurrentHashMap<Integer, TimerTask> delayedMap = new ConcurrentHashMap<>();
+    private final Map<Integer, TimerTask> delayedMap = new ConcurrentHashMap<>();
 
     private static final int ONE_AND_ONLY_KEY = 1;
 
@@ -26,8 +27,9 @@ public class Debouncer {
         TimerTask prev;
         do {
             prev = delayedMap.putIfAbsent(ONE_AND_ONLY_KEY, task);
-            if (prev == null)
+            if (prev == null) {
                 sched.schedule(task, interval, TimeUnit.MILLISECONDS);
+            }
         } while (prev != null && !prev.extend()); // Exit only if new task was added to map, or existing task was extended successfully
     }
 
@@ -58,7 +60,7 @@ public class Debouncer {
             synchronized (lock) {
                 long remaining = dueTime - System.currentTimeMillis();
                 if (remaining > 0) { // Re-schedule task
-                    sched.schedule(this, remaining, TimeUnit.MILLISECONDS);
+                    sched.schedule(this, interval, TimeUnit.MILLISECONDS);
                 } else { // Mark as terminated and invoke callback
                     dueTime = -1;
                     try {

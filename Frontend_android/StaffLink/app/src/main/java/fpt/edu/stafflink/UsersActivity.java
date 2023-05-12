@@ -10,11 +10,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -39,7 +40,6 @@ import io.reactivex.schedulers.Schedulers;
 public class UsersActivity extends BaseActivity {
     private static final String ERROR_TAG = "UsersActivity";
     private static final String USER_ACTION = "UserAction";
-    private static final int DELAY_TIME_IN_MILLISECOND = 1000;
 
     private int pageNumber = 1;
     private boolean ableToLoad = true;
@@ -47,6 +47,7 @@ public class UsersActivity extends BaseActivity {
     ImageButton buttonNewUser;
     ImageButton buttonRefreshUsers;
     CustomInputTextComponent inputTextSearchUsers;
+    ProgressBar progressBarInfiniteLoading;
     CustomTableComponent<UserResponse> tableUsers;
 
     ActivityResultLauncher<Intent> formActivityResultLauncher;
@@ -58,6 +59,7 @@ public class UsersActivity extends BaseActivity {
         buttonNewUser = findViewById(R.id.buttonNewUser);
         buttonRefreshUsers = findViewById(R.id.buttonRefreshUsers);
         inputTextSearchUsers = findViewById(R.id.inputTextSearchUsers);
+        progressBarInfiniteLoading = findViewById(R.id.progressBarInfiniteLoading);
         tableUsers = findViewById(R.id.tableUsers);
 
         this.setFormActivityResultLauncher();
@@ -175,49 +177,57 @@ public class UsersActivity extends BaseActivity {
         }
         this.ableToLoad = false;
 
-        Pagination pagination = new Pagination(pageNumber, PAGE_SIZE, "id", Pagination.DESC);
+        progressBarInfiniteLoading.setVisibility(View.VISIBLE);
 
-        Disposable disposable = RetrofitServiceManager.getUserService(this)
-                .getUsers(search, pagination)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        response ->
-                            super.handleResponse(
-                                    response,
-                                    (responseBody, gson) -> {
-                                        tableUsers.setError(null);
-                                        Type type = new TypeToken<List<UserResponse>>() {}.getType();
-                                        List<UserResponse> userResponses = gson.fromJson(gson.toJson(responseBody), type);
-                                        if (pageNumber == 1) {
-                                            tableUsers.setObjects(userResponses);
-                                        } else {
-                                            List<UserResponse> filteredUserResponses = userResponses.stream()
-                                                    .filter(user -> !tableUsers.getObjects().contains(user))
-                                                    .collect(Collectors.toList());
-                                            tableUsers.adapter.addNewItems(filteredUserResponses);
-                                        }
+        handler.postDelayed(() -> {
+            Pagination pagination = new Pagination(pageNumber, PAGE_SIZE, "id", Pagination.DESC);
+            Disposable disposable = RetrofitServiceManager.getUserService(this)
+                    .getUsers(search, pagination)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            response ->
+                                    super.handleResponse(
+                                            response,
+                                            (responseBody, gson) -> {
+                                                tableUsers.setError(null);
+                                                Type type = new TypeToken<List<UserResponse>>() {}.getType();
+                                                List<UserResponse> userResponses = gson.fromJson(gson.toJson(responseBody), type);
+                                                if (pageNumber == 1) {
+                                                    tableUsers.setObjects(userResponses);
+                                                } else {
+                                                    List<UserResponse> filteredUserResponses = userResponses.stream()
+                                                            .filter(user -> !tableUsers.getObjects().contains(user))
+                                                            .collect(Collectors.toList());
+                                                    tableUsers.adapter.addNewItems(filteredUserResponses);
+                                                }
 
-                                        handler.postDelayed(() -> {
-                                            if (userResponses.size() == PAGE_SIZE) {
-                                                pageNumber ++;
-                                                ableToLoad = true;
-                                            } else {
-                                                ableToLoad = false;
+                                                progressBarInfiniteLoading.setVisibility(View.GONE);
+
+                                                handler.postDelayed(() -> {
+                                                    if (userResponses.size() == PAGE_SIZE) {
+                                                        pageNumber ++;
+                                                        ableToLoad = true;
+                                                    } else {
+                                                        ableToLoad = false;
+                                                    }
+                                                }, DELAY_TIME_IN_MILLISECOND);
+
+                                            },
+                                            errorApiResponse -> {
+                                                progressBarInfiniteLoading.setVisibility(View.GONE);
+                                                tableUsers.setError(errorApiResponse.getMessage());
                                             }
-                                        }, DELAY_TIME_IN_MILLISECOND);
-
-                                    },
-                                    errorApiResponse -> tableUsers.setError(errorApiResponse.getMessage())
-                            ),
-                        error -> {
-                            Log.e(ERROR_TAG, "fetchUsers: " + error.getMessage(), error);
-                            super.pushToast(error.getMessage());
-                            tableUsers.setError(error.getMessage());
-                        }
-                );
-
-        compositeDisposable.add(disposable);
+                                    ),
+                            error -> {
+                                progressBarInfiniteLoading.setVisibility(View.GONE);
+                                Log.e(ERROR_TAG, "fetchUsers: " + error.getMessage(), error);
+                                super.pushToast(error.getMessage());
+                                tableUsers.setError(error.getMessage());
+                            }
+                    );
+            compositeDisposable.add(disposable);
+        }, LOADING_EXTRA_TIME_IN_MILLISECOND);
     }
 
     private void refresh() {

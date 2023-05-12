@@ -43,14 +43,17 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:theme="@style/progressBarSuccess"/>
 
-    <fpt.edu.stafflink.components.CustomCheckBoxComponent
-        android:id="@+id/checkBoxChecklist"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        app:ableToRemoveItems="true"
-        app:ableToChangePositions="true"
-        app:hasBottomLine="true"
-        android:paddingHorizontal="5dp"
-        android:paddingVertical="10dp"/>
+        android:layout_height="wrap_content">
+
+        <fpt.edu.stafflink.components.CustomCheckBoxComponent
+            android:id="@+id/checkBoxChecklist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            app:hasBottomLine="true"
+            android:paddingHorizontal="5dp"
+            android:paddingVertical="10dp"/>
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>

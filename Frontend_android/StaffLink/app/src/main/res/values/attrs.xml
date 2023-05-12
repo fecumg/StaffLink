@@ -68,5 +68,6 @@
         <attr name="ableToRemoveItems" format="boolean"/>
         <attr name="ableToChangePositions" format="boolean"/>
         <attr name="hasBottomLine" format="boolean"/>
+        <attr name="enabled" format="boolean"/>
     </declare-styleable>
 </resources>

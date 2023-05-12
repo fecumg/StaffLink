@@ -82,8 +82,6 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<UserRoleMapping> userRoleMappings = new ArrayList<>();
-
-
 }
 
 

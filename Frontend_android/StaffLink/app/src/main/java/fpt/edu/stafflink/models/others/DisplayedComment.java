@@ -1,18 +1,19 @@
 package fpt.edu.stafflink.models.others;
 
 import fpt.edu.stafflink.models.responseDtos.CommentResponse;
+import fpt.edu.stafflink.models.responseDtos.UserResponse;
 
 public class DisplayedComment {
     private CommentResponse comment;
-    private String avatar;
+    private UserResponse user;
 
     public DisplayedComment(CommentResponse comment) {
         this.comment = comment;
     }
 
-    public DisplayedComment(CommentResponse comment, String avatar) {
+    public DisplayedComment(CommentResponse comment, UserResponse user) {
         this.comment = comment;
-        this.avatar = avatar;
+        this.user = user;
     }
 
     public CommentResponse getComment() {
@@ -23,11 +24,11 @@ public class DisplayedComment {
         this.comment = comment;
     }
 
-    public String getAvatar() {
-        return avatar;
+    public UserResponse getUser() {
+        return user;
     }
 
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
+    public void setUser(UserResponse user) {
+        this.user = user;
     }
 }

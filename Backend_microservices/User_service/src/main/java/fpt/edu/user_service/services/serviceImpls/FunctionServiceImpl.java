@@ -9,6 +9,7 @@ import fpt.edu.user_service.exceptions.UniqueKeyViolationException;
 import fpt.edu.user_service.pagination.Pagination;
 import fpt.edu.user_service.repositories.FunctionRepository;
 import fpt.edu.user_service.repositories.UserRepository;
+import fpt.edu.user_service.repositories.UserRoleMappingRepository;
 import fpt.edu.user_service.services.FunctionService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.BadRequestException;
@@ -42,6 +43,8 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 @Log4j2
 public class FunctionServiceImpl extends BaseService implements FunctionService {
+    @Autowired
+    private UserRoleMappingRepository userRoleMappingRepository;
 
     private static final String getAllMethodCache = "allFunctionResponses";
     private static final String getMethodCache = "FunctionResponses";
@@ -231,10 +234,10 @@ public class FunctionServiceImpl extends BaseService implements FunctionService 
             Function function = optionalFunction.get();
             List<ExchangeUser> exchangeUsers = this.getAffectedExchangeUser(function);
 
-//            send message to demand auth-gateway to update guardedPaths redis cache
-            this.sendMessageToDeletePathCache(function.getId());
-
             functionRepository.delete(function);
+
+//            send message to demand auth-gateway to update guardedPaths redis cache
+            this.sendMessageToDeletePathCache(id);
 
 //            send message to demand auth-gateway to update authenticatedUser redis cache
             this.sendMessageToUpdateAuthCache(exchangeUsers);

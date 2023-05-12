@@ -53,6 +53,8 @@ public class AuthorizedProjectsActivity extends BaseActivity {
 
     ActivityResultLauncher<Intent> formActivityResultLauncher;
 
+    reactor.core.Disposable fetchProjectsDisposable;
+
     @Override
     protected void onSubCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_projects);
@@ -155,7 +157,7 @@ public class AuthorizedProjectsActivity extends BaseActivity {
     protected void fetchProjects() {
         MultiValuePagination pagination = new MultiValuePagination();
 
-        reactor.core.Disposable disposable = WebClientServiceManager.getProjectService()
+        fetchProjectsDisposable = WebClientServiceManager.getProjectService()
                 .getAuthorizedProjects(this, pagination)
                 .subscribe(
                         projectResponse -> runOnUiThread(() -> {
@@ -169,10 +171,15 @@ public class AuthorizedProjectsActivity extends BaseActivity {
                         })
                 );
 
-        reactorCompositeDisposable.add(disposable);
+        reactorCompositeDisposable.add(fetchProjectsDisposable);
     }
 
     private void refresh() {
+        runOnUiThread(() -> {
+            if (fetchProjectsDisposable != null && !fetchProjectsDisposable.isDisposed()) {
+                fetchProjectsDisposable.dispose();
+            }
+        });
         this.pageNumber = 1;
         listProjects.setObjects(new ArrayList<>());
         this.fetchProjects();

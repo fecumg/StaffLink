@@ -32,6 +32,7 @@ public class CustomCheckBoxAdapter<T> extends BaseAdapter<T, CustomCheckBoxAdapt
     private Drawable buttonDrawable;
     private int textSize;
     private boolean hasBottomLine;
+    private boolean enabled;
 
     RecyclerView mRecyclerView;
 
@@ -87,6 +88,11 @@ public class CustomCheckBoxAdapter<T> extends BaseAdapter<T, CustomCheckBoxAdapt
 
     public void setCustomTextSize(int textSize) {
         this.textSize = textSize;
+        notifyItemRangeChanged(0, getItemCount());
+    }
+
+    public void setCheckEnabled(boolean enabled) {
+        this.enabled = enabled;
         notifyItemRangeChanged(0, getItemCount());
     }
 
@@ -156,6 +162,7 @@ public class CustomCheckBoxAdapter<T> extends BaseAdapter<T, CustomCheckBoxAdapt
 
         holder.itemCheckBoxMainElement.setText(this.getMainFieldValue(object));
 
+        holder.itemCheckBoxMainElement.setOnCheckedChangeListener(null);
         holder.itemCheckBoxMainElement.setChecked(checkedObjects.stream().anyMatch(checkedObject -> checkedObject.equals(object)));
 
         if (this.buttonDrawable != null) {
@@ -171,6 +178,8 @@ public class CustomCheckBoxAdapter<T> extends BaseAdapter<T, CustomCheckBoxAdapt
         } else {
             holder.itemCheckBoxBottomLine.setVisibility(View.GONE);
         }
+
+        holder.itemCheckBoxMainElement.setEnabled(this.enabled);
 
         holder.itemCheckBoxMainElement.setOnCheckedChangeListener((compoundButton, b) -> {
             if (b) {
@@ -242,7 +251,7 @@ public class CustomCheckBoxAdapter<T> extends BaseAdapter<T, CustomCheckBoxAdapt
         return GenericUtils.getFieldValue(object, this.mainField);
     }
 
-    private void removeCheckedObject(T object) {
+    public void removeCheckedObject(T object) {
         for (T checkedObject: this.checkedObjects) {
             if (checkedObject.equals(object)) {
                 checkedObjects.remove(checkedObject);

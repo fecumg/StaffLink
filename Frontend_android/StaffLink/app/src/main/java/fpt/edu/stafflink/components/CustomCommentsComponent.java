@@ -23,8 +23,6 @@ public class CustomCommentsComponent extends LinearLayout {
 
     CustomCommentAdapter adapter;
 
-    private List<UserResponse> relatedUsers = new ArrayList<>();
-
     private OnScrolledToTopHandler onScrolledToTopHandler;
 
     public CustomCommentsComponent(Context context, @Nullable AttributeSet attrs) {
@@ -37,7 +35,7 @@ public class CustomCommentsComponent extends LinearLayout {
         View view = inflate(context, R.layout.component_comments_custom, this);
         CustomCommentsComponentMainElement = view.findViewById(R.id.CustomCommentsComponentMainElement);
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, true);
         CustomCommentsComponentMainElement.setLayoutManager(layoutManager);
 
         adapter = new CustomCommentAdapter(new ArrayList<>());
@@ -65,7 +63,7 @@ public class CustomCommentsComponent extends LinearLayout {
     public void addNewItem(DisplayedComment object) {
         UserResponse authUser = this.adapter.getAuthUser();
         if (authUser != null && object.getComment().getCreatedBy() == authUser.getId()) {
-            object.setAvatar(authUser.getAvatar());
+            object.setUser(authUser);
         }
         this.adapter.addNewItem(object);
     }
@@ -73,7 +71,7 @@ public class CustomCommentsComponent extends LinearLayout {
     public void insertItem(int position, DisplayedComment object) {
         UserResponse authUser = this.adapter.getAuthUser();
         if (authUser != null && object.getComment().getCreatedBy() == authUser.getId()) {
-            object.setAvatar(authUser.getAvatar());
+            object.setUser(authUser);
         }
         this.adapter.insertItem(position, object);
     }
@@ -91,15 +89,20 @@ public class CustomCommentsComponent extends LinearLayout {
         }
     }
 
-    public void insertRelatedUser(UserResponse userResponse) {
-        if (relatedUsers.contains(userResponse) || this.adapter.getAuthUser().equals(userResponse)) {
+    public void insertRelatedUser(UserResponse userResponse, int startPosition, int effectedCount) {
+        List<DisplayedComment> displayedComments = this.getObjects();
+        if (startPosition >= displayedComments.size() || startPosition + effectedCount > displayedComments.size()) {
             return;
         }
-        relatedUsers.add(userResponse);
-        List<DisplayedComment> displayedComments = this.getObjects();
-        for (int i = 0; i < displayedComments.size(); i++) {
-            if (displayedComments.get(i).getComment().getCreatedBy() == userResponse.getId()) {
-                displayedComments.get(i).setAvatar(userResponse.getAvatar());
+        for (int i = startPosition; i < startPosition + effectedCount; i++) {
+            if (userResponse != null) {
+                if (displayedComments.get(i).getComment().getCreatedBy() == userResponse.getId()) {
+                    if (this.adapter.getAuthUser() != null && !this.adapter.getAuthUser().equals(userResponse)) {
+                        displayedComments.get(i).setUser(userResponse);
+                    }
+                    this.adapter.notifyItemChanged(i);
+                }
+            } else {
                 this.adapter.notifyItemChanged(i);
             }
         }

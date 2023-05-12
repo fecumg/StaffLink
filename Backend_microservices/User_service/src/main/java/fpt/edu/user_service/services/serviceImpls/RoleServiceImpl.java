@@ -6,9 +6,7 @@ import fpt.edu.user_service.dtos.responseDtos.RoleResponse;
 import fpt.edu.user_service.entities.Function;
 import fpt.edu.user_service.entities.Role;
 import fpt.edu.user_service.pagination.Pagination;
-import fpt.edu.user_service.repositories.FunctionRepository;
-import fpt.edu.user_service.repositories.RoleRepository;
-import fpt.edu.user_service.repositories.UserRepository;
+import fpt.edu.user_service.repositories.*;
 import fpt.edu.user_service.services.RoleService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.NotFoundException;
@@ -38,6 +36,10 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 @Log4j2
 public class RoleServiceImpl extends BaseService implements RoleService {
+    @Autowired
+    private RoleFunctionMappingRepository roleFunctionMappingRepository;
+    @Autowired
+    private UserRoleMappingRepository userRoleMappingRepository;
 
     private static final String getAllMethodCache = "allRoleResponses";
     private static final String getMethodCache = "roleResponses";

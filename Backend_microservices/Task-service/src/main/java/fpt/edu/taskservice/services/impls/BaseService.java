@@ -108,22 +108,22 @@ public class BaseService<T> {
         }
     }
 
-    protected String getFieldValue(Object object, String fieldName) {
+    protected Object getFieldValue(Object object, String fieldName) {
         if (!StringUtils.hasText(fieldName) || object == null) {
-            return "";
+            return null;
         }
         Class<?> clazz = object.getClass();
         try {
             Field field = this.getField(clazz, fieldName);
             if (field != null) {
                 field.setAccessible(true);
-                return String.valueOf(field.get(object));
+                return field.get(object);
             } else {
-                return "";
+                return null;
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-            return "";
+            return null;
         }
     }
 
@@ -147,9 +147,9 @@ public class BaseService<T> {
         } else {
             Flux<T> sortedObjectFlux;
             if (pagination.getDirection().equals(Pagination.ASC)) {
-                sortedObjectFlux = objectFlux.sort(Comparator.comparing(object -> this.getFieldValue(object, pagination.getSortBy())));
+                sortedObjectFlux = objectFlux.sort(getComparator(pagination.getSortBy()));
             } else if (pagination.getDirection().equals(Pagination.DESC)) {
-                sortedObjectFlux = objectFlux.sort(Comparator.comparing(object -> this.getFieldValue(object, pagination.getSortBy())).reversed());
+                sortedObjectFlux = objectFlux.sort(getComparator(pagination.getSortBy()).reversed());
             } else {
                 throw new BadRequestException("Sort direction must be either '" + Pagination.ASC + "' or '" + Pagination.DESC + "'");
             }
@@ -162,6 +162,23 @@ public class BaseService<T> {
                 return sortedObjectFlux;
             }
         }
+    }
+
+    private Comparator<T> getComparator(String fieldName) {
+        return (o1, o2) -> {
+            Object fieldValue = getFieldValue(o1, fieldName);
+            if (fieldValue instanceof Integer) {
+                return (int) getFieldValue(o1, fieldName) - (int) getFieldValue(o2, fieldName);
+            } else if (fieldValue instanceof Double) {
+                return (double) getFieldValue(o1, fieldName) < (double) getFieldValue(o2, fieldName) ? -1 : 1;
+            } else if (fieldValue instanceof Long) {
+                return (long) getFieldValue(o1, fieldName) < (long) getFieldValue(o2, fieldName) ? -1 : 1;
+            } else if (fieldValue instanceof Date) {
+                return ((Date) getFieldValue(o1, fieldName)).compareTo((Date) getFieldValue(o2, fieldName));
+            } else {
+                return String.valueOf(getFieldValue(o1, fieldName)).compareTo(String.valueOf(getFieldValue(o2, fieldName)));
+            }
+        };
     }
 
     protected Mono<Project> buildProject(Project project) {

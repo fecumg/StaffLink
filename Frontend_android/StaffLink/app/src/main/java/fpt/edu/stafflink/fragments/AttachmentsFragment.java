@@ -120,7 +120,7 @@ public class AttachmentsFragment extends BaseFragment{
                         })
                 );
 
-        getBaseActivity().reactorCompositeDisposable.add(disposable);
+        reactorCompositeDisposable.add(disposable);
     }
 
     private void setUploadHandler() {
@@ -152,7 +152,7 @@ public class AttachmentsFragment extends BaseFragment{
                                 textViewError.setText(error.getMessage());
                             });
 
-            getBaseActivity().compositeDisposable.add(disposable);
+            compositeDisposable.add(disposable);
         });
     }
 
@@ -191,7 +191,7 @@ public class AttachmentsFragment extends BaseFragment{
                                 textViewError.setText(error.getMessage());
                             });
 
-            getBaseActivity().compositeDisposable.add(disposable);
+            compositeDisposable.add(disposable);
         });
     }
 

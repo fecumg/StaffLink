@@ -62,6 +62,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     private static final String ERROR_TAG = "BaseActivity";
     private static final String LOGOUT_ACTION = "logoutAction";
 
+    protected static final int DELAY_TIME_IN_MILLISECOND = 1000;
+    protected static final int LOADING_EXTRA_TIME_IN_MILLISECOND = 500;
+
     DrawerLayout baseDrawerLayout;
     FrameLayout baseFrameLayout;
     NavigationView baseNavigationView;
@@ -136,6 +139,14 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (compositeDisposable == null || compositeDisposable.isDisposed()) {
+            compositeDisposable = new CompositeDisposable();
+        }
+        if (reactorCompositeDisposable == null || reactorCompositeDisposable.isDisposed()) {
+            reactorCompositeDisposable = Disposables.composite();
+        }
+
         baseDrawerLayout.closeDrawers();
         this.fetchAuthorizedFunctions();
         this.fetchAuthUser(this);
@@ -385,8 +396,6 @@ public abstract class BaseActivity extends AppCompatActivity {
             return;
         }
 
-        System.out.println(this);
-
         LocalBroadcastManager.getInstance(this)
                 .registerReceiver(new BroadcastReceiver() {
                     @Override
@@ -399,8 +408,12 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        compositeDisposable.dispose();
-        reactorCompositeDisposable.dispose();
+        if (compositeDisposable != null) {
+            compositeDisposable.dispose();
+        }
+        if (reactorCompositeDisposable != null) {
+            reactorCompositeDisposable.dispose();
+        }
     }
 
     protected abstract void onSubCreate(@Nullable Bundle savedInstanceState);

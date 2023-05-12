@@ -77,7 +77,7 @@ public class CheckItemServiceImpl extends BaseService<CheckItem> implements Chec
     @Override
     public Mono<CheckItemResponse> update(String id, EditCheckItemRequest editCheckItemRequest) {
         return checkItemRepository.findById(id)
-                .switchIfEmpty(Mono.error(new NotFoundException("check item not found")))
+                .switchIfEmpty(Mono.error(new NotFoundException("check item with id " + id + " not found")))
                 .flatMap(this::buildCheckItem)
                 .map(currentCheckItem -> {
                     currentCheckItem.setChecked(editCheckItemRequest.isChecked());
@@ -116,9 +116,9 @@ public class CheckItemServiceImpl extends BaseService<CheckItem> implements Chec
                         .map(checkItem -> {
                             checkItem.setPosition(request.getPosition());
                             return checkItem;
-                        }))
+                        })
+                )
                 .flatMap(checkItem -> checkItemRepository.save(checkItem))
-                .collectList()
                 .then();
     }
 

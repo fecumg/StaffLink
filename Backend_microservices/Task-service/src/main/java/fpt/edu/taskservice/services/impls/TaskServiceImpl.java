@@ -16,7 +16,6 @@ import jakarta.ws.rs.NotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
@@ -35,7 +33,6 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * @author Truong Duc Duong
@@ -79,23 +76,7 @@ public class TaskServiceImpl extends BaseService<Task> implements TaskService {
                 .flatMap(preparedTask -> setDueAt(preparedTask, newTaskRequest))
                 .flatMap(preparedTask -> taskRepository.save(preparedTask))
                 .flatMap(super::buildTaskResponse)
-                .doOnNext(taskResponse -> {
-                    log.info("Task with id '{}' saved successfully", taskResponse.getId());
-
-                    DefaultSingletonBeanRegistry registry = (DefaultSingletonBeanRegistry) context.getAutowireCapableBeanFactory();
-
-                    @SuppressWarnings("unchecked")
-                    Map<String, WebSocketHandler> urlMap = (Map<String, WebSocketHandler>) ((SimpleUrlHandlerMapping) handlerMapping).getUrlMap();
-                    urlMap.put("/comments/" + taskResponse.getId(), webSocketHandler);
-
-                    registry.destroySingleton("handlerAdapter");
-
-                    for (String key: urlMap.keySet()) {
-                        System.out.println(key);
-                    }
-
-                    registry.registerSingleton("handlerAdapter", new SimpleUrlHandlerMapping(urlMap));
-                })
+                .doOnSuccess(taskResponse -> log.info("Task with id '{}' saved successfully", taskResponse.getId()))
                 .doOnError(throwable -> log.error(throwable.getMessage()));
     }
 

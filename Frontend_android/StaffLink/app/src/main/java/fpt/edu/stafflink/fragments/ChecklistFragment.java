@@ -41,7 +41,7 @@ import okhttp3.RequestBody;
 
 public class ChecklistFragment extends BaseFragment{
     private static final String ERROR_TAG = "ChecklistFragment";
-    private static final int DEFAULT_DELAY_TIME = 1000;
+    private static final int DEFAULT_DELAY_TIME = 0;
 
     TextView textViewError;
     CustomInputTextComponent inputTextContent;
@@ -107,9 +107,15 @@ public class ChecklistFragment extends BaseFragment{
         if (this.accessType == PROJECT_ACCESS_TYPE_OBSERVABLE) {
             inputTextContent.setVisibility(View.GONE);
             buttonSubmitCheckItem.setVisibility(View.GONE);
+            checkBoxChecklist.setAbleToRemoveItems(false);
+            checkBoxChecklist.setAbleToChangePositions(false);
+            checkBoxChecklist.setCheckEnabled(false);
         } else {
             inputTextContent.setVisibility(View.VISIBLE);
             buttonSubmitCheckItem.setVisibility(View.VISIBLE);
+            checkBoxChecklist.setAbleToRemoveItems(true);
+            checkBoxChecklist.setAbleToChangePositions(true);
+            checkBoxChecklist.setCheckEnabled(true);
 
             buttonSubmitCheckItem.setOnClickListener(view -> {
                 NewCheckItemRequest newCheckItemRequest = this.validateNewCheckItem();
@@ -143,12 +149,13 @@ public class ChecklistFragment extends BaseFragment{
             this.updateProgressBar();
 
             checkBoxChecklist.postDelayed(() -> {
-                List<CheckItemResponse> cloneCheckBoxChecklist = new ArrayList<>(checkBoxChecklist.getObjects());
-                Collections.reverse(cloneCheckBoxChecklist);
+                if (checkBoxChecklist == null || checkBoxChecklist.getObjects() == null) return;
+                List<CheckItemResponse> clonedChecklist = new ArrayList<>(checkBoxChecklist.getObjects());
+                Collections.reverse(clonedChecklist);
 
                 List<RearrangedCheckItemRequest> rearrangedCheckItemRequests = new ArrayList<>();
-                for (int i = 0; i < cloneCheckBoxChecklist.size(); i++) {
-                    rearrangedCheckItemRequests.add(new RearrangedCheckItemRequest(cloneCheckBoxChecklist.get(i).getId(), i));
+                for (int i = 0; i < clonedChecklist.size(); i++) {
+                    rearrangedCheckItemRequests.add(new RearrangedCheckItemRequest(clonedChecklist.get(i).getId(), i));
                 }
 
                 Disposable disposable = RetrofitServiceManager.getCheckItemService(super.retrieveContext())
@@ -168,7 +175,7 @@ public class ChecklistFragment extends BaseFragment{
                                     textViewError.setText(error.getMessage());
                                 });
 
-                getBaseActivity().compositeDisposable.add(disposable);
+                compositeDisposable.add(disposable);
             }, DEFAULT_DELAY_TIME);
         });
     }
@@ -198,7 +205,7 @@ public class ChecklistFragment extends BaseFragment{
                                     textViewError.setText(error.getMessage());
                                 });
 
-                getBaseActivity().compositeDisposable.add(disposable);
+                compositeDisposable.add(disposable);
             }, DEFAULT_DELAY_TIME);
         });
     }
@@ -221,7 +228,7 @@ public class ChecklistFragment extends BaseFragment{
                         })
                 );
 
-        getBaseActivity().reactorCompositeDisposable.add(disposable);
+        reactorCompositeDisposable.add(disposable);
     }
 
     public void submitNewCheckItem(RequestBody newCheckItemRequestBody) {
@@ -241,6 +248,7 @@ public class ChecklistFragment extends BaseFragment{
                                             } else {
                                                 checkBoxChecklist.addNewItem(checkItemResponse);
                                             }
+
                                             checkBoxChecklist.scrollTo(0);
                                             super.getBaseActivity().pushToast("Check item added successfully");
                                         },
@@ -252,7 +260,7 @@ public class ChecklistFragment extends BaseFragment{
                             textViewError.setText(error.getMessage());
                         });
 
-        getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     public void submitEditCheckItem(String id, RequestBody editCheckItemRequestBody) {
@@ -264,9 +272,7 @@ public class ChecklistFragment extends BaseFragment{
                         response ->
                                 getBaseActivity().handleGenericResponse(
                                         response,
-                                        (checkItemResponse) -> {
-                                            textViewError.setText(null);
-                                        },
+                                        (checkItemResponse) -> textViewError.setText(null),
                                         errorApiResponse -> textViewError.setText(errorApiResponse.getMessage())
                                 ),
                         error -> {
@@ -275,7 +281,7 @@ public class ChecklistFragment extends BaseFragment{
                             textViewError.setText(error.getMessage());
                         });
 
-        getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     public NewCheckItemRequest validateNewCheckItem() {

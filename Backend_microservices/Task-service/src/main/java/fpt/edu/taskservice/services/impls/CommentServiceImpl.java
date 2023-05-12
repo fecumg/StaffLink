@@ -5,11 +5,13 @@ import com.google.gson.GsonBuilder;
 import fpt.edu.taskservice.dtos.requestDtos.CommentRequest;
 import fpt.edu.taskservice.dtos.responseDtos.CommentResponse;
 import fpt.edu.taskservice.entities.Comment;
+import fpt.edu.taskservice.exceptions.UnauthorizedException;
 import fpt.edu.taskservice.pagination.Pagination;
 import fpt.edu.taskservice.repositories.CommentRepository;
 import fpt.edu.taskservice.repositories.TaskRepository;
 import fpt.edu.taskservice.services.CommentService;
 import fpt.edu.taskservice.services.validations.ValidationHandler;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,15 +83,21 @@ public class CommentServiceImpl extends BaseService<Comment> implements CommentS
     private Flux<CommentResponse> buildCommentResponseFlux(Flux<Comment> commentFlux, Pagination pagination) {
         return super.paginate(commentFlux, pagination)
                 .map(CommentResponse::new)
-                .delayElements(Duration.ofMillis(50))
+                .delayElements(Duration.ofMillis(80))
                 .doOnError(throwable -> log.error(throwable.getMessage()));
     }
 
     private void setCreatedBy(Comment comment, WebSocketSession webSocketSession) {
         String authUserIdString = webSocketSession.getHandshakeInfo().getHeaders().getFirst(AUTH_ID);
-        if (StringUtils.hasText(authUserIdString)) {
-            int authUserId = Integer.parseInt(authUserIdString);
-            comment.setCreatedBy(authUserId);
+        try {
+            if (StringUtils.hasText(authUserIdString)) {
+                int authUserId = Integer.parseInt(authUserIdString);
+                comment.setCreatedBy(authUserId);
+            } else {
+                throw new UnauthorizedException("Sender's id empty");
+            }
+        } catch (NumberFormatException e) {
+            throw new BadRequestException("Sender's id invalid");
         }
     }
 }

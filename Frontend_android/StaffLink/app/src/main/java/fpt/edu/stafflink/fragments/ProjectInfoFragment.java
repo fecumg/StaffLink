@@ -214,7 +214,7 @@ public class ProjectInfoFragment extends BaseFragment {
                             textViewError.setText(error.getMessage());
                         });
 
-        getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     private void fetchCreatedBy(int userId) {
@@ -243,7 +243,7 @@ public class ProjectInfoFragment extends BaseFragment {
                             textViewError.setText(error.getMessage());
                         });
 
-        getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     private void fetchAuthorizedUser(int userId) {
@@ -268,7 +268,7 @@ public class ProjectInfoFragment extends BaseFragment {
                             textViewError.setText(error.getMessage());
                         });
 
-        getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     private void searchUsers(String search) {
@@ -322,7 +322,7 @@ public class ProjectInfoFragment extends BaseFragment {
                         }
                 );
 
-        getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     public void submitNewProject(RequestBody projectRequestBody) {
@@ -357,7 +357,7 @@ public class ProjectInfoFragment extends BaseFragment {
                             this.projectAccessActivity.enableSubmitNew();
                         });
 
-        getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     public void submitEditProject(String id, RequestBody projectRequestBody) {
@@ -384,7 +384,7 @@ public class ProjectInfoFragment extends BaseFragment {
                             textViewError.setText(error.getMessage());
                         });
 
-        getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     public ProjectRequest validateProject() {

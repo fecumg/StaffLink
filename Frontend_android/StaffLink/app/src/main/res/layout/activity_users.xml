@@ -49,11 +49,27 @@
         android:inputType="textPersonName"
         android:layout_marginBottom="-20dp"/>
 
-    <fpt.edu.stafflink.components.CustomTableComponent
-        android:id="@+id/tableUsers"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:defaultImage="@drawable/ic_person_light_foreground"
-        app:defaultImageTint="@color/primary"
-        app:imageShape="oval"/>
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ProgressBar
+            android:id="@+id/progressBarInfiniteLoading"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:progress="100"
+            android:theme="@style/progressBarSuccess"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:indeterminate="true"
+            android:visibility="gone"/>
+
+        <fpt.edu.stafflink.components.CustomTableComponent
+            android:id="@+id/tableUsers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:defaultImage="@drawable/ic_person_light_foreground"
+            app:defaultImageTint="@color/primary"
+            app:imageShape="oval"/>
+    </RelativeLayout>
 </LinearLayout>

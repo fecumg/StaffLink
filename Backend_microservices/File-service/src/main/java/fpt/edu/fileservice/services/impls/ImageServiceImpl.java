@@ -174,7 +174,7 @@ public class ImageServiceImpl extends BaseService implements ImageService {
                             for (File imageFile: imageFiles) {
                                 if (!imageNames.contains(imageFile.getName())) {
                                     imageFile.deleteOnExit();
-                                    log.warn("image file {} does not sync with data from User-service has been deleted", imageFile.getAbsolutePath());
+                                    log.warn("image file {} does not sync with data from User-service and has been deleted", imageFile.getAbsolutePath());
                                 }
                             }
                         },

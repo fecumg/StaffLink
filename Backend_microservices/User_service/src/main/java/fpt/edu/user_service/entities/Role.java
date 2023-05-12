@@ -60,6 +60,6 @@ public class Role extends BaseEntity{
 
 
 
-    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     private List<RoleFunctionMapping> roleFunctionMappings = new ArrayList<>();
 }

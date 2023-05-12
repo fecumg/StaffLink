@@ -60,10 +60,33 @@ public class CustomCheckBoxComponent<T> extends LinearLayout {
 
     private void initItemTouchHelper(boolean ableToChangePositions, boolean ableToRemoveItems) {
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.START | ItemTouchHelper.END, ItemTouchHelper.LEFT) {
+            int dragFrom = -1;
+            int dragTo = -1;
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                changePositions(viewHolder, target);
-                return false;
+                int fromPosition = viewHolder.getAdapterPosition();
+                int toPosition = target.getAdapterPosition();
+
+                if(dragFrom == -1) {
+                    dragFrom =  fromPosition;
+                }
+                dragTo = toPosition;
+
+                adapter.notifyItemMoved(fromPosition, toPosition);
+
+                return true;
+            }
+
+            @Override
+            public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+                super.clearView(recyclerView, viewHolder);
+                if(dragFrom != -1 && dragTo != -1 && dragFrom != dragTo) {
+                    adapter.getObjects().add(dragTo, adapter.getObjects().remove(dragFrom));
+                    if (onPositionChangedHandler != null) {
+                        onPositionChangedHandler.handle();
+                    }
+                }
+                dragFrom = dragTo = -1;
             }
 
             @Override
@@ -86,27 +109,20 @@ public class CustomCheckBoxComponent<T> extends LinearLayout {
         itemTouchHelper.attachToRecyclerView(customCheckBoxComponentMainElement);
     }
 
-    private void changePositions(RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-        int fromPosition = viewHolder.getAdapterPosition();
-        int toPosition = target.getAdapterPosition();
-
-        Collections.swap(adapter.getObjects(), fromPosition, toPosition);
-
-        adapter.notifyItemMoved(fromPosition, toPosition);
-
-        if (this.onPositionChangedHandler != null) {
-            this.onPositionChangedHandler.handle();
-        }
-    }
-
     private void removeItem(RecyclerView.ViewHolder viewHolder, int direction) {
         int position = viewHolder.getAdapterPosition();
+        T object = adapter.getObjects().get(position);
 
         if (direction == ItemTouchHelper.LEFT) {
-            if (this.onRemovedHandler != null) {
-                this.onRemovedHandler.handle(adapter.getObjects().get(position));
-            }
             adapter.removeItem(position);
+
+            if (getCheckedObjects().contains(object)) {
+                adapter.removeCheckedObject(object);
+            }
+
+            if (this.onRemovedHandler != null) {
+                this.onRemovedHandler.handle(object);
+            }
         }
     }
 
@@ -213,6 +229,10 @@ public class CustomCheckBoxComponent<T> extends LinearLayout {
         this.adapter.setHasBottomLine(hasBottomLine);
     }
 
+    public void setCheckEnabled(boolean enabled) {
+        this.adapter.setCheckEnabled(enabled);
+    }
+
     public void setOnPositionChangedHandler(OnPositionChangedHandler onPositionChangedHandler) {
         this.onPositionChangedHandler = onPositionChangedHandler;
     }
@@ -242,6 +262,9 @@ public class CustomCheckBoxComponent<T> extends LinearLayout {
 
             boolean hasBottomLine = typedArray.getBoolean(R.styleable.CustomCheckBoxComponent_hasBottomLine, false);
             this.setHasBottomLine(hasBottomLine);
+
+            boolean enabled = typedArray.getBoolean(R.styleable.CustomCheckBoxComponent_enabled, true);
+            this.setCheckEnabled(enabled);
         } finally {
             typedArray.recycle();
         }

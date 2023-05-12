@@ -317,7 +317,7 @@ public class TaskInfoFragment extends BaseFragment{
                             textViewError.setText(error.getMessage());
                         });
 
-        getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     private void fetchCreatedBy(int userId) {
@@ -346,7 +346,7 @@ public class TaskInfoFragment extends BaseFragment{
                             textViewError.setText(error.getMessage());
                         });
 
-        getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     private void fetchAssignedUser(int userId) {
@@ -371,7 +371,7 @@ public class TaskInfoFragment extends BaseFragment{
                             textViewError.setText(error.getMessage());
                         });
 
-        getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     private void searchUsers(String search) {
@@ -425,7 +425,7 @@ public class TaskInfoFragment extends BaseFragment{
                         }
                 );
 
-        getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     public void submitNewTask(RequestBody newTaskRequestBody) {
@@ -460,7 +460,7 @@ public class TaskInfoFragment extends BaseFragment{
                             this.taskAccessActivity.enableSubmitNew();
                         });
 
-        getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     public void submitEditTask(String id, RequestBody editTaskRequestBody) {
@@ -488,7 +488,7 @@ public class TaskInfoFragment extends BaseFragment{
                             textViewError.setText(error.getMessage());
                         });
 
-        getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     public void submitEditStatus(String id, RequestBody editStatusRequestBody) {
@@ -516,7 +516,7 @@ public class TaskInfoFragment extends BaseFragment{
                             textViewError.setText(error.getMessage());
                         });
 
-        getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     public NewTaskRequest validateNewTask() {

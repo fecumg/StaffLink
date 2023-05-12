@@ -32,6 +32,7 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -79,6 +80,8 @@ public class ProjectAccessActivity extends BaseActivity {
 
     ActivityResultLauncher<Intent> formActivityResultLauncher;
     BaseFragment fragment;
+
+    View currentMenuItem;
 
     @Override
     protected void onSubCreate(Bundle savedInstanceState) {
@@ -194,6 +197,9 @@ public class ProjectAccessActivity extends BaseActivity {
     }
 
     private void alterScreenByCase(View menuItem) {
+        if (menuItem.equals(currentMenuItem)) {
+            return;
+        }
         if (menuItem.equals(projectAccessMenuInfo)) {
             this.showInfoOnEdit();
         } else if (menuItem.equals(projectAccessMenuInitiated)) {
@@ -205,9 +211,16 @@ public class ProjectAccessActivity extends BaseActivity {
         } else if (menuItem.equals(projectAccessMenuOverdue)) {
             this.showTasks(TaskStatus.OVERDUE.getCode());
         }
+        currentMenuItem = menuItem;
     }
 
     private void replaceFragment(BaseFragment fragment) {
+        if (fragment == null ) return;
+
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentProjectInfo);
+        if(currentFragment != null) {
+            getSupportFragmentManager().beginTransaction().remove(currentFragment).commit();
+        }
         fragment.onAttach(getBaseContext());
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -307,7 +320,6 @@ public class ProjectAccessActivity extends BaseActivity {
 
                                                     listTasks.scrollTo(listTasks.getObjects().indexOf(taskResponse));
                                                     listTasks.setError(null);
-                                                    System.out.println("done");
                                                 });
                                             }
                                         },

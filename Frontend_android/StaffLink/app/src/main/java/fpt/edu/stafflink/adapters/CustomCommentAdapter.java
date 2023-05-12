@@ -40,7 +40,7 @@ public class CustomCommentAdapter extends BaseAdapter<DisplayedComment, CustomCo
 
     @Override
     public int getItemViewType(int position) {
-        if (getObjects().get(position).getComment().getCreatedBy() == authUser.getId()) {
+        if (authUser != null && getObjects().get(position).getComment().getCreatedBy() == authUser.getId()) {
             return TYPE_AUTH;
         } else return TYPE_OTHER;
     }
@@ -65,26 +65,48 @@ public class CustomCommentAdapter extends BaseAdapter<DisplayedComment, CustomCo
         }
         DisplayedComment object = super.getObjects().get(position);
 
-        if (position > 0 && object.getComment().getCreatedBy() == super.getObjects().get(position - 1).getComment().getCreatedBy()) {
+        if ((getItemCount() > position + 1) && object.getComment().getCreatedBy() == super.getObjects().get(position + 1).getComment().getCreatedBy()) {
             holder.itemCommentAvatar.setVisibility(View.INVISIBLE);
+            holder.itemCommentAvatar.clearUrl();
+
+            int marginBottom = (int) holder.itemCommentLayout.getResources().getDimension(R.dimen.comment_item_margin_bottom);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            layoutParams.setMargins(0, 0, 0, marginBottom);
+            holder.itemCommentLayout.setLayoutParams(layoutParams);
+
+            holder.itemCommentSender.setVisibility(View.GONE);
         } else {
             holder.itemCommentAvatar.setVisibility(View.VISIBLE);
-            if (StringUtils.isNotEmpty(object.getAvatar())) {
-                holder.itemCommentAvatar.setUrl(RetrofitManager.getImageUrl(holder.itemCommentAvatar.getContext(), object.getAvatar()));
+            if (object.getUser() != null && StringUtils.isNotEmpty(object.getUser().getAvatar())) {
+                holder.itemCommentAvatar.setUrl(RetrofitManager.getThumbnailUrl(holder.itemCommentAvatar.getContext(), object.getUser().getAvatar()));
+            }
+
+            int marginTop = (int) holder.itemCommentLayout.getResources().getDimension(R.dimen.comment_item_margin_top);
+            int marginBottom = (int) holder.itemCommentLayout.getResources().getDimension(R.dimen.comment_item_margin_bottom);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            layoutParams.setMargins(0, marginTop, 0, marginBottom);
+            holder.itemCommentLayout.setLayoutParams(layoutParams);
+
+            if (object.getUser() != null && this.getAuthUser() != null && object.getComment().getCreatedBy() != this.getAuthUser().getId()) {
+                holder.itemCommentSender.setVisibility(View.VISIBLE);
+                holder.itemCommentSender.setText(object.getUser().getName());
+            } else {
+                holder.itemCommentSender.setVisibility(View.GONE);
             }
         }
-
         holder.itemCommentMainElement.setText(object.getComment().getContent());
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         LinearLayout itemCommentLayout;
+        TextView itemCommentSender;
         TextView itemCommentMainElement;
         CustomImageComponentOval itemCommentAvatar;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             itemCommentLayout = itemView.findViewById(R.id.itemCommentLayout);
+            itemCommentSender = itemView.findViewById(R.id.itemCommentSender);
             itemCommentMainElement = itemView.findViewById(R.id.itemCommentMainElement);
             itemCommentAvatar = itemView.findViewById(R.id.itemCommentAvatar);
         }

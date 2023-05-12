@@ -22,6 +22,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -40,12 +41,6 @@ import fpt.edu.stafflink.models.requestDtos.taskRequestDtos.NewTaskRequest;
 import okhttp3.RequestBody;
 
 public class TaskAccessActivity extends BaseActivity {
-    private static final String ERROR_TAG = "TaskAccessActivity";
-
-    private static final int MENU_INFO = 0;
-    private static final int MENU_ATTACHMENTS = 1;
-    private static final int MENU_CHECKLIST = 2;
-    private static final int MENU_COMMENTS = 3;
 
     ImageButton buttonBack;
     ImageButton buttonSubmitTask;
@@ -71,6 +66,7 @@ public class TaskAccessActivity extends BaseActivity {
 
     BaseFragment fragment;
 
+    View currentMenuItem;
 
     @Override
     protected void onSubCreate(Bundle savedInstanceState) {
@@ -150,6 +146,9 @@ public class TaskAccessActivity extends BaseActivity {
     }
 
     private void alterScreenByCase(View menuItem) {
+        if (menuItem.equals(currentMenuItem)) {
+            return;
+        }
         if (menuItem.equals(taskAccessMenuInfo)) {
             this.showInfoOnEdit();
         } else if (menuItem.equals(taskAccessMenuAttachments)) {
@@ -162,9 +161,16 @@ public class TaskAccessActivity extends BaseActivity {
 //            show comments
             this.showComments();
         }
+        currentMenuItem = menuItem;
     }
 
     private void replaceFragment(BaseFragment fragment) {
+        if (fragment == null ) return;
+
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentTaskInfo);
+        if(currentFragment != null) {
+            getSupportFragmentManager().beginTransaction().remove(currentFragment).commit();
+        }
         fragment.onAttach(getBaseContext());
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

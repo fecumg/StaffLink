@@ -22,12 +22,13 @@ import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringUtils;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import dev.gustavoavila.websocketclient.WebSocketClient;
 import fpt.edu.stafflink.R;
-import fpt.edu.stafflink.TaskAccessActivity;
 import fpt.edu.stafflink.components.CustomCommentsComponent;
 import fpt.edu.stafflink.components.CustomInputTextComponent;
 import fpt.edu.stafflink.models.others.DisplayedComment;
@@ -36,15 +37,15 @@ import fpt.edu.stafflink.models.responseDtos.CommentResponse;
 import fpt.edu.stafflink.models.responseDtos.UserResponse;
 import fpt.edu.stafflink.pagination.MultiValuePagination;
 import fpt.edu.stafflink.retrofit.RetrofitServiceManager;
-import fpt.edu.stafflink.utilities.GenericUtils;
 import fpt.edu.stafflink.webClient.WebClientServiceManager;
+import io.reactivex.BackpressureStrategy;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class CommentsFragment extends BaseFragment {
     private static final String ERROR_TAG = "CommentsFragment";
-    private static final int DEFAULT_PAGE_SIZE = 20;
+    private static final int DEFAULT_PAGE_SIZE = 12;
 
     TextView textViewError;
     CustomInputTextComponent inputTextComment;
@@ -52,12 +53,8 @@ public class CommentsFragment extends BaseFragment {
     CustomCommentsComponent comments;
     ProgressBar progressBarInfiniteLoading;
 
-    private String projectId;
     private String id;
-    private int position;
     private int accessType;
-
-    TaskAccessActivity taskAccessActivity;
 
     WebSocketClient webSocketClient;
     URI uri;
@@ -90,9 +87,7 @@ public class CommentsFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            this.projectId = getArguments().getString(PARAM_PARENT_STRING_ID);
             this.id = getArguments().getString(PARAM_STRING_ID);
-            this.position = getArguments().getInt(PARAM_POSITION);
             this.accessType = getArguments().getInt(PARAM_PROJECT_ACCESS_TYPE);
         }
     }
@@ -126,14 +121,6 @@ public class CommentsFragment extends BaseFragment {
             buttonSubmitComment.setVisibility(View.GONE);
         } else {
             inputTextComment.setVisibility(View.VISIBLE);
-            inputTextComment.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
-                Rect r = new Rect();
-                inputTextComment.getWindowVisibleDisplayFrame(r);
-                if (inputTextComment.getRootView().getHeight() - (r.bottom - r.top) > 500) {
-                    comments.scrollTo(comments.getObjects().size() - 1);
-                }
-            });
-
             buttonSubmitComment.setVisibility(View.VISIBLE);
             buttonSubmitComment.setOnClickListener(view -> this.submitComment());
         }
@@ -143,14 +130,19 @@ public class CommentsFragment extends BaseFragment {
         comments.setAuthUser(getBaseActivity().getAuthUser());
     }
 
-    private void fetchCreatorOfComment(int userId) {
-        if (this.relatedUserMap.containsKey(userId) || (comments.getAuthUser() != null && comments.getAuthUser().getId() == userId)) {
+    private void fetchCreatorOfComment(int userId, int startPosition, int effectedCount) {
+        if (relatedUserMap.containsKey(userId) && relatedUserMap.get(userId) != null) {
+            comments.insertRelatedUser(relatedUserMap.get(userId), startPosition, effectedCount);
+            return;
+        } else if (comments.getAuthUser() != null && comments.getAuthUser().getId() == userId) {
+            comments.insertRelatedUser(comments.getAuthUser(), startPosition, effectedCount);
             return;
         }
         Disposable disposable = RetrofitServiceManager.getUserService(super.retrieveContext())
                 .getUser(userId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .toFlowable(BackpressureStrategy.BUFFER)
                 .subscribe(
                         response ->
                                 super.getBaseActivity().handleResponse(
@@ -159,18 +151,22 @@ public class CommentsFragment extends BaseFragment {
                                             textViewError.setError(null);
                                             UserResponse userResponse = gson.fromJson(gson.toJson(responseBody), UserResponse.class);
                                             relatedUserMap.put(userId, userResponse);
-                                            comments.insertRelatedUser(userResponse);
+                                            comments.insertRelatedUser(userResponse, startPosition, effectedCount);
                                         },
-                                        errorApiResponse -> textViewError.setError(errorApiResponse.getMessage())
+                                        errorApiResponse -> {
+                                            textViewError.setError(errorApiResponse.getMessage());
+                                            comments.insertRelatedUser(null, startPosition, effectedCount);
+                                        }
                                 ),
                         error -> {
                             Log.e(ERROR_TAG, "fetchCreatorOfComment: " + error.getMessage(), error);
                             super.getBaseActivity().pushToast(error.getMessage());
                             textViewError.setError(error.getMessage());
+                            comments.insertRelatedUser(null, startPosition, effectedCount);
                         }
                 );
 
-        super.getBaseActivity().compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable);
     }
 
     private void fetchComments(String taskId) {
@@ -183,23 +179,30 @@ public class CommentsFragment extends BaseFragment {
         MultiValuePagination pagination = new MultiValuePagination(this.currentPage, DEFAULT_PAGE_SIZE, "id", MultiValuePagination.DESC);
         int previousSize = comments.getObjects().size();
 
+        List<Integer> userIds = new ArrayList<>();
+
         reactor.core.Disposable disposable = WebClientServiceManager.getCommentServiceInstance()
                 .getCommentsByTaskId(getContext(), taskId, pagination)
                 .subscribe(
                         commentResponse -> getBaseActivity().runOnUiThread(() -> {
                             textViewError.setText(null);
                             DisplayedComment displayedComment = new DisplayedComment(commentResponse);
-                            comments.insertItem(0, displayedComment);
-                            this.fetchCreatorOfComment(commentResponse.getCreatedBy());
+                            comments.addNewItem(displayedComment);
+                            userIds.add(commentResponse.getCreatedBy());
                         }),
                         error -> getBaseActivity().runOnUiThread(() -> {
+                            progressBarInfiniteLoading.setVisibility(View.GONE);
+
                             Log.e(ERROR_TAG, "fetchComments: " + error.getMessage(), error);
                             getBaseActivity().pushToast(error.getMessage());
                             textViewError.setError(error.getMessage());
                         }),
                         () -> getBaseActivity().runOnUiThread(() -> {
                             progressBarInfiniteLoading.setVisibility(View.GONE);
-                            if (comments.getObjects().size() - previousSize == DEFAULT_PAGE_SIZE) {
+
+                            int numberOfFetchedComments = comments.getObjects().size() - previousSize;
+                            userIds.forEach(userId -> fetchCreatorOfComment(userId, 0, comments.getObjects().size()));
+                            if (numberOfFetchedComments == DEFAULT_PAGE_SIZE) {
                                 this.currentPage++;
                                 this.ableToLoad = true;
                             } else {
@@ -207,8 +210,7 @@ public class CommentsFragment extends BaseFragment {
                             }
                         })
                 );
-
-        getBaseActivity().reactorCompositeDisposable.add(disposable);
+        reactorCompositeDisposable.add(disposable);
     }
 
     public void submitComment() {
@@ -233,9 +235,9 @@ public class CommentsFragment extends BaseFragment {
                 DisplayedComment displayedComment = new DisplayedComment(commentResponse);
 
                 getBaseActivity().runOnUiThread(() -> {
-                    comments.addNewItem(displayedComment);
-                    comments.scrollTo(GenericUtils.getIndexOf(displayedComment, comments.getObjects()));
-                    fetchCreatorOfComment(commentResponse.getCreatedBy());
+                    comments.insertItem(0, displayedComment);
+                    comments.scrollTo(0);
+                    fetchCreatorOfComment(commentResponse.getCreatedBy(), 0, 1);
                 });
             }
 
