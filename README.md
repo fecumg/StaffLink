@@ -1,7 +1,6 @@
 ### This repository was created and contributed by Truong Duc Duong (fecumg)
 
 ![alt slide](https://github.com/fecumg/StaffLink/blob/main/StaffLink_Documents/ReadMe_images/StaffLink_Slides.jpg?raw=true)
-![alt slide](https://github.com/fecumg/StaffLink/blob/main/StaffLink_Documents/ReadMe_images/StaffLink_Slides_1.jpg?raw=true)
 ![alt slide](https://github.com/fecumg/StaffLink/blob/main/StaffLink_Documents/ReadMe_images/StaffLink_Slides_2.jpg?raw=true)
 ![alt slide](https://github.com/fecumg/StaffLink/blob/main/StaffLink_Documents/ReadMe_images/StaffLink_Slides_3.jpg?raw=true)
 ![alt slide](https://github.com/fecumg/StaffLink/blob/main/StaffLink_Documents/ReadMe_images/StaffLink_Slides_4.jpg?raw=true)
