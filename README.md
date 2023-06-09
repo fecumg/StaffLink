@@ -1,77 +1,32 @@
-![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.001.png)
+### This repository was created and contributed by Truong Duc Duong (fecumg)
 
-**TEAM 1**
+![alt slide](https://github.com/fecumg/StaffLink/blob/main/StaffLink_Documents/ReadMe_images/StaffLink_Slides.jpg?raw=true)
+![alt slide](https://github.com/fecumg/StaffLink/blob/main/StaffLink_Documents/ReadMe_images/StaffLink_Slides_1.jpg?raw=true)
+![alt slide](https://github.com/fecumg/StaffLink/blob/main/StaffLink_Documents/ReadMe_images/StaffLink_Slides_2.jpg?raw=true)
+![alt slide](https://github.com/fecumg/StaffLink/blob/main/StaffLink_Documents/ReadMe_images/StaffLink_Slides_3.jpg?raw=true)
+![alt slide](https://github.com/fecumg/StaffLink/blob/main/StaffLink_Documents/ReadMe_images/StaffLink_Slides_4.jpg?raw=true)
+![alt slide](https://github.com/fecumg/StaffLink/blob/main/StaffLink_Documents/ReadMe_images/StaffLink_Slides_5.jpg?raw=true)
 
-Tr**ươ**ng Đ**ứ**c D**ươ**ng - H noi - M y 12, 2023
 
-Members:
-
-**Trương Đức Dương Nguyễn Khánh Duy Phùng Việt Hưng** 
-
-**Nguyễn Thành Đông** 
-
-Mentor:
-
-**Mr. Bùi Văn Dương**
-
-`   `![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.002.png)![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.003.png)![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.004.png)![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.005.png)
-
-![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.006.png) Dynamic ![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.007.png)![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.008.png)![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.009.png)![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.010.png)![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.003.png)![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.004.png)![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.005.png)![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.011.png)![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.012.png)
-
-authorization
-
-User management Project and task management Designed to run on![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.013.png)![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.014.png)![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.015.png)
-
-Android smartphones
-
-**Main features**
-
-Frontend:
-
-**‣Android Studio Electric Eel** 
-
-Backend:
-
-**‣Spring boot 3** 
-
-•Choreography architecture model (RabbitMQ 3 as message broker) •Spring cloud discovery: Eureka server, gateway and clients •Spring MVC and Spring WebFlux
-
-**‣MySQL 8** 
-
-**‣MongoDB 6** 
-
-**‣Redis 6** 
-
-**‣RabbitMQ 3** 
-
-**‣WebSocket**
-
-**Implemented technologies**
-
-**Android application User-service![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.016.png)![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.017.png)**
-
-¥Spring MVC  Images Edit Auth caches (RabbitMQ) ¥MySQL 
-
-¥Redis
-
-Auth information via API calls API cal s API calls
-
-**Auth-gateway** 
-
-¥Based on Eureka gateway API calls
-
-**File-service**
-
-¥Dynamic authorization Via RabbitMQ ¥Reactive Redis
-
-**Task-service** 
-
-¥Spring WebFlux 
-
-¥MongoDB  Attachments ¥WebSocket
-
-**Choreographed system diagram**
-
-![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.018.png)
-
-**Database design![](Aspose.Words.2eaa6002-cd0e-490e-8dfb-41292368227b.019.png)**
+### Screenshots
+<p float="left">
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.19.20.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.20.08.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.20.26.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.20.47.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.20.59.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.21.24.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.21.35.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.21.53.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.22.08.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.22.20.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.22.41.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.23.07.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.23.34.png" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.24.16.png" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.26.11.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.27.24.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.27.50.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot%202023-05-05%20at%2015.28.01.png" alt="screenshot" width="200"/>
+  <img src="https://github.com/fecumg/StaffLink/blob/main/StaffLink_Screenshots/Screenshot_20230512_071241.png" alt="screenshot" width="200"/>
+ </p>
