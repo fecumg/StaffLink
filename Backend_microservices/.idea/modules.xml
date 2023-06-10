@@ -7,9 +7,13 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Backend_microservices.Auth_gateway.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Backend_microservices.Auth_gateway.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Backend_microservices.User_service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Backend_microservices.User_service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/File-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/File-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/StaffLink.Backend_microservices.Auth_gateway.main.iml" filepath="$PROJECT_DIR$/.idea/modules/StaffLink.Backend_microservices.Auth_gateway.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/StaffLink.Backend_microservices.User_service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/StaffLink.Backend_microservices.User_service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Task-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Task-service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/User_service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/User_service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/fpt.edu.Auth_gateway.main.iml" filepath="$PROJECT_DIR$/.idea/modules/fpt.edu.Auth_gateway.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fpt.edu.File-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/fpt.edu.File-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fpt.edu.Task-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/fpt.edu.Task-service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/fpt.edu.User_service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/fpt.edu.User_service.main.iml" />
     </modules>
   </component>
