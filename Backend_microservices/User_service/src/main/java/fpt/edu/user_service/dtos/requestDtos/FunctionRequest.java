@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.Nullable;
 
 /**
  * @author Truong Duc Duong
@@ -27,7 +26,6 @@ public class FunctionRequest {
     @Size(max = 500, message = "Uri cannot exceed {max} characters")
     private String uri;
 
-    @Nullable
     private int parentId;
 
     private boolean displayed = true;
