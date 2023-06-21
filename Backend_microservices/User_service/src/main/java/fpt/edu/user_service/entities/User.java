@@ -5,7 +5,6 @@ import fpt.edu.user_service.customAnnotations.Phone;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,16 +31,15 @@ public class User extends BaseEntity {
     private int id;
 
     @NotNull
-    @Size(max = 50)
+    @Column(length = 50)
     private String name;
 
     @NotNull
-    @Column(unique = true)
-    @Size(min = 6, max = 20)
+    @Column(length = 20, unique = true)
     private String username;
 
     @NotNull
-    @Size(max = 50)
+    @Column(length = 50)
     private String address;
 
     @Phone
@@ -52,7 +50,7 @@ public class User extends BaseEntity {
     private String email;
 
     @NotNull
-    @Size(min = 6)
+    @Column(length = 500)
     private String password;
 
     @Nullable

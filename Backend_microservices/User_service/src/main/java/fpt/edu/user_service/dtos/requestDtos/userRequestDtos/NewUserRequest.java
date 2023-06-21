@@ -50,8 +50,6 @@ public class NewUserRequest {
     @Schema(format = "password")
     private String password;
 
-    @NotNull(message = "Password cannot be empty")
-    @Size(min = 6, message = "Password cannot be less than {min} characters")
     @Schema(format = "password")
     private String confirmPassword;
 

@@ -1,8 +1,8 @@
 package fpt.edu.user_service.entities;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,14 +27,15 @@ public class Function extends BaseEntity{
     private int id;
 
     @NotNull
-    @Size(max = 50)
+    @Column(length = 50)
     private String name;
 
     @NotNull
-    @Size(max = 500)
+    @Column(length = 500)
     private String description;
 
-    @Size(max = 500)
+    @Nullable
+    @Column(length = 500)
     private String uri;
 
     @ManyToOne(fetch = FetchType.LAZY)
